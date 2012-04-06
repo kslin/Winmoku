@@ -1,4 +1,4 @@
-(* This file contains all the modules and functions for the Gomoku board *)
+* This file contains all the modules and functions for the Gomoku board *)
 exception TODO
 
 (* This is a signature for a Gomoku board *)
