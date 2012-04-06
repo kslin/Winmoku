@@ -1,0 +1,1 @@
+type order = Black | White | Unocc ;;
