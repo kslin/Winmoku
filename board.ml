@@ -43,7 +43,7 @@ struct
     Open Occupied
     Open Threat
     Open Boardstuffs
-    type board = occupied list list
+    type board = (index * occupied) list
     type place = index
     type color = occupied
     type threats = threat list
@@ -68,7 +68,5 @@ struct
 
     (* Gets the threats in the direction specified *)
     let getThreats (b: board) : threats = raise TODO
-
-    (* *)
     
 end
