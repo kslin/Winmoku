@@ -1,1 +1,1 @@
-type order = Black | White | Unocc ;;
+type occupied = Black | White | Unocc ;;

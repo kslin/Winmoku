@@ -1,8 +1,12 @@
 (* This file contains all the modules and functions for the Gomoku board *)
 exception TODO
 
+open Occupied
+open Threat
+open Boardstuffs
+
 (* This is a signature for a Gomoku board *)
-module BOARD =
+module type BOARD =
 sig
     type board
     type place
@@ -38,24 +42,26 @@ end
 
 (* This is a signature for a board that only considers specific neighbors
    For example, a board of only the horizontal relationships *)
-module MiniBoard (BT: boardtype) (size: int) : BOARD =
+
+module MiniBoard : BOARD =
 struct
-    Open Occupied
-    Open Threat
-    Open Boardstuffs
-    type board = occupied list list
+
+    type board = (index * occupied) list
     type place = index
     type color = occupied
     type threats = threat list
 
     (* An empty board *)
     let empty = []
+
+    (* returns the color of an index *)
+    let getIndex (i: index) : color = raise TODO
  
     (* determines if an attempted insert is valid *)
-    let isValid (i: index) : bool = raise TODO
+    let isValid (b:board) (i: index) : bool = raise TODO
 
     (* Inserts a piece on the board *)
-    let insert (b: board) (i: index) (c: color) : option = raise TODO
+    let insert (b: board) (i: index) (c: color) : board = raise TODO
 
     (* Removes a piece on the board *)
     let remove (b: board) (i: index) : board = raise TODO
@@ -68,7 +74,5 @@ struct
 
     (* Gets the threats in the direction specified *)
     let getThreats (b: board) : threats = raise TODO
-
-    (* *)
     
 end
