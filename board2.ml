@@ -161,7 +161,9 @@ object (self)
 
     (* If n1 is already part of a neighbor list, add n2 to the list.
        If not, make the two into a new neighbor list *)
-    method private addNeighbors (n1: index) (n2:index) =
+    method private addNeighbors (i1: index) (i2:index) =
+    	let n1 = self#convertBack i1 in
+    	let n2 = self#convertBack i2 in
     	let rec findneighlist lst =
     		match lst with 
     			|[] -> (n1::n2::[])::neighbor_list
