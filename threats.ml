@@ -64,17 +64,21 @@ functor (board: BOARD) ->
     let get_threats = Board.getThreats
 
     let get_dependent_threats (b: board) (t: threat) =
-      bOld = Board.remove b t in 
-      nThreats = get_threats b in
-      oThreats = get_threats bOld in
-      let rec notin s1 s2 = 
-	match s2 with
-        | hd::tl -> if List.exists (fun x -> (x = hd)) s1 then notin s1 td 
-                    else hd::(notin s1 td)
-        | _ -> [] in
-      notin oThreats nThreats
+      let (tgain, _, _) = t in 
+      let threats = get_threats b in
+      let dependent x = 
+        let (_ , trest, _) = x in
+        List.exists (fun y -> (tgain = y)) trest in
+      List.filter dependent threats
 
     let gen_new_board (b: board) (t:threat) =
-      
+      let (tgain, _, tcost) = t in
+      let rec insertwhitelist (b:board) (t: index list) =
+        match t with
+        | hd::tl -> insertlist (Board.insert b hd White) tl
+        | _ -> b in
+      insertwhitelist (Board.insert b tgain Black) tcost
+
+
        
          
