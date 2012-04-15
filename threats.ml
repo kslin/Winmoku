@@ -1,3 +1,6 @@
+open Board
+open Threat
+
 (*This is the file that will implement threat spaced search *)
 
 exception TODO;;
@@ -11,7 +14,6 @@ exception TODO;;
 *)
 
 
-
 module type THREATS = 
 sig
   
@@ -19,6 +21,7 @@ sig
   
   (* one threat *)
   type threat
+  
   (* a collection of threats *)
   type threats
   
@@ -28,7 +31,7 @@ sig
 
   (* Given a board returns the threats associated with it *)
   val get_threats: board -> threats
-
+  
   (* Given a collection of threats xs and a threat y 
      returns the threats in xs that are dependent on y *)
   val dependent_threats : threats -> threat -> threat
@@ -50,5 +53,28 @@ sig
 
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
-
 end
+  
+functor (board: BOARD) -> 
+  struct
+    type board = board.board
+    type threat = threat
+    type threats = threat list
+      
+    let get_threats = Board.getThreats
+
+    let get_dependent_threats (b: board) (t: threat) =
+      bOld = Board.remove b t in 
+      nThreats = get_threats b in
+      oThreats = get_threats bOld in
+      let rec notin s1 s2 = 
+	match s2 with
+        | hd::tl -> if List.exists (fun x -> (x = hd)) s1 then notin s1 td 
+                    else hd::(notin s1 td)
+        | _ -> [] in
+      notin oThreats nThreats
+
+    let gen_new_board (b: board) (t:threat) =
+      
+       
+         
