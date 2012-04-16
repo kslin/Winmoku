@@ -4,8 +4,10 @@ type boardtype = Horizontal | Vertical | DiagLeft | DiagRight
 
 type index = int*int 
 
+type threattype = StraightFour | Four | Three | SplitThree | WallThree
+
 (* A threat has a gain square, cost squares, and rest squares *)
-type threat = Threat of index * index list * index list 
+type threat = Threat of threattype * index * index list * index list 
 
 type occupied = Black | White | Unocc 
 

@@ -1,4 +1,5 @@
 exception TODO
+exception ERROR
 
 open Boardstuffs
 open Piece
@@ -57,6 +58,9 @@ object (self)
 
     val mutable neighbor_list : index list list = []
 
+    (* Stores which rows have black pieces occupying it *)
+    val mutable neighbor_rows : int list = []
+
     (* Initializer *)
     method set_board newboard =  board <- (newboard :> (piece list list))
 
@@ -67,10 +71,10 @@ object (self)
             try (Some ((List.nth (List.nth board x) y)#get_value))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
-    method private getPiece (i: index) : piece option =
+    (*method private getPiece (i: index) : piece option =
     	let (x,y) = i in
             try (Some ((List.nth (List.nth board x) y)))
-                with Failure "nth"|Invalid_argument "List.nth" -> None
+                with Failure "nth"|Invalid_argument "List.nth" -> None*)
 
     method private convertIndex (i:index) = 
     	match btype with
@@ -78,12 +82,12 @@ object (self)
     		|Vertical -> let (x,y) = i in (y,x)
     		|DiagRight -> 
     			let (x,y) = i in 
-        		if y > x then (size - (y-x), x)
-        		else (size + (x-y), y)
+        		if y > x then (size -1 - (y-x), x)
+        		else (size -1 + (x-y), y)
         	|DiagLeft -> 
     	    	let (x,y) = i in
-        		if (x + y - 1) <= size then (x + y - 1, y)
-        		else (x + y - 1, 1 - x  + size)
+        		if (x + y - 1) <= (size - 1) then (x + y - 1, y)
+        		else (x + y - 1, 1 - x  + size - 1)
 
     method private convertBack (ci:index) = 
     	match btype with
@@ -91,12 +95,12 @@ object (self)
     		|Vertical -> let (x,y) = ci in (y,x)
     		|DiagRight -> 
     			let (x,y) = ci in
-    			if x < size then (y, (size-x)+y)
-    			else (x+y-size, y) 
+    			if x < (size - 1) then (y, (size - 1 -x) +y)
+    			else (x+y-size - 1, y) 
         	|DiagLeft -> 
         		let (x,y) = ci in
-        		if x <= size then (x-y+1, y)
-        		else (1+size-y,x+y-size)
+        		if x <= (size -1) then (x-y+1, y)
+        		else (size-y,x+y-size - 1)
 
     method private changeIndex (i:index) (c:occupied) = 
     	let (x,y) = i in
@@ -113,11 +117,13 @@ object (self)
     (* Given an index and a color, insert the piece and update neighbors *)
     method insert (ci:index) (c: occupied) : bool =
     	let i = self#convertIndex ci in
+    	let (x,y) = i in
     	match self#getIndex i with
     		|None -> false
     		|Some Unocc -> self#changeIndex i c; 
-    			List.iter (fun x -> self#addNeighbors x i) 
-    			            (self#getNeighbors i);  
+    			List.iter (fun a -> self#addNeighbors a i) 
+    			            (self#getNeighbors i); 
+                if c = Black then self#addNeighRows x;
     			true
     		|_ -> false
 
@@ -152,7 +158,56 @@ object (self)
     	checkNeighbors neighbor_list
 
 
-    method getThreats =  raise TODO
+    method getThreats = 
+        List.flatten (List.map self#containsThreats )
+
+    (* Determines if a row has threats in it and returns the threats *)
+    method private containsThreats (lst: index list) : threat list = 
+    	if List.length lst < 5 then []
+        else let sixlist = self#hasContSix lst in
+    	    (*let rec findfives flst = match flst with
+                |[] -> flst
+                |hd::tl -> let ((a,aind),(b,bind),
+                                (c,cind),(d,dind),
+                                (e,eind)) = hd in 
+                    (match (aind,bind,cind,dind,eind) with
+                        |(Unocc,Black,Black,Unocc,Unocc) -> 
+                            (Threat (d,[a,e],[b,c]))::(findfives tl)
+                        |(Unocc,Unocc,Black,Black,Unocc) ->
+                            (b,[a,e],[c,d])::(findfives tl)
+                        |(Unocc,Black,Unocc,Black,Unocc) ->
+                            (c,[a,e],[b,d])::(findfives tl) 
+                        |_ -> findfives tl ) in *)
+
+            let rec findsixes slst : threat list = match slst with
+                |[] -> []
+                |hd::tl -> let ((a,aind),(b,bind),
+                                (c,cind),(d,dind),
+                                (e,eind),(f,find)) = hd in 
+                (match (aind,bind,cind,dind,eind,find) with
+                    |(Unocc,Black,Black,Black,Unocc,Unocc) -> 
+                (Threat (StraightFour,e,[a;f],[b;c;d]))::(findsixes tl) 
+                    |(Unocc,Unocc, Black,Black,Black,Unocc) -> 
+                (Threat (StraightFour,b,[a;f],[c;d;e]))::(findsixes tl) 
+                    |(Unocc,Black,Unocc,Black,Black,Unocc) -> 
+                (Threat (StraightFour,c,[a;f],[b;d;e]))::(findsixes tl) 
+                    |(Unocc,Black,Black,Unocc,Black,Unocc) -> 
+                (Threat (StraightFour,d,[a;f],[b;c;e]))::(findsixes tl)
+                    |(Unocc,Black,Black,Unocc,Unocc,Unocc) ->
+                (Threat (SplitThree,e,[a;d;f],[b;c]))::(findsixes tl)
+                    |(Unocc,Unocc,Black,Unocc,Black,Unocc) ->
+                (Threat (SplitThree,b,[a;d;f],[c;e]))::(findsixes tl)
+                    |(Unocc,Black,Unocc,Unocc,Black,Unocc) ->
+                (Threat (SplitThree,c,[a;d;f],[b;e]))::
+                (Threat (SplitThree,d,[a;c;f],[b;e]))::(findsixes tl)
+                    |(Unocc,Unocc,Unocc,Black,Black,Unocc) ->
+                (Threat (SplitThree,b,[a;c;f],[d;e]))::(findsixes tl)
+                    |(Unocc,Black,Unocc,Black,Unocc,Unocc) ->
+                (Threat (SplitThree,e,[a;c;f],[b;d]))::(findsixes tl)
+                    |_ -> findsixes tl ) in
+        (findsixes sixlist) 
+
+                
 
 
     (*method private hasNeighbors (i:index) : index list option=  
@@ -170,6 +225,81 @@ object (self)
     			|hd::tl -> if List.mem n1 hd then (n2::hd)::tl
     				else hd::(findneighlist tl)
     	in neighbor_list <- (findneighlist neighbor_list)
+
+    method private addNeighRows (row: int) = 
+    	if List.mem row neighbor_rows then ()
+    	else neighbor_rows <- (row::neighbor_rows)
+
+    method private sublist lst start endpoint = 
+        if endpoint < 4 then None else
+    	let listlength = List.length lst in
+        if endpoint >= listlength then None else
+    	let rec buildlist current lst2 =
+    		if current < start then Some lst2
+    		else buildlist (current - 1) ((List.nth lst current)::lst2) in
+    	buildlist start []
+
+
+    (* If a row has five continuous spaces that are either occupied by
+    	black or unoccupied, return the spaces*)
+    method private hasContFive (row: index list) = 
+    	if List.length row < 5 then []
+    	else let rec iter_row start fivelist = 
+    		match self#sublist row start (start + 4) with
+    			|None -> fivelist
+    			|Some (a::b::c::d::e::[]) -> 
+    				let aind = self#getIndex a in
+                    let bind = self#getIndex b in
+                    let cind = self#getIndex c in
+                    let dind = self#getIndex d in
+                    let eind = self#getIndex e in
+                    if (aind = Some White) ||
+                       (bind = Some White) ||
+                       (cind = Some White) ||
+                       (dind = Some White) ||
+                       (eind = Some White)
+    				then iter_row (start+1) fivelist
+    				else iter_row (start+1) (((a,aind),(b,bind),
+                                              (c,cind),(d,dind),
+                                              (e,eind))::fivelist)
+                |_ -> fivelist in
+        iter_row 0 []
+
+    method private deopt x = match x with
+        |None -> raise ERROR
+        |Some s -> s
+
+    (* If a row has six continuous spaces that are either occupied by
+        black or unoccupied, return the spaces*)
+    method private hasContSix (row: index list) = 
+        if List.length row < 6 then []
+        else let rec iter_row start sixlist = 
+            match self#sublist row start (start + 5) with
+                |None -> sixlist
+                |Some (a::b::c::d::e::f::[]) -> 
+                    let aind = self#getIndex a in
+                    let bind = self#getIndex b in
+                    let cind = self#getIndex c in
+                    let dind = self#getIndex d in
+                    let eind = self#getIndex e in
+                    let find = self#getIndex f in
+                    if (aind = Some White) ||
+                       (bind = Some White) ||
+                       (cind = Some White) ||
+                       (dind = Some White) ||
+                       (eind = Some White) ||
+                       (find = Some White)
+                    then iter_row (start+1) sixlist
+                    else iter_row (start+1) (((a,self#deopt aind),
+                                              (b,self#deopt bind),
+                                              (c,self#deopt cind),
+                                              (d,self#deopt dind),
+                                              (e,self#deopt eind),
+                                              (f,self#deopt find))::sixlist)
+                |_ -> sixlist in
+        iter_row 0 []
+
+
 
 
 end
