@@ -85,7 +85,7 @@ functor (B: BOARD) ->
         | _ -> b in
       insertwhitelist (board.insert b tgain Black) tcost
 
-    let gen_threat_tree (b: board) (t: threat) = 
+    let rec gen_threat_tree (b: board) (t: threat) = 
       if B.iswin then
 	Win(b, t)
       else
@@ -93,7 +93,12 @@ functor (B: BOARD) ->
 	if threatlist = [] then 
 	  Leaf(b, t)	    
 	else
-	  let boardList = List.map (fun x -> (gen_new_board b x), x) threatList in
+	  let tree_from_threat (x:threat) = 
+	    gen_threat_tree (gen_new_board b x) x
+	  in
+	  let treeList = 
+	    List.map tree_from_threat threatList in
+	  Node(b, t, treeList)
 
 
 (*
