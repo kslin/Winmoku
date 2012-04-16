@@ -55,23 +55,27 @@ sig
   val merge : tree -> tree -> tree
 end
   
-functor (board: BOARD) -> 
+functor (B: BOARD) -> 
   struct
-    type board = board.board
+    type board = B.board
     type threat = threat
     type threats = threat list
-    type tree = Node of Board * Threat * (tree list) | 
-                Leaf of Board * Threat   
- 
-    let get_threats = board.getThreats
+    type tree = 
+      | Node of board * threat * (tree list)
+      | Leaf of board * threat   
+      | Win of board * threat 
 
-    let get_dependent_threats (b: board) (t: threat) =
-      let (tgain, _, _) = t in 
-      let threats = get_threats b in
+    let get_threats = B.getThreats
+
+    let dependent_threats (ts: threats) (t: threat) = 
+      let (tgain, _, _) = t in
       let dependent x = 
         let (_ , trest, _) = x in
         List.exists (fun y -> (tgain = y)) trest in
-      List.filter dependent threats
+      List.filter dependent threats 
+
+    let get_dependent_threats (b: board) (t: threat) =
+      dependent_threats (get_threats b) t
 
     let gen_new_board (b: board) (t:threat) =
       let (tgain, _, tcost) = t in
@@ -82,10 +86,19 @@ functor (board: BOARD) ->
       insertwhitelist (board.insert b tgain Black) tcost
 
     let gen_threat_tree (b: board) (t: threat) = 
-      let threatList = get_dependent_threats b t in 
+      if B.iswin then
+	Win(b, t)
+      else
+	let threatList = get_dependent_threats b t in 
+	if threatlist = [] then 
+	  Leaf(b, t)	    
+	else
+	  let boardList = List.map (fun x -> (gen_new_board b x), x) threatList in
+
+
+(*
       let treeList = List.map (fun x -> (Leaf(gen_new_board b x), x)) threatList in
       match treeList with
       | hd::_ -> Node(b, t, treeList)
       | [] -> Leaf(b, t)
-
-               
+*)
