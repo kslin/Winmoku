@@ -60,8 +60,10 @@ functor (board: BOARD) ->
     type board = board.board
     type threat = threat
     type threats = threat list
-      
-    let get_threats = Board.getThreats
+    type tree = Node of Board * Threat * (tree list) | 
+                Leaf of Board * Threat   
+ 
+    let get_threats = board.getThreats
 
     let get_dependent_threats (b: board) (t: threat) =
       let (tgain, _, _) = t in 
@@ -75,10 +77,15 @@ functor (board: BOARD) ->
       let (tgain, _, tcost) = t in
       let rec insertwhitelist (b:board) (t: index list) =
         match t with
-        | hd::tl -> insertlist (Board.insert b hd White) tl
+        | hd::tl -> insertlist (board.insert b hd White) tl
         | _ -> b in
-      insertwhitelist (Board.insert b tgain Black) tcost
+      insertwhitelist (board.insert b tgain Black) tcost
 
+    let gen_threat_tree (b: board) (t: threat) = 
+      let threatList = get_dependent_threats b t in 
+      let treeList = List.map (fun x -> (Leaf(gen_new_board b x), x)) threatList in
+      match treeList with
+      | hd::_ -> Node(b, t, treeList)
+      | [] -> Leaf(b, t)
 
-       
-         
+               
