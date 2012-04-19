@@ -11,5 +11,20 @@
 open Board
 open Tree
 open Draw
+open GUI
 
+let test_board =
+	GUI.run_game
+		(* Initialize the board to be empty *)
+		begin fun () -> ();
+		end
+		begin fun () ->
+      		Graphics.clear_graph () ; 
+      		Event.fire_event Board.click_event () ;
+      		(* draw loop *)
+      		Board.indices begin fun p -> 
+        		in List.iter (fun w -> w#draw) (Board.get p)
+      		end
+      	end ;;
 
+test_board () ;;

@@ -1,184 +1,176 @@
-(* This file contains all the modules and functions for the Gomoku board *)
-exception TODO
+open Event
+open Miniboard
 
-open Boardstuffs
-
-let unisize : int = 19
-
-(* This is a signature for a Gomoku board *)
-module type BOARD =
-sig
-    type board
-
-    (* An empty board *)
-    val empty: board
-
-    (* Given an index, returns whether it exists and is occupied *)
-    val getIndex: board -> index -> occupied option
-
-    (* Inserts pieces on the board *)
-    val insert: board -> index -> occupied -> board option
-
-    (* Removes pieces from a board, returns None if the remove is invalid 
-       This is only used for testing purposes *)
-    val remove: board -> index -> board option
-
-    (* Given an index, returns a list of neighbors *)
-    val getNeighbors: board -> index -> index list
-
-    (* Checks if the board has a winning configuration *)
-    val isWin: board -> bool
-
-    (* Given a board, returns all the threats *)
-    val getThreats: board -> threat list
-    
-end
-
-(* Argument to be passed into a board *)
-module type BOARD_ARG = 
-sig
-    
-    val btype : boardtype
-    
-    val convertIndex : index -> index
-
-end
-
-(* Argument for the horizontal board *)
-module HorizontalBoardArg : BOARD_ARG =
+module Board =
 struct
 
-    let btype = Horizontal
+  (** Dimensions **)
 
-    let convertIndex (i: index) = i
+  (** The icon width for each position. *)
+  let obj_width : int = 20
+
+  (** The icon height for each position. *)
+  let obj_height : int = 20
+
+  (** The world has size x size positions *)
+  let size : int = 19
+
+  (** The board is represented by 4 miniboards *)
+  let board : board_object * board_object * board_object * board_object =
+    ((new miniboard size), (new miniboard size),
+     (new miniboard size), (new miniboard size))
+
+  (** Board Operations **)
+
+  (** Reset to a blank board *)
+  let reset () : unit = 
+    let (w,x,y,z) = board in 
+    w#reset;
+    x#reset;
+    y#reset;
+    z#reset
+
+(*)
+  (** Get all objects associated with a location in the world. *)
+  let get ((x,y):int*int) : world_object_i list = 
+    world.(x).(y)
+
+  (** Set a location in the world to contain a new list of objects. *)
+  let set ((x,y):int*int) (wos:world_object_i list) : unit = 
+    world.(x).(y) <- wos
+
+  (** Modify a location in the world with value os to contain (f os). *)
+  let modify (p:int*int) (f:world_object_i list -> world_object_i list) : unit =
+    set p (f (get p))
+
+  (** Add an object to the list of world objects at a location. *)
+  let add (p:int*int) (w:world_object_i) : unit = 
+    modify p (fun wos -> if List.mem w wos then wos else w::wos)
+
+  (** Remove an object from the list of world objects at a location. Does
+      nothing if the object was not in the list. *)
+  let remove (p:int*int) (w:world_object_i) : unit = 
+    modify p (fun wos -> List.filter (fun w' -> w' <> w) wos)
+
+  (** Same as remove but fails if the object is not in the list. *)
+  let remove_must_exist (p:int*int) (w:world_object_i) : unit =
+    assert (List.mem w (get p)) ;
+    remove p w
+
+  (** Fold over all objects in the world. *)
+  let fold (f:world_object_i -> 'a -> 'a) (i:'a) : 'a =
+    Array.fold_right 
+      (fun row accum -> 
+         Array.fold_right 
+           (fun os accum' -> List.fold_right f os accum') 
+           row 
+           accum)
+      world 
+      i 
+
+  (** Call a function for all indices in the world. *)
+  let indices (f:int*int -> unit) : unit =
+    Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) world
+
+  (** True if the world contains the point (x,y). *)
+  let check_bounds ((x,y):int*int) : bool = 
+    x >= 0 && x < size && y >= 0 && y < size
+
+  (** Iterate of all world objects along with their corresponding location. *)
+  let iteri (f:int*int -> world_object_i -> unit) : unit = 
+    indices (fun p -> List.iter (f p) (get p))
+
+  (** True if the world contains no objects at point p. *)
+  let is_empty p = get p = []
+
+  (** All objects within n spaces from location (x,y). *)
+  let objects_within_range ((x,y):int*int) (n:int) : world_object_i list =
+    let xlow = max (x-n) 0 in
+    let ylow = max (y-n) 0 in
+    let xhigh = min (x+n) (size-1) in
+    let yhigh = min (y+n) (size-1) in
+    let coords = Helpers.cross (Helpers.range xlow xhigh) (Helpers.range ylow yhigh) in
+    List.fold_right (fun p t -> get p @ t) coords []
+
+  (** The next available point to (x,y) is a random close by element which is
+      both on the grid and is unoccupied. *)
+  let rec next_available ((x,y):int*int) : int*int =
+    if not (check_bounds (x,y)) then 
+      next_available (Helpers.bound 0 (size-1) x,Helpers.bound 0 (size-1) y)
+    else if not (is_empty (x,y)) then
+      next_available (Direction.move_point (x,y) (Some (Direction.random rand)))
+    else (x,y)
+
+  (****************************)
+  (***** Spawning Objects *****)
+  (****************************)
+
+  (** [spawn n p f] will call f n times on points near p which are both on the
+      grid and unoccupied. *)
+  let rec spawn (n:int) (p:int*int) (f:int*int -> unit) : unit =
+    if n <= 0 then () else 
+      let p' = next_available p in
+      f p' ;
+      spawn (n-1) p' f
+
+    (** [spawn_iter num num_spawn barrier f] will call [spawn n p f] num times
+        where p is a randomly chosen point.  [barrier] will be called between
+        spawns. *)
+  let rec spawn_iter (num_iter:int) 
+                     (num_spawn:int) 
+                     (barrier:unit -> unit)
+                     (f:int*int -> unit) : unit =
+    if num_iter = 0 then () else begin
+      barrier () ;
+      spawn (rand num_spawn) (rand size, rand size) f ;
+      spawn_iter (num_iter-1) num_spawn barrier f
+    end
+
+  (**************************)
+  (***** World Movement *****)
+  (**************************)
+
+  (** True if there are any obstacles at point p. *)
+  let has_obstacles (p:int*int) : bool =
+    Helpers.fold_left (||) false (List.map (fun o -> o#is_obstacle) (get p))
+
+  (** True if there are any obstacles in the path. *)
+  let path_has_obstacles (ps:(int*int) list) : bool =
+    Helpers.fold_left (||) false (List.map has_obstacles ps)
+
+  (** An object can move to point p if it is in bounds and doesn't contain any
+      obstacles. *)
+  let can_move (p:int*int) : bool =
+    check_bounds p && not (has_obstacles p)
+
+  (** If the natural path from p1 to p2 contains no obstacles then the direction
+      from p1 to p2 is the natural direction.  Otherwise it is random. *)
+  let direction_from_to (p1:int*int) (p2:int*int) : Direction.direction option =
+    assert (check_bounds p1 && check_bounds p2) ;
+    if path_has_obstacles (Direction.natural_path p1 p2) 
+    then Some (Direction.random rand)
+    else Direction.natural p1 p2
+
+  (** Gives the direction towards the object, gives random direction if there
+     is an obstacle **)
+  let indirect (p1:int*int) (p2:int*int) : Direction.direction option =
+    let dir = Direction.natural p1 p2 in
+    let next_space = Direction.move_point p1 dir in
+    if has_obstacles next_space 
+    then Some (Direction.random rand)
+    else dir
+
+  (******************)
+  (***** EVENTS *****)
+  (******************)
+
+  (** Fires when objects should perform their action. *)
+  let action_event : unit Event.event = Event.new_event ()
+
+  (** Fires when objects should move. *)
+  let move_event : unit Event.event = Event.new_event ()
+
+  (** Fires when objects should age. *)
+  let age_event : unit Event.event = Event.new_event ()
+*)
 end
-
-(* Argument for the vertical board *)
-module VerticalBoardArg : BOARD_ARG =
-struct
-
-    let btype = Vertical
-
-    (* switch the coordinates *)
-    let convertIndex (i: index) = let (x,y) = i in (y,x)
-end
-
-(* Argument for the board that goes diagonal right. The first row starts 
-   in the top right corner, and rows go from top left to bottom right *)
-module DiagRightBoardArg : BOARD_ARG =
-struct
-
-    let btype = DiagRight
-
-    let convertIndex (i: index) = 
-        let (x,y) = i in 
-        if y > x then (unisize - (y-x), x)
-        else (unisize + (x-y), y)
-end
-
-(* Argument for the board that goes diagonal left. The first row starts 
-   in the top left corner, and rows go from bottom left to top right *)
-module DiagLeftBoardArg : BOARD_ARG =
-struct
-
-    let btype = DiagLeft
-
-    let convertIndex (i: index) = 
-        let (x,y) = i in
-        if (x + y - 1) <= unisize then (x + y - 1, y)
-        else (x + y - 1, y + 1 - (x + y - unisize)) 
-end
-
-
-(* This is a signature for a board that only considers specific neighbors
-   For example, a board of only the horizontal relationships *)
-module MiniBoard (B: BOARD_ARG) : BOARD =
-struct
-
-    type board = occupied list list
-
-    let rec emptyList (n: int) (occ: occupied list) : occupied list = 
-            match n with
-                |0 -> occ
-                |_ -> emptyList (n-1) (Unocc::occ)
-
-    let rec emptySquare (n:int) (b: board) : board =
-        match n with
-            |0 -> b
-            |_ -> emptySquare (n-1) ((emptyList n [])::b)
-
-    let emptyDiag (n: int) (b: board) : board =
-        let rec rec_emptyDiag n2 b2 = 
-            match n2 with
-                |0 -> b
-                |_ -> rec_emptyDiag (n2-1)            
-                    ((emptyList (n - abs(n - n2)) [])::b2) in
-        rec_emptyDiag ((2*n) - 1) b 
-
-    let empty = match B.btype with
-        |Horizontal|Vertical -> emptySquare unisize []
-        |DiagRight|DiagLeft -> emptyDiag unisize []
-
-    let getIndex (b: board) (i:index) : occupied option = 
-        let (x,y) = B.convertIndex i in
-            try (Some (List.nth (List.nth b x) y))
-                with Failure "nth" -> None
-
-                (*if (x < 1) || (y < 1) then None
-                else (match B.btype with 
-                    |Horizontal -> 
-                        if (x > unisize) || (y > unisize) then None
-                        else Some (List.nth (List.nth b x) y)
-                    |Vertical -> 
-                        if (x > unisize) || (y > unisize) then None
-                        else Some (List.nth (List.nth b x) y)
-                    |DiagLeft -> 
-                        if (x > ((unisize * 2) + 1)) || 
-                            (y > (unisize-abs(unisize - x))) then None
-                        else Some (List.nth (List.nth b x) y)
-                    |DiagRight -> 
-                        if (x > ((unisize * 2) + 1)) || 
-                            (y > (unisize-abs(unisize - x))) then None
-                        else Some (List.nth (List.nth b x) y) )*)
-
-    (* Helper function, index should already be converted *)
-    let changeIndex (b: board) (i: index) (c: occupied) : board =
-        let (x,y) = i in 
-            let rec changerow row yval = match row with
-                |[] -> row
-                |hd::tl -> if yval = y then c::tl 
-                    else hd::(changerow tl (yval+1)) in
-        let rec changecol (col: occupied list list) xval = match col with
-            |[] -> col   
-            |hd::tl -> if xval = x then (changerow hd 1)::tl
-                else hd::(changecol tl (xval + 1)) in  
-        changecol b 1 
-
-
-    let insert (b: board) (i: index) (c: occupied) : board option = 
-        match getIndex b i with
-            |None -> None
-            |Some Unocc -> let newi = B.convertIndex i in
-                Some (changeIndex b newi c)
-            |_ -> None
-
-
-    let remove (b: board) (i: index) : board option = 
-        match getIndex b i with
-            |None -> None
-            |_ -> let newi = B.convertIndex i in
-                   Some (changeIndex b newi Unocc)
-
-    let getNeighbors (b: board) (i: index) : index list = raise TODO
-
-    let isWin (b: board) : bool = raise TODO
-
-    let getThreats (b: board) : threat list = raise TODO
-    
-end
-
-(*module Board : BOARD =
-struct
-
-    type board = 
-end*)
