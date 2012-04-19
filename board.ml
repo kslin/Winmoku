@@ -30,7 +30,7 @@ struct
     y#reset;
     z#reset
 
-(*)
+(*
   (** Get all objects associated with a location in the world. *)
   let get ((x,y):int*int) : world_object_i list = 
     world.(x).(y)

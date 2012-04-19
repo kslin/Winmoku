@@ -2,7 +2,7 @@ open Miniboard
 open Boardstuffs
 open Piece
 
-class horizontalboard (size:int): board_object =
+class verticalboard (size:int): board_object =
 object (self)
 	inherit miniboard size as super
 
@@ -24,5 +24,5 @@ object (self)
                 in build_rows (n-1) ((build_row size [])::b ) )
         in (build_rows size [])
 
-    method convertIndex ci = ci
+    method convertIndex ci = let (x,y) = ci in (y,x)
 end

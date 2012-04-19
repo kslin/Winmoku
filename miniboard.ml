@@ -13,6 +13,9 @@ object
     (* Resets the board to be blank *)
     method reset : unit
 
+    (* Converts the board index to the universal index *)
+    method convertIndex : index -> index
+
     (* Builds an empty board *)
     method buildEmptyBoard : piece list list
 
@@ -96,7 +99,7 @@ object (self)
             try (Some ((List.nth (List.nth board x) y)))
                 with Failure "nth"|Invalid_argument "List.nth" -> None*)
 
-    method private convertIndex (i:index) = i
+    method convertIndex (i:index) = i
     	(*match btype with
 	    	|Horizontal -> i
     		|Vertical -> let (x,y) = i in (y,x)
