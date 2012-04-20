@@ -1,6 +1,7 @@
 open Miniboard
 open Boardstuffs
 open Piece
+open Boardobject
 
 class verticalboard (size:int): board_object =
 object (self)

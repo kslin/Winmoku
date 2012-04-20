@@ -1,24 +1,25 @@
+exception Error
+
 open Event
 open Miniboard
+open Pieceobject
+open Boardstuffs
+open Boardobject
+open Horizontalboard
+open Verticalboard
+open Diagrightboard
+open Diagleftboard
 
 module Board =
 struct
 
-  (** Dimensions **)
-
-  (** The icon width for each position. *)
-  let obj_width : int = 20
-
-  (** The icon height for each position. *)
-  let obj_height : int = 20
-
-  (** The world has size x size positions *)
-  let size : int = 19
-
   (** The board is represented by 4 miniboards *)
   let board : board_object * board_object * board_object * board_object =
-    ((new miniboard size), (new miniboard size),
-     (new miniboard size), (new miniboard size))
+    ((new horizontalboard world_size), (new verticalboard world_size),
+     (new diagrightboard world_size), (new diagleftboard world_size))
+
+  (** Keeps track of who's turn it is **)
+  let player : occupied ref = ref Black
 
   (** Board Operations **)
 
@@ -30,32 +31,36 @@ struct
     y#reset;
     z#reset
 
-(*
-  (** Get all objects associated with a location in the world. *)
-  let get ((x,y):int*int) : world_object_i list = 
-    world.(x).(y)
 
-  (** Set a location in the world to contain a new list of objects. *)
-  let set ((x,y):int*int) (wos:world_object_i list) : unit = 
-    world.(x).(y) <- wos
+  (** Get the piece associated with a location in the world. **)
+  let get (i:index) : piece_object = 
+    let (a,b,c,d) = board in match a#getPiece i with
+        |None -> raise Error
+        |Some p -> p
 
-  (** Modify a location in the world with value os to contain (f os). *)
-  let modify (p:int*int) (f:world_object_i list -> world_object_i list) : unit =
-    set p (f (get p))
+  (** Change the status of a piece on the board to whichever color player is**)
+  let set (i:index) : unit = 
+    let (a,b,c,d) = board in 
+        match (a#insert i !player, b#insert i !player, 
+            c#insert i !player, d#insert i !player) with
+            |(true,true,true,true) -> ()
+            |_ -> raise Error
 
-  (** Add an object to the list of world objects at a location. *)
-  let add (p:int*int) (w:world_object_i) : unit = 
-    modify p (fun wos -> if List.mem w wos then wos else w::wos)
+   (** Change the color of the current player **)
+   let switch_color () : unit = match !player with
+        |Black -> ignore(player := White)
+        |White -> ignore(player := Black)
+        |Unocc -> ()
 
-  (** Remove an object from the list of world objects at a location. Does
-      nothing if the object was not in the list. *)
-  let remove (p:int*int) (w:world_object_i) : unit = 
-    modify p (fun wos -> List.filter (fun w' -> w' <> w) wos)
+  (** Remove a piece at a location **)
+  let remove (i:index) : unit = 
+    let (a,b,c,d) = board in
+    ignore (a#remove i);
+    ignore (b#remove i);
+    ignore (c#remove i);
+    ignore (d#remove i)
 
-  (** Same as remove but fails if the object is not in the list. *)
-  let remove_must_exist (p:int*int) (w:world_object_i) : unit =
-    assert (List.mem w (get p)) ;
-    remove p w
+(*)
 
   (** Fold over all objects in the world. *)
   let fold (f:world_object_i -> 'a -> 'a) (i:'a) : 'a =
@@ -67,11 +72,12 @@ struct
            accum)
       world 
       i 
-
+*)
   (** Call a function for all indices in the world. *)
   let indices (f:int*int -> unit) : unit =
-    Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) world
-
+    let (a,b,c,d) = board in
+    List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices
+(*)
   (** True if the world contains the point (x,y). *)
   let check_bounds ((x,y):int*int) : bool = 
     x >= 0 && x < size && y >= 0 && y < size
@@ -159,18 +165,11 @@ struct
     if has_obstacles next_space 
     then Some (Direction.random rand)
     else dir
-
+*)
   (******************)
   (***** EVENTS *****)
   (******************)
 
-  (** Fires when objects should perform their action. *)
-  let action_event : unit Event.event = Event.new_event ()
-
-  (** Fires when objects should move. *)
-  let move_event : unit Event.event = Event.new_event ()
-
-  (** Fires when objects should age. *)
-  let age_event : unit Event.event = Event.new_event ()
-*)
+  (** Fires when the mouse is clicked. *)
+  
 end

@@ -1,68 +1,12 @@
-exception TODO
 exception ERROR
 
 open Boardstuffs
-open Piece
+open Boardobject
+open Pieceobject
 
-class type board_object = 
-object
-
-	(* Initilizes the board *)
-	method set_board : piece list list -> unit
-
-    (* Resets the board to be blank *)
-    method reset : unit
-
-    (* Converts the board index to the universal index *)
-    method convertIndex : index -> index
-
-    (* Builds an empty board *)
-    method buildEmptyBoard : piece list list
-
-    (* Builds an empty list of index lists *)
-    method buildRows : index list list
-
-	(* Given an index, returns whether it exists and is occupied *)
-    method getIndex : index -> occupied option
-
-    (* Inserts pieces on the board *)
-    method insert : index -> occupied -> bool
-
-    (* Removes pieces from a board, returns false if the remove is invalid 
-       This is only used for testing purposes *)
-    method remove : index -> bool
-
-    (* Given an index, returns a list of neighbors *)
-    method getNeighbors : index -> index list
-
-    (* Checks if the board has a winning configuration *)
-    method isWin : bool
-
-    (* Given a board, returns all the threats *)
-    method getThreats : threat list
-end
-
-(*let rec emptyList (n: int) (occ: piece list) : piece list = 
-    match n with
-        |0 -> occ
-        |_ -> emptyList (n-1) ((new piece)::occ)
-
-let rec emptySquare (n:int) (b: piece list list) : piece list list =
-    match n with
-        |0 -> b
-        |_ -> emptySquare (n-1) ((emptyList n [])::b)
-
-let emptyDiag (n: int) (b: piece list list) : piece list list =
-    let rec rec_emptyDiag n2 b2 = 
-        match n2 with
-            |0 -> b
-            |_ -> rec_emptyDiag (n2-1)            
-                ((emptyList (n - abs(n - n2)) [])::b2) in
-    rec_emptyDiag ((2*n) - 1) b *)
 
 class miniboard (size: int) : board_object =
 object (self)
-
 
 	(* Instance Variables *)
 
@@ -77,7 +21,7 @@ object (self)
     val mutable occ_rows : index list list = []
 
     (* Initializer *)
-    method set_board newboard =  board <- (newboard :> (piece list list))
+    method set_board newboard =  board <- (newboard :> (piece_object list list))
 
     (* Methods *)
 
@@ -85,51 +29,31 @@ object (self)
         board <- self#buildEmptyBoard;
         rows <- self#buildRows
 
+    method getIndices = rows
+
     method buildEmptyBoard = []
 
     method buildRows = []
+
+    method getPiece (i: index) : piece_object option =
+        let (x,y) = i in
+            try (Some ((List.nth (List.nth board x) y)))
+                with Failure "nth"|Invalid_argument "List.nth" -> None
 
 	method private getIndex (i:index) : occupied option = 
         let (x,y) = i in
             try (Some ((List.nth (List.nth board x) y)#get_value))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
-    (*method private getPiece (i: index) : piece option =
-    	let (x,y) = i in
-            try (Some ((List.nth (List.nth board x) y)))
-                with Failure "nth"|Invalid_argument "List.nth" -> None*)
-
     method convertIndex (i:index) = i
-    	(*match btype with
-	    	|Horizontal -> i
-    		|Vertical -> let (x,y) = i in (y,x)
-    		|DiagRight -> 
-    			let (x,y) = i in 
-        		if y > x then (size -1 - (y-x), x)
-        		else (size -1 + (x-y), y)
-        	|DiagLeft -> 
-    	    	let (x,y) = i in
-        		if (x + y - 1) <= (size - 1) then (x + y - 1, y)
-        		else (x + y - 1, 1 - x  + size - 1)*)
 
     method private convertBack (ci:index) = ci
-    	(*match btype with
-	    	|Horizontal -> ci
-    		|Vertical -> let (x,y) = ci in (y,x)
-    		|DiagRight -> 
-    			let (x,y) = ci in
-    			if x < (size - 1) then (y, (size - 1 -x) +y)
-    			else (x+y-size - 1, y) 
-        	|DiagLeft -> 
-        		let (x,y) = ci in
-        		if x <= (size -1) then (x-y+1, y)
-        		else (size-y,x+y-size - 1)*)
 
     method private changeIndex (i:index) (c:occupied) = 
     	let (x,y) = i in
     	let rec changerow row yval = match row with
             |[] -> ()
-            |hd::tl -> if yval = y then (hd :> piece)#set_value c
+            |hd::tl -> if yval = y then (hd :> piece_object)#set_value c
                 else changerow tl (yval+1) in
         let rec changecol col xval = match col with
             |[] -> ()
@@ -138,8 +62,8 @@ object (self)
         changecol board 1 
 
     (* Given an index and a color, insert the piece and update neighbors *)
-    method insert (ci:index) (c: occupied) : bool =
-    	let i = self#convertIndex ci in
+    method insert (i:index) (c: occupied) : bool =
+    	let i = self#convertIndex i in
     	let (x,y) = i in
     	match self#getIndex i with
     		|None -> false
@@ -150,8 +74,8 @@ object (self)
     			true
     		|_ -> false
 
-    method remove (ci: index) : bool =
-    	let i = self#convertIndex ci in
+    method remove (i: index) : bool =
+    	let i = self#convertIndex i in
     	match self#getIndex i with
     		|None -> false
     		|_ -> self#changeIndex i Unocc; true

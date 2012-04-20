@@ -9,22 +9,22 @@
  * first move from that sequence, and send board to draw.                   *)
 
 open Board
-open Tree
-open Draw
+open Boardobject
+(*open Tree
+open Draw*)
 open GUI
 
-let test_board =
+let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		begin fun () -> ();
-		end
-		begin fun () ->
+		(fun () -> Board.reset ())
+		begin fun (i:int*int) -> 
       		Graphics.clear_graph () ; 
-      		Event.fire_event Board.click_event () ;
+      		(*Event.fire_event Boardobject.click_event () ;*)
       		(* draw loop *)
-      		Board.indices begin fun p -> 
-        		in List.iter (fun w -> w#draw) (Board.get p)
-      		end
+      		Graphics.set_color Graphics.black ;
+      		Graphics.fill_circle 5 5 5;
+      		Board.indices (fun p -> (Board.get p)#draw p)
       	end ;;
 
 test_board () ;;
