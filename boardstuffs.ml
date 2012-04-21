@@ -3,13 +3,10 @@ open Event
 (** Dimensions **)
 
   (** The icon width for each position. *)
-  let obj_width : int = 20
-
-  (** The icon height for each position. *)
-  let obj_height : int = 20
+  let obj_width : int = 25
 
   (** The world has size x size positions *)
-  let world_size : int = 19
+  let world_size : int = 5
 
 type boardtype = Horizontal | Vertical | DiagLeft | DiagRight 
 

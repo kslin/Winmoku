@@ -1,3 +1,5 @@
+exception Terminate
+
 (** An Interface for events. *)
 module type EVENT = 
 sig
@@ -109,6 +111,7 @@ struct
       fire_event i_event !tally
     end) ;
     i_event
+
 end
 
 

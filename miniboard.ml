@@ -10,7 +10,7 @@ object (self)
 
 	(* Instance Variables *)
 
-	val mutable board = []
+	val mutable board : piece_object list list = [[]]
 
     val mutable rows = []
 
@@ -20,10 +20,11 @@ object (self)
     (* Stores the rows that have pieces occupying it *)
     val mutable occ_rows : index list list = []
 
-    (* Initializer *)
-    method set_board newboard =  board <- (newboard :> (piece_object list list))
-
     (* Methods *)
+
+    method getsize = (List.length board)
+
+    method getmax = List.length (List.nth board 0)
 
     method reset = 
         board <- self#buildEmptyBoard;
@@ -35,22 +36,23 @@ object (self)
 
     method buildRows = []
 
-    method getPiece (i: index) : piece_object option =
-        let (x,y) = i in
+    method getPiece (ci: index) : piece_object option =
+        let (x,y) = ci in
             try (Some ((List.nth (List.nth board x) y)))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
-	method private getIndex (i:index) : occupied option = 
-        let (x,y) = i in
+	method private getIndex (ci:index) : occupied option = 
+        let (x,y) = ci in
+            ((*self#print_tuple x y;*)
             try (Some ((List.nth (List.nth board x) y)#get_value))
-                with Failure "nth"|Invalid_argument "List.nth" -> None
+                with Failure "nth"|Invalid_argument "List.nth" -> None)
 
     method convertIndex (i:index) = i
 
-    method private convertBack (ci:index) = ci
+    method convertBack (ci:index) = ci
 
-    method private changeIndex (i:index) (c:occupied) = 
-    	let (x,y) = i in
+    method private changeIndex (ci:index) (c:occupied) = 
+    	let (x,y) = ci in
     	let rec changerow row yval = match row with
             |[] -> ()
             |hd::tl -> if yval = y then (hd :> piece_object)#set_value c
@@ -61,17 +63,22 @@ object (self)
                 else changecol tl (xval + 1) in  
         changecol board 1 
 
+    method private print_tuple x y = print_string " ("; print_int x; 
+        print_string ","; print_int y; print_string ") "; flush_all ()
+
     (* Given an index and a color, insert the piece and update neighbors *)
     method insert (i:index) (c: occupied) : bool =
-    	let i = self#convertIndex i in
-    	let (x,y) = i in
+    	let ci = self#convertIndex i in
+    	let (x,y) = ci in
     	match self#getIndex i with
-    		|None -> false
+    		|None -> (self#print_tuple x y; false)
     		|Some Unocc -> self#changeIndex i c; 
-    			List.iter (fun a -> self#addNeighbors a i) 
+    			(*List.iter (fun a -> self#addNeighbors a i) 
     			            (self#getNeighbors i); 
-                if c = Black then self#addNeighRows (List.nth rows x);
-    			true
+                if c = Black then self#addNeighRows (List.nth rows x);*)
+                print_string "ok";
+                flush_all ();
+                true
     		|_ -> false
 
     method remove (i: index) : bool =

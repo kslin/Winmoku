@@ -25,5 +25,7 @@ object (self)
                 in build_rows (n-1) ((build_row size [])::b ) )
         in (build_rows size [])
 
-    method convertIndex ci = let (x,y) = ci in (y,x)
+    method convertIndex i = let (x,y) = i in (y,x)
+
+    method convertBack ci = let (x,y) = ci in (y,x)
 end

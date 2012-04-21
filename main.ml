@@ -13,18 +13,54 @@ open Boardobject
 (*open Tree
 open Draw*)
 open GUI
+open Boardstuffs
+
+let gridarrayhor = Array.make world_size (0,0,0,0);;
+let gridarrayver = Array.make world_size (0,0,0,0);;
+
+let floor = obj_width
+let ceiling = world_size * obj_width
+
+let draw_grid () = 
+    Array.iteri (fun x _ -> gridarrayhor.(x) <- (obj_width,((x+1)*obj_width),
+    		   ((world_size)*obj_width),((x+1)*obj_width))) 
+    	gridarrayhor;
+    Graphics.draw_segments gridarrayhor;
+    Array.iteri (fun x _ -> gridarrayver.(x) <- (((x+1)*obj_width), obj_width,
+    		   ((x+1)*obj_width),((world_size)*obj_width))) 
+    	gridarrayver;
+    Graphics.draw_segments gridarrayver
+
+(** defines leeway for the click **)
+let leeway = obj_width / 4;;
+
+(** Finds the closest index that is next to the click **)
+let round_click ((x,y):int*int) = 
+	(abs ((x - obj_width)/obj_width), abs ((y - obj_width)/obj_width))
+
+let respond_click ((x,y):int*int) = 
+	if ( (x < floor - leeway) || (y < floor - leeway) ||
+		(x > ceiling + leeway) || (y > ceiling + leeway) )
+	then ()
+	else 
+		(let (i,j) = round_click (x,y) in
+		(*print_int i; print_string ", ";
+		print_int j; print_string "  ";
+		flush_all ();*)
+		Board.set (i,j))
 
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		(fun () -> Board.reset ())
+		(fun () -> Board.reset ();
+					draw_grid ();
+      				Board.indices (fun p -> (Board.get p)#draw p))
 		begin fun (i:int*int) -> 
-      		Graphics.clear_graph () ; 
-      		(*Event.fire_event Boardobject.click_event () ;*)
+      		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
-      		Graphics.set_color Graphics.black ;
-      		Graphics.fill_circle 5 5 5;
+      		respond_click i;
+      		draw_grid ();
       		Board.indices (fun p -> (Board.get p)#draw p)
       	end ;;
 
-test_board () ;;
+let _ = test_board () ;;

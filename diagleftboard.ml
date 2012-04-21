@@ -24,8 +24,16 @@ object (self)
 
     method convertIndex ci = 
         let (x,y) = ci in
-            if x <= (size -1) then (x-y+1, y)
-            else (size-y,x+y-size - 1)
+        if y > x
+        then (size - 1 - (y - x), x)
+        else (size - 1 + (x - y), y)
+
+    method convertBack i =
+        let (x,y) = i in
+        if x < size 
+        then (y, size - 1 - x + y)
+        else (x + y - size + 1, y) 
+
 
     (** Helper Methods **)
     method private buildEmptyList (n1: int) : piece list = 

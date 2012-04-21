@@ -6,9 +6,9 @@ open Pieceobject
 
 class type board_object = 
 object
+    method getsize : int
 
-	(* Initilizes the board *)
-	method set_board : piece_object list list -> unit
+    method getmax : int
 
     (* Resets the board to be blank *)
     method reset : unit
@@ -18,6 +18,9 @@ object
 
     (* Converts the board index to the universal index *)
     method convertIndex : index -> index
+
+    (* Convers index back *)
+    method convertBack : index -> index
 
     (* Builds an empty board *)
     method buildEmptyBoard : piece_object list list

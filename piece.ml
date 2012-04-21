@@ -12,19 +12,20 @@ object (self)
 	method set_value newval = value <- newval
 
 	method draw (i:index) = match v with
-		|Black -> self#circle i obj_width obj_height Graphics.black
-		|White -> self#circle i obj_width obj_height Graphics.white
-		|Unocc -> self#cross i obj_width obj_height
+		|Black -> self#circle i obj_width obj_width Graphics.black
+		|White -> self#unf_circle i obj_width obj_width Graphics.black
+		|Unocc -> ()
 
 	method private circle ((x,y):int*int) (width:int) (height:int)
              (bg:Graphics.color) : unit =
     	Graphics.set_color bg ;
-    	Graphics.fill_circle (x*width) (y*height) 
+    	Graphics.fill_circle ((x+1)*width) ((y+1)*height) 
                          (min width height / 2) 
 
-    method private cross ((x,y):int*int) (width:int) (height:int) : unit = 
-    	Graphics.set_color Graphics.black;
-    	Graphics.fill_rect (x*width - (width/2)) (y*height) width (height/10);
-    	Graphics.fill_rect (x*width) (y*height - (height/2)) (width/10) (height)
+    method private unf_circle ((x,y):int*int) (width:int) (height:int)
+             (bg:Graphics.color) : unit =
+    	Graphics.set_color bg ;
+    	Graphics.draw_circle ((x+1)*width) ((y+1)*height) 
+                         (min width height / 2) 
 
 end

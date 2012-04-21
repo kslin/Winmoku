@@ -8,7 +8,12 @@ object (self)
 	inherit miniboard size as super
 
     method buildEmptyBoard = 
-        self#buildEmptyDiag size
+        let rec emptyDiag (n: int) (b: piece list list) =
+            match n with
+                |0 -> b
+                |_ -> emptyDiag (n-1)            
+                    ((self#buildEmptyList (size - abs(size - n)) )::b)
+        in emptyDiag ((2*size) - 1) []
 
     method buildRows = 
         let rec emptyDiag (n1: int) (b: index list list)=
@@ -22,10 +27,17 @@ object (self)
                         ((emptyList (size - abs(size - n1)) [])::b)
         in emptyDiag ((2*size) - 1) []
 
-    method convertIndex ci = 
+    method convertIndex i = 
+        let (x,y) = i in
+        if (x + y) > (size-1) 
+        then (x+y, size - y - 1)
+        else (x+y, x)
+
+    method convertBack ci = 
         let (x,y) = ci in
-           if x < (size - 1) then (y, (size - 1 -x) +y)
-            else (x+y-size - 1, y) 
+        if (x > (size - 1))
+        then (x+y + 1 - size, size - y - 1)
+        else (y, x - y)
 
     (** Helper Methods **)
     method private buildEmptyList (n1: int) : piece list = 
@@ -34,13 +46,5 @@ object (self)
                 |0 -> occ
                 |_ -> emptyList (n-1) ((new piece Unocc)::occ)
         in emptyList n1 []
-
-    method private buildEmptyDiag (n1: int) : piece list list =
-        let rec emptyDiag (n: int) (b: piece list list) =
-            match n with
-                |0 -> b
-                |_ -> emptyDiag (n-1)            
-                    ((self#buildEmptyList (size - abs(size - n)) )::b)
-        in emptyDiag ((2*n1) - 1) []
 
 end

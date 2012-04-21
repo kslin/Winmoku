@@ -9,56 +9,84 @@ open Horizontalboard
 open Verticalboard
 open Diagrightboard
 open Diagleftboard
+open Piece
 
 module Board =
 struct
 
-  (** The board is represented by 4 miniboards *)
-  let board : board_object * board_object * board_object * board_object =
-    ((new horizontalboard world_size), (new verticalboard world_size),
-     (new diagrightboard world_size), (new diagleftboard world_size))
+  	(** Represent the board as an array of pieces**)
+  	let board : piece_object array array = 
+  		Array.make_matrix world_size world_size ((new piece Unocc))
 
-  (** Keeps track of who's turn it is **)
-  let player : occupied ref = ref Black
+  	(** The board is also represented by 4 miniboards **)
+  	let horboard : board_object ref = ref (new horizontalboard world_size)
+  	let verboard : board_object ref = ref (new verticalboard world_size)
+  	let dgrboard : board_object ref = ref (new diagrightboard world_size)
+  	let dglboard : board_object ref = ref (new diagleftboard world_size)
 
-  (** Board Operations **)
+  	(** Keeps track of who's turn it is **)
+  	let player : occupied ref = ref Black
 
-  (** Reset to a blank board *)
-  let reset () : unit = 
-    let (w,x,y,z) = board in 
-    w#reset;
-    x#reset;
-    y#reset;
-    z#reset
+  	(** Board Operations **)
+
+  	(** Reset to a blank board *)
+  	let reset () : unit = 
+  		Array.iteri (fun x -> Array.iteri 
+  			(fun y _ -> board.(x).(y) <- (new piece Unocc))) board;
+    	(!horboard)#reset;
+    	(!verboard)#reset;
+    	(!dgrboard)#reset;
+    	(!dglboard)#reset;
+    	print_int !horboard#getsize;
+    	print_string ", ";
+    	print_int !horboard#getmax;
+    	print_string "  ";
+    	print_int !verboard#getsize;
+    	print_string ", ";
+    	print_int !horboard#getmax;
+    	print_string "  ";
+    	print_int !dgrboard#getsize;
+    	print_string ", ";
+    	print_int !horboard#getmax;
+    	print_string "  ";
+    	print_int !dglboard#getsize;
+    	print_string ", ";
+    	print_int !horboard#getmax;
+    	print_string "  ";
+    	flush_all ()
 
 
-  (** Get the piece associated with a location in the world. **)
-  let get (i:index) : piece_object = 
-    let (a,b,c,d) = board in match a#getPiece i with
-        |None -> raise Error
-        |Some p -> p
+  	(** Get the piece associated with a location in the world. **)
+  	let get ((x,y):index) : piece_object = 
+    	board.(x).(y)
 
-  (** Change the status of a piece on the board to whichever color player is**)
-  let set (i:index) : unit = 
-    let (a,b,c,d) = board in 
-        match (a#insert i !player, b#insert i !player, 
-            c#insert i !player, d#insert i !player) with
-            |(true,true,true,true) -> ()
-            |_ -> raise Error
-
-   (** Change the color of the current player **)
+    (** Change the color of the current player **)
    let switch_color () : unit = match !player with
-        |Black -> ignore(player := White)
-        |White -> ignore(player := Black)
+        |Black -> ignore(player := White);
+        	print_string "now white";
+        			flush_all ()
+        |White -> ignore(player := Black);
+        	print_string "not black";
+        			flush_all ()
         |Unocc -> ()
 
+  	(** Change the status of a piece on the board to whichever color player is**)
+  	let set (i:index) : unit = 
+    	match ((!horboard)#insert i !player, (!verboard)#insert i !player, 
+          (!dgrboard)#insert i !player, (!dglboard)#insert i !player) with
+        	|(true,true,true,true) -> 
+        		(let (x,y) = i in 
+        			board.(x).(y) <- (new piece !player);
+        			switch_color () )
+        	|_ -> raise Error
+
   (** Remove a piece at a location **)
-  let remove (i:index) : unit = 
-    let (a,b,c,d) = board in
-    ignore (a#remove i);
-    ignore (b#remove i);
-    ignore (c#remove i);
-    ignore (d#remove i)
+  let remove ((x,y):index) : unit = 
+    ignore ((!horboard)#remove (x,y));
+    ignore ((!verboard)#remove (x,y));
+    ignore ((!dgrboard)#remove (x,y));
+    ignore ((!dglboard)#remove (x,y));
+    board.(x).(y) <- (new piece Unocc)
 
 (*)
 
@@ -73,10 +101,11 @@ struct
       world 
       i 
 *)
-  (** Call a function for all indices in the world. *)
+  (** Call a function for all pieces in the world. *)
   let indices (f:int*int -> unit) : unit =
-    let (a,b,c,d) = board in
-    List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices
+    (*let (a,b,c,d) = board in
+    List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices*)
+    Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) board
 (*)
   (** True if the world contains the point (x,y). *)
   let check_bounds ((x,y):int*int) : bool = 
