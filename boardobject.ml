@@ -43,7 +43,7 @@ object
     method remove : index -> bool
 
     (* Given an index, returns a list of neighbors *)
-    method getNeighbors : index -> index list
+    method getNeighbors : index -> (index option)*(index option)
 
     (* Checks if the board has a winning configuration *)
     method isWin : bool

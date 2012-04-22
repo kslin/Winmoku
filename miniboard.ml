@@ -14,8 +14,11 @@ object (self)
 
     val mutable rows = []
 
-    (* Stores the lists of neighbors *)
-    val mutable neighbor_list : index list list = []
+    (* Stores the lists of black neighbors *)
+    val mutable black_neighbor_list : index list list = []
+
+    (* Stores the lists of white neighbors *)
+    val mutable white_neighbor_list : index list list = []
 
     (* Stores the rows that have pieces occupying it *)
     val mutable occ_rows : int list = []
@@ -84,17 +87,35 @@ object (self)
     method insert (i:index) (c: occupied) : bool =
     	let ci = self#convertIndex i in
     	let (x,y) = ci in
-    	match self#getIndex ci with
-    		|None -> false
-    		|Some Unocc -> self#changeIndex ci c; 
-    			(List.iter (fun a -> self#addNeighbors a ci) 
-    			            (self#getNeighbors ci)); 
+    	match (self#getIndex ci, c) with
+    		|(None, _) -> false
+    		|(Some Unocc, Black) -> self#changeIndex ci c; 
+                (match self#getNeighbors ci with
+                    |(None,None) -> 
+                        black_neighbor_list <- 
+                        [self#convertBack ci]::black_neighbor_list
+                    |(Some s, None) ->
+                        self#addBlackNeighbors s ci
+                    |(None, Some s) ->
+                        self#addBlackNeighbors s ci
+                    |(Some x, Some y) ->
+                        self#addMultBlackNeighbors x ci y );
                 (if List.mem x occ_rows then ()
                 else occ_rows <- (x::occ_rows) );
-                (*print_string "(";
-                List.iter (fun x -> print_int x; print_string ", "; flush_all ()) occ_rows;
-                print_string ") ";
-                flush_all ();*)
+                true
+            |(Some Unocc, White) -> self#changeIndex ci c; 
+                (match self#getNeighbors ci with
+                    |(None,None) -> 
+                        white_neighbor_list <- 
+                        [self#convertBack ci]::white_neighbor_list
+                    |(Some s, None) ->
+                        self#addWhiteNeighbors s ci
+                    |(None, Some s) ->
+                        self#addWhiteNeighbors s ci
+                    |(Some x, Some y) ->
+                        self#addMultWhiteNeighbors x ci y );
+                (if List.mem x occ_rows then ()
+                else occ_rows <- (x::occ_rows) );
                 true
     		|_ -> false
 
@@ -107,18 +128,20 @@ object (self)
     method private getNeighbors (ci:index) = 
     	let (x,y) = ci in
     	match self#getIndex ci with
-    		|None -> []
-            |Some Unocc -> []
+    		|None -> (None, None)
+            |Some Unocc -> (None, None)
     		|Some mycolor ->
     	(match (self#getIndex (x,y-1)), (self#getIndex (x,y+1)) with
-    		|(None,None) -> []
-    		|(None, Some n2) -> if n2 = mycolor then (x,y+1)::[] else []
-    		|(Some n1, None) -> if n1 = mycolor then (x,y-1)::[] else []
+    		|(None,None) -> (None, None)
+    		|(None, Some n2) -> 
+                if n2 = mycolor then (Some (x,y+1), None) else (None,None)
+    		|(Some n1, None) -> 
+                if n1 = mycolor then (Some (x,y-1), None) else (None,None)
     		|(Some n1, Some n2) -> (match ((n1 = mycolor), n2 = mycolor) with
-    			|(false,false) -> []
-    			|(false, true) -> (x,y+1)::[]
-    			|(true, false) ->(x,y-1)::[]
-    			|_ -> (x,y-1)::((x,y+1)::[])  ) )
+    			|(false,false) -> (None,None)
+    			|(false, true) -> (Some (x,y+1), None)
+    			|(true, false) -> (Some (x,y-1), None)
+    			|_ -> (Some (x,y-1), Some (x,y+1))  ))
 
 
 
@@ -127,14 +150,61 @@ object (self)
     		|[] -> false
     		|hd::tl -> if List.length hd > 4 then true
     			else checkNeighbors tl in
-    	checkNeighbors neighbor_list
+    	(checkNeighbors black_neighbor_list) || 
+        (checkNeighbors white_neighbor_list)
 
 
     method getThreats = 
         List.flatten (List.map (fun x -> self#containsThreats (List.nth rows x)) occ_rows)
 
+    method private containsThreats (lst: index list) : threat list =
+        if List.length lst < 5 then []
+        else (let rec rec_findthreats threats lst = match lst with
+            |[] -> threats
+            |hd::tl -> 
+                if List.length hd = 3 
+                then rec_findthreats ((self#handle_threes hd)@threats) tl
+                else if List.length hd = 2
+                then rec_findthreats ((self#handle_twos hd)@threats) tl
+                else if List.length hd = 1
+                then rec_findthreats ((self#handle_ones hd)@threats) tl
+                else [] 
+            in rec_findthreats [] black_neighbor_list )
+
+    method private handle_threes (lst: index list) : threat list =
+        match lst with
+            |(x1,y1)::(x2,y2)::(x3,y3)::[] -> 
+                (match (self#getIndex (x1,y1-2), self#getIndex (x1, y1-1),
+                self#getIndex (x3,y3+1), self#getIndex (x3,y3+2)) with
+                    |((None|Some White), (None|Some White), Some Unocc, Some Unocc) ->
+                        [Threat(Four, (x3,y3+1), [(x3,y3+2)], lst);
+                         Threat(Four, (x3,y3+2), [(x3,y3+1)], lst)]
+                    |((None|Some White), Some Unocc, Some Unocc, (None|Some White)) ->
+                        [Threat(Four, (x1,y1-1), [(x3,y3+1)], lst);
+                         Threat(Four, (x3,y3+1), [(x1,y1-1)], lst)]
+                    |((None|Some White), Some Unocc, Some Unocc, Some Unocc) ->
+                        [Threat(Four, (x1,y1-1), [(x3,y3+1)], lst);
+                         Threat(StraightFour, (x3,y3+1), [(x1,y1-1);(x3,y3+2)], lst)
+                         Threat(Four, (x3,y3+2), [(x3,y3+1)], lst)]
+                    |(Some Unocc, Some Unocc, (None|Some White), (None|Some White))
+                        [Threat(Four, (x1,y1-1), [(x1,y1-2)], lst);
+                         Threat(Four, (x1,y1-2), [(x1,y1-1)], lst)]
+                    |(Some Unocc, Some Unocc, Some Unocc, (None|Some White)) ->
+                        [Threat(Four, (x3,y3+1), [(x1,y1-1)], lst);
+                         Threat(StraightFour, (x1,y1-1), [(x1,y1-2);(x3,y3+1)], lst);
+                         Threat(Four, (x1,y1-2), [(x1,y1-1)], lst)]
+                    |_ -> [])
+            |_ -> raise ERROR
+
+    method private handle_twos (lst: index list) : threat list = raise TODO
+        (*match lst with
+            |n1::n2::[] ->
+            |_ -> raise ERROR *)
+
+    method private handle_ones (lst: index list) : threat list = raise TODO
+
     (* Determines if a row has threats in it and returns the threats *)
-    method private containsThreats (lst: index list) : threat list = 
+    (*method private containsThreats (lst: index list) : threat list = 
     	if List.length lst < 5 then []
         else let sixlist = self#hasContSix lst in
     	    (*let rec findfives flst = match flst with
@@ -177,49 +247,84 @@ object (self)
                     |(Unocc,Black,Unocc,Black,Unocc,Unocc) ->
                 (Threat (SplitThree,e,[a;c;f],[b;d]))::(findsixes tl)
                     |_ -> findsixes tl ) in
-        (findsixes sixlist) 
+        (findsixes sixlist) *)
 
                 
 
-
-    (*method private hasNeighbors (i:index) : index list option=  
-    	try (Some (List.find (List.mem i) neighbor_list))
-    	with Not_found -> None*)
-
     (* If i1 is already part of a neighbor list, add i2 to the list.
        If not, make the two into a new neighbor list *)
-    method private addNeighbors (ci1: index) (ci2:index) =
-    	let i1 = self#convertBack ci1 in
-    	let i2 = self#convertBack ci2 in
+    method private addBlackNeighbors (ci1: index) (ci2:index) =
     	let rec findneighlist lst =
     		match lst with 
-    			|[] -> (i1::i2::[])::neighbor_list
-    			|hd::tl -> if List.mem i1 hd then (i2::hd)::tl
+    			|[] -> (self#tuple_sort(ci1::ci2::[]))::black_neighbor_list
+    			|hd::tl -> 
+                    if List.mem ci1 hd then (self#tuple_sort(ci2::hd))::tl
     				else hd::(findneighlist tl)
-    	in neighbor_list <- (findneighlist neighbor_list)
+    	in black_neighbor_list <- (findneighlist black_neighbor_list)
+
+    method private addWhiteNeighbors (ci1: index) (ci2:index) =
+        let rec findneighlist lst =
+            match lst with 
+                |[] -> (self#tuple_sort(ci1::ci2::[]))::white_neighbor_list
+                |hd::tl -> 
+                    if List.mem ci1 hd then (self#tuple_sort(ci2::hd))::tl
+                    else hd::(findneighlist tl)
+        in white_neighbor_list <- (findneighlist white_neighbor_list)
 
     (* If i1 or i2 are already in a neighbor list, add the other 2 to 
         the same list. If both are in a list, merge the lists. If 
         none are in a list, make a new neighbor list *)
-    method private addMultNeighbors (ci1: index) (ci2: index) (ci3: index) =
-        let i1 = self#convertBack ci1 in
-        let i2 = self#convertBack ci2 in
-        let i3 = self#convertBack ci3 in
-        let rec findneighlist n lst isfirst isthird =
+    method private addMultBlackNeighbors (ci1: index) (ci2: index) (ci3: index) =
+        let rec findneighlist lst isfirst isthird rest =
             match lst with
-                |[] -> (isfirst, isthird)
-                |hd::tl -> match (List.mem i1 hd, List.mem i3 hd) with
-                    |(false, false) -> findneighlist (n+1) tl isfirst isthird
-                    |(true, false) -> findneighlist (n+1) tl n isthird
-                    |(false, true) -> findneighlist (n+1) tl isfirst n
-                    |(true, true) -> raise Error
-        in match findneighlist neighbor_list 0 -1 -1 with
-            |(-1, -1) -> (i1::i2::i3::[])::neighbor_list
-            |(x, -1) -> (i)
+                |[] -> (isfirst, isthird, rest)
+                |hd::tl -> (match (List.mem ci1 hd, List.mem ci3 hd) with
+                    |(false, false) -> 
+                        findneighlist tl isfirst isthird (hd::rest)
+                    |(true, false) -> 
+                        findneighlist tl hd isthird rest
+                    |(false, true) -> 
+                        findneighlist tl isfirst hd rest
+                    |(true, true) -> 
+                        raise ERROR)
+        in match findneighlist black_neighbor_list [] [] [] with
+            |([], [], r) -> 
+                black_neighbor_list <- 
+                    (self#tuple_sort (ci1::ci2::ci3::[]))::black_neighbor_list
+            |(x, [], r) -> 
+                black_neighbor_list <- (self#tuple_sort(ci2::ci3::x))::r
+            |([], y, r) -> 
+                black_neighbor_list <- (self#tuple_sort(ci1::ci2::y))::r
+            |(x, y, r) -> 
+                black_neighbor_list <- (self#tuple_sort(ci2::(x@y)))::r
 
-    method private mergeLists l1 l2 = 
-        match (l1,l2) with
-            |(n1,-1) -> let rec parselist 
+    method private addMultWhiteNeighbors (ci1: index) (ci2: index) (ci3: index) =
+        let rec findneighlist lst isfirst isthird rest =
+            match lst with
+                |[] -> (isfirst, isthird, rest)
+                |hd::tl -> (match (List.mem ci1 hd, List.mem ci3 hd) with
+                    |(false, false) -> 
+                        findneighlist tl isfirst isthird (hd::rest)
+                    |(true, false) -> 
+                        findneighlist tl hd isthird rest
+                    |(false, true) -> 
+                        findneighlist tl isfirst hd rest
+                    |(true, true) -> 
+                        raise ERROR)
+        in match findneighlist white_neighbor_list [] [] [] with
+            |([], [], r) -> 
+                white_neighbor_list <- 
+                    (self#tuple_sort (ci1::ci2::ci3::[]))::white_neighbor_list
+            |(x, [], r) -> 
+                white_neighbor_list <- (self#tuple_sort(ci2::ci3::x))::r
+            |([], y, r) -> 
+                white_neighbor_list <- (self#tuple_sort(ci1::ci2::y))::r
+            |(x, y, r) -> 
+                white_neighbor_list <- (self#tuple_sort(ci2::(x@y)))::r
+
+    method private tuple_sort lst = 
+        List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 
+
 
     (*method private addNeighRows (row: index list) = 
     	if List.mem row occ_rows then ()
