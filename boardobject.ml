@@ -36,7 +36,7 @@ object
     method getPiece : index -> piece_object option
 
     (* Inserts pieces on the board *)
-    method insert : index -> occupied -> bool
+    method insert : index -> occupied -> board_object option
 
     (* Removes pieces from a board, returns false if the remove is invalid 
        This is only used for testing purposes *)

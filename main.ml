@@ -15,6 +15,8 @@ open Draw*)
 open GUI
 open Boardstuffs
 
+module MyBoard = Myboard ;;
+
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
 
@@ -44,29 +46,29 @@ let round_click ((x,y):int*int) =
 	(abs (roundfloat ((float_of_int (x - obj_width))/.(float_of_int obj_width))), 
 	abs (roundfloat ((float_of_int (y - obj_width))/.(float_of_int obj_width))))
 
-let respond_click ((x,y):int*int) = 
+let respond_click (b:MyBoard.board) ((x,y):int*int) = 
 	if ( (x < floor - leeway) || (y < floor - leeway) ||
 		(x > ceiling + leeway) || (y > ceiling + leeway) )
-	then ()
-	else 
-		(let (i,j) = round_click (x,y) in
-		(*print_int i; print_string ", ";
-		print_int j; print_string "  ";
-		flush_all ();*)
-		Board.set (i,j))
+	then b
+	else MyBoard.insert b (round_click (x,y))
+
+let b = MyBoard.empty
 
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		(fun () -> Board.reset ();
-					draw_grid ();
-      				Board.indices (fun p -> (Board.get p)#draw p))
+		(fun () -> draw_grid ();
+      				MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
-      		respond_click i;
+      		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
+      		b = respond_click b i;
+      		(if MyBoard.getColor b = White then print_string " it's White  ");
+      		(if MyBoard.isWin b then print_string "Win!!!! "; flush_all ());
+      		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
       		draw_grid ();
-      		Board.indices (fun p -> (Board.get p)#draw p)
+      		MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p)
       	end ;;
 
 let _ = test_board () ;;
