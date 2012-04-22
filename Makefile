@@ -15,9 +15,6 @@ FILES = \
 	boardobject.ml \
 	miniboard.ml \
 	piece.ml \
-	blackpiece.ml \
-	whitepiece.ml \
-	unoccpiece.ml \
 	horizontalboard.ml \
 	verticalboard.ml \
 	diagrightboard.ml \
