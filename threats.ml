@@ -1,4 +1,4 @@
-open Board
+open Myboard
 open Threat
 
 (*This is the file that will implement threat spaced search *)
@@ -106,4 +106,4 @@ module tGenerator(B: BOARD) : THREATS =
     let rec merge tree1 tree2 = tree1
 end
 
-module BThreats = tGenerator(Board)
+module BThreats = tGenerator(Myboard)
