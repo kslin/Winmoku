@@ -11,11 +11,30 @@ open Diagrightboard
 open Diagleftboard
 open Piece
 
-module Board =
+module type BOARD =
+sig 
+	type board
+
+	val empty : board
+
+	val get : board -> index -> piece_object
+
+	val insert : board -> index -> occupied -> board
+
+	val isWin : board -> bool
+
+	val getThreats : board -> threat list
+end
+
+module Myboard : BOARD =
 struct
 
+	(**Board will be an array of pieces, 4 miniboards, and who's turn it is **)
+	type board = occupied*(piece_object array array)*(board_object)*
+						(board_object)*(board_object)*(board_object)
+
   	(** Represent the board as an array of pieces**)
-  	let board : piece_object array array = 
+  	(*let board : piece_object array array = 
   		Array.make_matrix world_size world_size ((new piece Unocc))
 
   	(** The board is also represented by 4 miniboards **)
@@ -25,34 +44,31 @@ struct
   	let dglboard : board_object ref = ref (new diagleftboard world_size)
 
   	(** Keeps track of who's turn it is **)
-  	let player : occupied ref = ref Black
+  	let player : occupied ref = ref Black*)
 
   	(** Board Operations **)
 
   	(** Reset to a blank board *)
-  	let reset () : unit = 
-  		Array.iteri (fun x -> Array.iteri 
-  			(fun y _ -> board.(x).(y) <- (new piece Unocc))) board;
-    	(!horboard)#reset;
-    	(!verboard)#reset;
-    	(!dgrboard)#reset;
-    	(!dglboard)#reset
+  	let empty () : board = 
+  		let piecearray = 
+  			Array.make_matrix world_size world_size (new piece Unocc) in
+  		let horboard = (new horizontalboard world_size)#empty in
+  		let verboard = (new verticalboard world_size)#empty in
+  		let dgrboard = (new diagrightboard world_size)#empty in
+  		let dglboard = (new diagleftboard world_size)#empty) in
+		(Black,piecearray,horboard,verboard.dgrboard,dglboard)
 
 
   	(** Get the piece associated with a location in the world. **)
-  	let get ((x,y):index) : piece_object = 
-    	board.(x).(y)
-
-    (** Change the color of the current player **)
-   let switch_color () : unit = match !player with
-        |Black -> ignore(player := White)
-        |White -> ignore(player := Black)
-        |Unocc -> ()
+  	let get (b:board) ((x,y):index) : piece_object = 
+  		let (p,pa,h,v,dr,dl) = b in
+    	pa.(x).(y)
 
   	(** Change the status of a piece on the board to whichever color player is**)
-  	let set (i:index) : unit = 
-    	match ((!horboard)#insert i !player, (!verboard)#insert i !player, 
-          (!dgrboard)#insert i !player, (!dglboard)#insert i !player) with
+  	let insert (b:board) (i:index) : unit = 
+  		let (p,pa,h,v,dr,dl) = b in
+    	match (h#insert i p, v#insert i p, 
+          (dr#insert i p, dl#insert i p) with
         	|(true,true,true,true) -> 
         		(let (x,y) = i in 
         			board.(x).(y) <- (new piece !player);
