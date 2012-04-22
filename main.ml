@@ -34,9 +34,15 @@ let draw_grid () =
 (** defines leeway for the click **)
 let leeway = obj_width / 4;;
 
+let roundfloat (f:float) : int = 
+	let remainder = mod_float f 1. in
+	if remainder < 0.5 then int_of_float f
+	else (int_of_float f) + 1 
+
 (** Finds the closest index that is next to the click **)
 let round_click ((x,y):int*int) = 
-	(abs ((x - obj_width)/obj_width), abs ((y - obj_width)/obj_width))
+	(abs (roundfloat ((float_of_int (x - obj_width))/.(float_of_int obj_width))), 
+	abs (roundfloat ((float_of_int (y - obj_width))/.(float_of_int obj_width))))
 
 let respond_click ((x,y):int*int) = 
 	if ( (x < floor - leeway) || (y < floor - leeway) ||
