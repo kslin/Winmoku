@@ -186,17 +186,40 @@ object (self)
     	try (Some (List.find (List.mem i) neighbor_list))
     	with Not_found -> None*)
 
-    (* If n1 is already part of a neighbor list, add n2 to the list.
+    (* If i1 is already part of a neighbor list, add i2 to the list.
        If not, make the two into a new neighbor list *)
-    method private addNeighbors (i1: index) (i2:index) =
-    	let n1 = self#convertBack i1 in
-    	let n2 = self#convertBack i2 in
+    method private addNeighbors (ci1: index) (ci2:index) =
+    	let i1 = self#convertBack ci1 in
+    	let i2 = self#convertBack ci2 in
     	let rec findneighlist lst =
     		match lst with 
-    			|[] -> (n1::n2::[])::neighbor_list
-    			|hd::tl -> if List.mem n1 hd then (n2::hd)::tl
+    			|[] -> (i1::i2::[])::neighbor_list
+    			|hd::tl -> if List.mem i1 hd then (i2::hd)::tl
     				else hd::(findneighlist tl)
     	in neighbor_list <- (findneighlist neighbor_list)
+
+    (* If i1 or i2 are already in a neighbor list, add the other 2 to 
+        the same list. If both are in a list, merge the lists. If 
+        none are in a list, make a new neighbor list *)
+    method private addMultNeighbors (ci1: index) (ci2: index) (ci3: index) =
+        let i1 = self#convertBack ci1 in
+        let i2 = self#convertBack ci2 in
+        let i3 = self#convertBack ci3 in
+        let rec findneighlist n lst isfirst isthird =
+            match lst with
+                |[] -> (isfirst, isthird)
+                |hd::tl -> match (List.mem i1 hd, List.mem i3 hd) with
+                    |(false, false) -> findneighlist (n+1) tl isfirst isthird
+                    |(true, false) -> findneighlist (n+1) tl n isthird
+                    |(false, true) -> findneighlist (n+1) tl isfirst n
+                    |(true, true) -> raise Error
+        in match findneighlist neighbor_list 0 -1 -1 with
+            |(-1, -1) -> (i1::i2::i3::[])::neighbor_list
+            |(x, -1) -> (i)
+
+    method private mergeLists l1 l2 = 
+        match (l1,l2) with
+            |(n1,-1) -> let rec parselist 
 
     (*method private addNeighRows (row: index list) = 
     	if List.mem row occ_rows then ()
