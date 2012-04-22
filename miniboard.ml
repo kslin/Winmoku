@@ -43,9 +43,10 @@ object (self)
         self#print_tuple (List.nth (List.nth rows x) y) 
                 
 
-    method reset = 
+    method empty = 
         board <- self#buildEmptyBoard;
-        rows <- self#buildRows
+        rows <- self#buildRows;
+        (self :> board_object)
 
     method getIndices = rows
 
@@ -84,11 +85,11 @@ object (self)
         print_string ","; print_int y; print_string ") "; flush_all ()
 
     (* Given an index and a color, insert the piece and update neighbors *)
-    method insert (i:index) (c: occupied) : bool =
+    method insert (i:index) (c: occupied) : board_object option =
     	let ci = self#convertIndex i in
     	let (x,y) = ci in
     	match (self#getIndex ci, c) with
-    		|(None, _) -> false
+    		|(None, _) -> None
     		|(Some Unocc, Black) -> self#changeIndex ci c; 
                 (match self#getNeighbors ci with
                     |(None,None) -> 
@@ -102,7 +103,7 @@ object (self)
                         self#addMultBlackNeighbors x ci y );
                 (if List.mem x occ_rows then ()
                 else occ_rows <- (x::occ_rows) );
-                true
+                Some (self :> board_object)
             |(Some Unocc, White) -> self#changeIndex ci c; 
                 (match self#getNeighbors ci with
                     |(None,None) -> 
@@ -116,8 +117,8 @@ object (self)
                         self#addMultWhiteNeighbors x ci y );
                 (if List.mem x occ_rows then ()
                 else occ_rows <- (x::occ_rows) );
-                true
-    		|_ -> false
+                Some (self :> board_object)
+    		|_ -> None
 
     method remove (i: index) : bool =
     	let i = self#convertIndex i in
@@ -125,7 +126,7 @@ object (self)
     		|None -> false
     		|_ -> self#changeIndex i Unocc; true
 
-    method private getNeighbors (ci:index) = 
+    method getNeighbors (ci:index) = 
     	let (x,y) = ci in
     	match self#getIndex ci with
     		|None -> (None, None)
@@ -183,23 +184,54 @@ object (self)
                         [Threat(Four, (x1,y1-1), [(x3,y3+1)], lst);
                          Threat(Four, (x3,y3+1), [(x1,y1-1)], lst)]
                     |((None|Some White), Some Unocc, Some Unocc, Some Unocc) ->
-                        [Threat(Four, (x1,y1-1), [(x3,y3+1)], lst);
-                         Threat(StraightFour, (x3,y3+1), [(x1,y1-1);(x3,y3+2)], lst)
-                         Threat(Four, (x3,y3+2), [(x3,y3+1)], lst)]
-                    |(Some Unocc, Some Unocc, (None|Some White), (None|Some White))
+                        [Threat(StraightFour, (x3,y3+1), [(x1,y1-1);(x3,y3+2)], lst)]
+                    |(Some Unocc, Some Unocc, (None|Some White), (None|Some White)) ->
                         [Threat(Four, (x1,y1-1), [(x1,y1-2)], lst);
                          Threat(Four, (x1,y1-2), [(x1,y1-1)], lst)]
                     |(Some Unocc, Some Unocc, Some Unocc, (None|Some White)) ->
-                        [Threat(Four, (x3,y3+1), [(x1,y1-1)], lst);
+                        [Threat(StraightFour, (x1,y1-1), [(x1,y1-2);(x3,y3+1)], lst)]
+                    |(Some Unocc, Some Unocc, Some Unocc, Some Unocc) ->
+                        [Threat(Four, (x1,y1-2), [(x1,y1-1)], lst);
+                         Threat(Four, (x3,y3+2), [(x3,y3+1)], lst);
                          Threat(StraightFour, (x1,y1-1), [(x1,y1-2);(x3,y3+1)], lst);
-                         Threat(Four, (x1,y1-2), [(x1,y1-1)], lst)]
+                         Threat(StraightFour, (x3,y3+1), [(x1,y1-1);(x3,y3+2)], lst)]
                     |_ -> [])
             |_ -> raise ERROR
 
-    method private handle_twos (lst: index list) : threat list = raise TODO
-        (*match lst with
-            |n1::n2::[] ->
-            |_ -> raise ERROR *)
+    method private handle_twos (lst: index list) : threat list = 
+        match lst with
+            |(x1,y1)::(x2,y2)::[] ->
+                (match (self#getIndex (x1,y1-3), self#getIndex (x1,y1-2),
+                        self#getIndex (x1,y1-1), self#getIndex (x2,y2+1),
+                        self#getIndex (x2,y2+2), self#getIndex (x2,y2+3)) with
+                    |((None|Some White),(None|Some White),(None|Some White),
+                     Some Unocc, Some Black, Some Unocc) ->
+                        [Threat(Four, (x2,y2+1), [(x2,y2+3)], lst);
+                         Threat(Four, (x2,y2+3), [(x2,y2+1)], lst)]
+                    |(Some Unocc, Some Black, Some Unocc,
+                     (None|Some White),(None|Some White),(None|Some White)) ->
+                        [Threat(Four, (x1,y1-1), [(x1,y1-3)], lst);
+                         Threat(Four, (x1,y1-3), [(x1,y1-1)], lst)]
+                    |((None|Some White), Some Black, Some Unocc,
+                     Some Unocc, _, _) -> 
+                        [Threat(Four, (x1,y1-1), [(x2,y2+1)], lst);
+                         Threat(Four, (x2,y2+1), [(x1,y1-1)], lst)]
+                    |(_,_,Some Unocc,
+                     Some Unocc, Some Black, (None|Some White)) ->
+                        [Threat(Four, (x1,y1-1), [(x2,y2+1)], lst);
+                         Threat(Four, (x2,y2+1), [(x1,y1-1)], lst)]
+                    |(_,_,Some Unocc,
+                     Some Unocc, Some Black, Some Unocc) ->
+                        [Threat(Four, (x1,y1-1), [(x2,y2+1)], lst);
+                         Threat(Four, (x2,y2+3), [(x2,y2+1)], lst);
+                         Threat(StraightFour, (x2,y2+1), [(x1,y1-1);(x2,y2+3)], lst)]
+                    (*|(Some Unocc, Some Black, Some Unocc,
+                     Some Unocc, _, _) ->
+                        [Threat(Four, (x1,y1-3), [(x1,y1-1)], lst);
+                         Threat(Four, (x2,y))]*)
+
+                    |_ -> [])
+            |_ -> raise ERROR 
 
     method private handle_ones (lst: index list) : threat list = raise TODO
 

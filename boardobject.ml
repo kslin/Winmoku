@@ -14,8 +14,8 @@ object
     method print_rows_elt : index -> unit
 
 
-    (* Resets the board to be blank *)
-    method reset : unit
+    (* Returns empty board *)
+    method empty : board_object
 
     (* Returns the list list of indices *)
     method getIndices : index list list
