@@ -8,12 +8,13 @@ object (self)
 	inherit miniboard size as super
 
     method buildEmptyBoard = 
+        print_string "\n I am printing from diagrightboard \n";
         let rec emptyDiag (n: int) (b: piece list list) =
             match n with
                 |0 -> b
                 |_ -> emptyDiag (n-1)            
                     ((self#buildEmptyList (size - abs(size - n)) )::b)
-        in emptyDiag ((2*size) - 1) []
+        in emptyDiag ((2*size) - 1) [];
 
     method buildRows = 
         let rec emptyDiag (n1: int) (b: index list list)=

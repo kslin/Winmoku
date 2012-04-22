@@ -25,7 +25,16 @@ object (self)
     method getsize = (List.length board)
 
     method printlistlengths = 
-    List.iter (fun x -> print_int (List.length x); print_string ", ") board
+        let rec rec_print n = match n with
+            |0 -> ()
+            |x -> print_string "The "; print_int x; print_string "th list in this list has "; 
+                print_int (List.length (List.nth board (x-1))); print_string " elements. ";
+                print_string "\n";
+                rec_print (n-1)
+        in rec_print self#getsize;
+        print_int self#getsize;
+        flush_all ()
+                
 
     method reset = 
         board <- self#buildEmptyBoard;

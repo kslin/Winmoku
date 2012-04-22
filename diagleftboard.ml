@@ -11,6 +11,7 @@ object (self)
         self#buildEmptyDiag size
 
     method buildRows = 
+        print_string "\n I am printing from diagleftboard \n";
         let rec emptyDiag (n1: int) (b: index list list)=
             match n1 with
                 |0 -> b

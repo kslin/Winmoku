@@ -8,6 +8,7 @@ object (self)
 	inherit miniboard size as super
 
     method buildEmptyBoard = 
+        print_string "\n I am printing from vertical \n";
         let rec build_board n b = match n with
             |0 -> b
             |_ -> (let rec build_row m r = match m with

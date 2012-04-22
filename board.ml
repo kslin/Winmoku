@@ -36,24 +36,7 @@ struct
     	(!horboard)#reset;
     	(!verboard)#reset;
     	(!dgrboard)#reset;
-    	(!dglboard)#reset;
-    	print_int !horboard#getsize;
-    	print_string ", ";
-    	!horboard#printlistlengths;
-    	print_string "  ";
-    	print_int !verboard#getsize;
-    	print_string ", ";
-    	!horboard#printlistlengths;
-    	print_string "  ";
-    	print_int !dgrboard#getsize;
-    	print_string ", ";
-    	!horboard#printlistlengths;
-    	print_string "  ";
-    	print_int !dglboard#getsize;
-    	print_string ", ";
-    	!horboard#printlistlengths;
-    	print_string "  ";
-    	flush_all ()
+    	(!dglboard)#reset
 
 
   	(** Get the piece associated with a location in the world. **)
