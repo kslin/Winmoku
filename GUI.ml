@@ -79,8 +79,8 @@ struct
   (** Start the graphical environment initialized to the size of the world.
       Handle clock and input events necessary to run the simulation. *)
   let run_game (init:unit -> unit) (handle_move:int*int -> unit) : unit =
-    run_ui ((world_size+2)*obj_width) (* GUI width *)
-           ((world_size+2)*obj_width) (* GUI height *)
+    run_ui ((world_size+3)*obj_width) (* GUI width *)
+           ((world_size+3)*obj_width) (* GUI height *)
            (* Event framework initializer *)
            begin fun () ->
              (* ignore(Event.add_listener key_pressed key_handler) ; *)

@@ -18,29 +18,31 @@ open Boardstuffs
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
 
-let floor = obj_width 
-let ceiling = world_size * obj_width
+let floor = obj_width * 2
+let ceiling = (world_size + 1) * (obj_width)
 
 
 let fill_board () = 
     Graphics.set_color (Graphics.rgb 204 153 51);
-    Graphics.fill_rect 0 0 (ceiling + obj_width) (ceiling + obj_width)
+    Graphics.fill_rect obj_width obj_width 
+    	(ceiling) (ceiling)
 
 let board_border () =
 	Graphics.set_line_width 6;
 	Graphics.set_color (Graphics.rgb 102 51 0);
-	Graphics.draw_rect 0 0  (ceiling + obj_width) (ceiling + obj_width);
+	Graphics.draw_rect obj_width obj_width  
+	    (ceiling) (ceiling);
 	Graphics.set_line_width 1
 
 let draw_grid () = 
     Graphics.set_color (Graphics.rgb 102 51 0);
     Graphics.set_line_width 1;
-    Array.iteri (fun x _ -> gridarrayhor.(x) <- (obj_width,((x+1)*obj_width),
-    		   ((world_size)*obj_width),((x+1)*obj_width))) 
+    Array.iteri (fun x _ -> gridarrayhor.(x) <- (floor,((x+2)*obj_width),
+    		   ceiling, ((x+2)*obj_width))) 
     	gridarrayhor;
     Graphics.draw_segments gridarrayhor;
-    Array.iteri (fun x _ -> gridarrayver.(x) <- (((x+1)*obj_width), obj_width,
-    		   ((x+1)*obj_width),((world_size)*obj_width))) 
+    Array.iteri (fun x _ -> gridarrayver.(x) <- (((x+2)*obj_width), floor,
+    		   ((x+2)*obj_width),(ceiling))) 
     	gridarrayver;
     Graphics.draw_segments gridarrayver
 
