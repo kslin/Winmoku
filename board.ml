@@ -61,7 +61,7 @@ struct
         		(let (x,y) = i in 
         			board.(x).(y) <- (new piece !player);
         			switch_color () )
-        	|_ -> raise Error
+        	|_ -> ()
 
   (** Remove a piece at a location **)
   let remove ((x,y):index) : unit = 

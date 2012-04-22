@@ -8,7 +8,6 @@ object (self)
 	inherit miniboard size as super
 
     method buildEmptyBoard = 
-        print_string "\n I am printing from diagrightboard \n";
         let rec emptyDiag (n: int) (b: piece list list) =
             match n with
                 |0 -> b

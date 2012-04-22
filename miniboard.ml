@@ -53,9 +53,8 @@ object (self)
 
 	method private getIndex (ci:index) : occupied option = 
         let (x,y) = ci in
-            ((*self#print_tuple x y;*)
             try (Some ((List.nth (List.nth board x) y)#get_value))
-                with Failure "nth"|Invalid_argument "List.nth" -> None)
+                with Failure "nth"|Invalid_argument "List.nth" -> None
 
     method convertIndex (i:index) = i
 
@@ -69,9 +68,10 @@ object (self)
                 else changerow tl (yval+1) in
         let rec changecol col xval = match col with
             |[] -> ()
-            |hd::tl -> if xval = x then (changerow hd 1)
+            |hd::tl -> if xval = x then (changerow hd 0)
                 else changecol tl (xval + 1) in  
-        changecol board 1 
+        changecol board 0
+        
 
     method private print_tuple x y = print_string " ("; print_int x; 
         print_string ","; print_int y; print_string ") "; flush_all ()
@@ -80,14 +80,12 @@ object (self)
     method insert (i:index) (c: occupied) : bool =
     	let ci = self#convertIndex i in
     	let (x,y) = ci in
-    	match self#getIndex i with
+    	match self#getIndex ci with
     		|None -> (self#print_tuple x y; false)
-    		|Some Unocc -> self#changeIndex i c; 
+    		|Some Unocc -> self#changeIndex ci c; 
     			(*List.iter (fun a -> self#addNeighbors a i) 
     			            (self#getNeighbors i); 
                 if c = Black then self#addNeighRows (List.nth rows x);*)
-                print_string "ok";
-                flush_all ();
                 true
     		|_ -> false
 
