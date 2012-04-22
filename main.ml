@@ -18,10 +18,23 @@ open Boardstuffs
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
 
-let floor = obj_width
+let floor = obj_width 
 let ceiling = world_size * obj_width
 
+
+let fill_board () = 
+    Graphics.set_color (Graphics.rgb 204 153 51);
+    Graphics.fill_rect 0 0 (ceiling + obj_width) (ceiling + obj_width)
+
+let board_border () =
+	Graphics.set_line_width 6;
+	Graphics.set_color (Graphics.rgb 102 51 0);
+	Graphics.draw_rect 0 0  (ceiling + obj_width) (ceiling + obj_width);
+	Graphics.set_line_width 1
+
 let draw_grid () = 
+    Graphics.set_color (Graphics.rgb 102 51 0);
+    Graphics.set_line_width 1;
     Array.iteri (fun x _ -> gridarrayhor.(x) <- (obj_width,((x+1)*obj_width),
     		   ((world_size)*obj_width),((x+1)*obj_width))) 
     	gridarrayhor;
@@ -59,13 +72,17 @@ let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
 		(fun () -> Board.reset ();
+					fill_board ();
 					draw_grid ();
+					board_border ();
       				Board.indices (fun p -> (Board.get p)#draw p))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
       		respond_click i;
+      		fill_board ();
       		draw_grid ();
+      		board_border ();
       		Board.indices (fun p -> (Board.get p)#draw p)
       	end ;;
 
