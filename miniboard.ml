@@ -134,8 +134,78 @@ object (self)
         List.flatten (List.map (fun x -> self#containsThreats (List.nth rows x)) occ_rows)
 
     (* Determines if a row has threats in it and returns the threats *)
+
+    method private containsCurrentThreats (lst: index list) : threat list = 
+      if List.length lst < 5 then []
+      else
+	let nogain = (-1,-1) in
+	let occupied_list = List.map (fun x -> (x, self#getIndex x)) lst in
+	let rec findThreat (lst: index * ocuppied list) = 
+	  match lst with
+	    | [] -> []
+	    | (a,aind)::(b,bind)::(c,cind)::(d,dind)::
+	       (e,eind)::(f,find)::(g,gind)::tl ->
+	      (match (aind, bind, cind, dind, eind, find, gind) with
+		| (Unocc, Unocc, Black, Black, Black, Unocc, White) ->
+		  Threat (WallThree, nogain, [a;b;f],[c;d;e]) :: 
+		    findThreat ((g, gind)::tl)
+		| (White, Unocc, Black, Black, Black, Unocc, Unocc) ->
+		  Threat (WallThree, nogain, [b;f;g],[c;d;e]) ::
+		    findThreat ((f, find)::(g,gind)::tl)
+	        | (Unocc, Unocc, Black, Black, Black, Unocc, Unocc) ->
+		  Threat (Three, nogain, [b;f], [c;d;e]) ::
+		    findThreat ((f, find)::(g,gind)::tl)
+	      )
+
+	    | (a,aind)::(b,bind)::(c,cind)::(d,dind)::
+	       (e,eind)::(f,find)::tl ->
+	      (match (aind, bind, cind, dind, eind, find) with
+		| (Unocc, Black, Unocc, Black, Black, Unocc) ->
+		  Threat (SplitThree, nogain, [c], [b;d;e]) ::
+		    findThreat ((c,cind)::(d,dind)::(e,eind)::(f,find)::tl)
+		| (Unocc, Black, Black, Unocc, Black, Unocc) ->
+		  Threat (SplitThree, nogain, [d], [b;c;e]) ::
+		    findThreat ((d,dind)::(e,eind)::(f,find)::tl)
+		| (Unocc, Black, Black, Black, Black, Unocc) ->
+		  Threat (StraightFour, nogain, [a;f], [b;c;d;e]) ::
+	            findThreat ((f,find)::tl)
+		| (Unocc, Black, Black, Black, Black, White) ->
+		  Threat (Four, nogain, [a], [b;c;d;e]) ::
+		    findThreat ((f,find)::tl)
+	      )
+	    | (a,aind)::(b,bind)::(c,cind)::(d,dind)::
+	       (e,eind)::tl ->
+	      (match (aind, bind, cind, dind, eind) with
+		| (Unocc, Black, Black, Black, Black) ->
+		  Threat (Four, nogain, [a], [b;c;d;e]) ::
+		    findThreat ((b,bind)::(c,cind)::(d,dind)::(e,eind)::tl)
+		| (Black, Unocc, Black, Black, Black) ->
+		  Threat (Four, nogain, [b], [a;c;d;e]) ::
+		    findThreat ((b,bind)::(c,cind)::(d,dind)::(e,eind)::tl)
+		| (Black, Black, Unocc, Black, Black) ->
+		  Threat (Four, nogain, [c], [a;b;d;e]) ::
+		    findThreat ((c,cind)::(d,dind)::(e,eind)::tl)
+		| (Black, Black, Black, Unocc, Black) ->
+		  Threat (Four, nogain, [d], [a;b;c;e]) ::
+		    findThreat ((d,dind)::(e,eind)::tl)
+		| (Black, Black, Black, Black, Unocc) ->
+		  Threat (Four, nogain, [e], [a;b;c;d]) ::
+		    findThreat ((e,eind)::tl)
+		| (Black, Black, Black, Black, Black) ->
+		  Threat (Five, nogain, [], [a;b;c;d;e]) ::
+		    findThreat tl
+	      )
+	in
+	findThreat occupied_list
+
+
+
     method private containsThreats (lst: index list) : threat list = 
     	if List.length lst < 5 then []
+	else let 
+
+
+
         else let sixlist = self#hasContSix lst in
     	    (*let rec findfives flst = match flst with
                 |[] -> flst
@@ -159,26 +229,34 @@ object (self)
                 (match (aind,bind,cind,dind,eind,find) with
                     |(Unocc,Black,Black,Black,Unocc,Unocc) -> 
                 (Threat (StraightFour,e,[a;f],[b;c;d]))::(findsixes tl) 
+
                     |(Unocc,Unocc, Black,Black,Black,Unocc) -> 
                 (Threat (StraightFour,b,[a;f],[c;d;e]))::(findsixes tl) 
+
                     |(Unocc,Black,Unocc,Black,Black,Unocc) -> 
                 (Threat (StraightFour,c,[a;f],[b;d;e]))::(findsixes tl) 
+
                     |(Unocc,Black,Black,Unocc,Black,Unocc) -> 
                 (Threat (StraightFour,d,[a;f],[b;c;e]))::(findsixes tl)
+
                     |(Unocc,Black,Black,Unocc,Unocc,Unocc) ->
                 (Threat (SplitThree,e,[a;d;f],[b;c]))::(findsixes tl)
+
                     |(Unocc,Unocc,Black,Unocc,Black,Unocc) ->
                 (Threat (SplitThree,b,[a;d;f],[c;e]))::(findsixes tl)
+
                     |(Unocc,Black,Unocc,Unocc,Black,Unocc) ->
                 (Threat (SplitThree,c,[a;d;f],[b;e]))::
                 (Threat (SplitThree,d,[a;c;f],[b;e]))::(findsixes tl)
+
                     |(Unocc,Unocc,Unocc,Black,Black,Unocc) ->
                 (Threat (SplitThree,b,[a;c;f],[d;e]))::(findsixes tl)
+
                     |(Unocc,Black,Unocc,Black,Unocc,Unocc) ->
                 (Threat (SplitThree,e,[a;c;f],[b;d]))::(findsixes tl)
+
                     |_ -> findsixes tl ) in
         (findsixes sixlist) 
-
                 
 
 
@@ -202,6 +280,9 @@ object (self)
     	if List.mem row occ_rows then ()
     	else occ_rows <- (row::occ_rows)*)
 
+
+     (* builds a sublist out of lst given the start and endpoint
+        returns none if lst or sublist is smaller than 5 *)
     method private sublist lst start endpoint = 
         if endpoint < 4 then None else
     	let listlength = List.length lst in
@@ -245,30 +326,32 @@ object (self)
         black or unoccupied, return the spaces*)
     method private hasContSix (row: index list) = 
         if List.length row < 6 then []
-        else let rec iter_row start sixlist = 
+        else 
+	  let rec iter_row start sixlist = 
             match self#sublist row start (start + 5) with
-                |None -> sixlist
-                |Some (a::b::c::d::e::f::[]) -> 
-                    let aind = self#getIndex a in
-                    let bind = self#getIndex b in
-                    let cind = self#getIndex c in
-                    let dind = self#getIndex d in
-                    let eind = self#getIndex e in
-                    let find = self#getIndex f in
-                    if (aind = Some White) ||
-                       (bind = Some White) ||
-                       (cind = Some White) ||
-                       (dind = Some White) ||
-                       (eind = Some White) ||
-                       (find = Some White)
-                    then iter_row (start+1) sixlist
-                    else iter_row (start+1) (((a,self#deopt aind),
-                                              (b,self#deopt bind),
-                                              (c,self#deopt cind),
-                                              (d,self#deopt dind),
-                                              (e,self#deopt eind),
-                                              (f,self#deopt find))::sixlist)
-                |_ -> sixlist in
+              |None -> sixlist
+              |Some (a::b::c::d::e::f::[]) -> 
+                let aind = self#getIndex a in
+                let bind = self#getIndex b in
+                let cind = self#getIndex c in
+                let dind = self#getIndex d in
+                let eind = self#getIndex e in
+                let find = self#getIndex f in
+                if (aind = Some White) ||
+                  (bind = Some White) ||
+                  (cind = Some White) ||
+                  (dind = Some White) ||
+                  (eind = Some White) ||
+                  (find = Some White)
+                then iter_row (start+1) sixlist
+                else iter_row (start+1) (((a,self#deopt aind),
+                                          (b,self#deopt bind),
+                                          (c,self#deopt cind),
+                                          (d,self#deopt dind),
+                                          (e,self#deopt eind),
+                                          (f,self#deopt find))::sixlist)
+              |_ -> sixlist 
+	  in
         iter_row 0 []
 
 
