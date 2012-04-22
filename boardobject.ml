@@ -8,7 +8,7 @@ class type board_object =
 object
     method getsize : int
 
-    method getlistlength : int
+    method printlistlengths : unit
 
     (* Resets the board to be blank *)
     method reset : unit

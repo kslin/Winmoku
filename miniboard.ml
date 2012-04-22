@@ -24,7 +24,8 @@ object (self)
 
     method getsize = (List.length board)
 
-    method getlistlength = List.length (List.nth board 0)
+    method printlistlengths = 
+    List.iter (fun x -> print_int (List.length x); print_string ", ") board
 
     method reset = 
         board <- self#buildEmptyBoard;
