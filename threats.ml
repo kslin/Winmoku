@@ -86,7 +86,7 @@ functor (B: BOARD) ->
       insertwhitelist (board.insert b tgain Black) tcost
 
     let rec gen_threat_tree (b: board) (t: threat) = 
-      if B.iswin then
+      if (board.isWin b) then
 	Win(b, t)
       else
 	let threatList = get_dependent_threats b t in 
