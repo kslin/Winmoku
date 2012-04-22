@@ -63,7 +63,7 @@ let test_board () =
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
       		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
-      		b = respond_click b i;
+      		let b = respond_click b i;
       		(if MyBoard.getColor b = White then print_string " it's White  ");
       		(if MyBoard.isWin b then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
