@@ -45,12 +45,8 @@ struct
 
     (** Change the color of the current player **)
    let switch_color () : unit = match !player with
-        |Black -> ignore(player := White);
-        	print_string "now white";
-        			flush_all ()
-        |White -> ignore(player := Black);
-        	print_string "not black";
-        			flush_all ()
+        |Black -> ignore(player := White)
+        |White -> ignore(player := Black)
         |Unocc -> ()
 
   	(** Change the status of a piece on the board to whichever color player is**)
@@ -60,7 +56,16 @@ struct
         	|(true,true,true,true) -> 
         		(let (x,y) = i in 
         			board.(x).(y) <- (new piece !player);
-        			switch_color () )
+        			switch_color ();
+        			print_threat_list !horboard#getThreats;
+        			print_threat_list !verboard#getThreats;
+        			print_threat_list !dgrboard#getThreats;
+        			print_threat_list !dglboard#getThreats;
+        			(if (!horboard#isWin ||
+        				!verboard#isWin ||
+        				!dgrboard#isWin ||
+        				!dglboard#isWin)
+        			then (print_string "Win!!!!!"; flush_all ())))
         	|_ -> ()
 
   (** Remove a piece at a location **)

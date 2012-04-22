@@ -6,9 +6,13 @@ open Pieceobject
 
 class type board_object = 
 object
+    (**** Get rid of later ****)
     method getsize : int
 
     method printlistlengths : unit
+
+    method print_rows_elt : index -> unit
+
 
     (* Resets the board to be blank *)
     method reset : unit

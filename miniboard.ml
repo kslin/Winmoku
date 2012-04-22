@@ -18,7 +18,7 @@ object (self)
     val mutable neighbor_list : index list list = []
 
     (* Stores the rows that have pieces occupying it *)
-    val mutable occ_rows : index list list = []
+    val mutable occ_rows : int list = []
 
     (* Methods *)
 
@@ -34,6 +34,10 @@ object (self)
         in rec_print self#getsize;
         print_int self#getsize;
         flush_all ()
+
+    method print_rows_elt (i: index) : unit =
+        let (x,y) = self#convertIndex i in
+        self#print_tuple (List.nth (List.nth rows x) y) 
                 
 
     method reset = 
@@ -73,7 +77,7 @@ object (self)
         changecol board 0
         
 
-    method private print_tuple x y = print_string " ("; print_int x; 
+    method private print_tuple (x,y) = print_string " ("; print_int x; 
         print_string ","; print_int y; print_string ") "; flush_all ()
 
     (* Given an index and a color, insert the piece and update neighbors *)
@@ -81,11 +85,16 @@ object (self)
     	let ci = self#convertIndex i in
     	let (x,y) = ci in
     	match self#getIndex ci with
-    		|None -> (self#print_tuple x y; false)
+    		|None -> false
     		|Some Unocc -> self#changeIndex ci c; 
-    			(*List.iter (fun a -> self#addNeighbors a i) 
-    			            (self#getNeighbors i); 
-                if c = Black then self#addNeighRows (List.nth rows x);*)
+    			(List.iter (fun a -> self#addNeighbors a ci) 
+    			            (self#getNeighbors ci)); 
+                (if List.mem x occ_rows then ()
+                else occ_rows <- (x::occ_rows) );
+                (*print_string "(";
+                List.iter (fun x -> print_int x; print_string ", "; flush_all ()) occ_rows;
+                print_string ") ";
+                flush_all ();*)
                 true
     		|_ -> false
 
@@ -95,10 +104,11 @@ object (self)
     		|None -> false
     		|_ -> self#changeIndex i Unocc; true
 
-    method private getNeighbors (i:index) = 
-    	let (x,y) = i in
-    	match self#getIndex i with
+    method private getNeighbors (ci:index) = 
+    	let (x,y) = ci in
+    	match self#getIndex ci with
     		|None -> []
+            |Some Unocc -> []
     		|Some mycolor ->
     	(match (self#getIndex (x,y-1)), (self#getIndex (x,y+1)) with
     		|(None,None) -> []
@@ -107,7 +117,7 @@ object (self)
     		|(Some n1, Some n2) -> (match ((n1 = mycolor), n2 = mycolor) with
     			|(false,false) -> []
     			|(false, true) -> (x,y+1)::[]
-    			|(true, false) -> (x,y-1)::[]
+    			|(true, false) ->(x,y-1)::[]
     			|_ -> (x,y-1)::((x,y+1)::[])  ) )
 
 
@@ -121,7 +131,7 @@ object (self)
 
 
     method getThreats = 
-        List.flatten (List.map self#containsThreats occ_rows)
+        List.flatten (List.map (fun x -> self#containsThreats (List.nth rows x)) occ_rows)
 
     (* Determines if a row has threats in it and returns the threats *)
     method private containsThreats (lst: index list) : threat list = 
@@ -188,9 +198,9 @@ object (self)
     				else hd::(findneighlist tl)
     	in neighbor_list <- (findneighlist neighbor_list)
 
-    method private addNeighRows (row: index list) = 
+    (*method private addNeighRows (row: index list) = 
     	if List.mem row occ_rows then ()
-    	else occ_rows <- (row::occ_rows)
+    	else occ_rows <- (row::occ_rows)*)
 
     method private sublist lst start endpoint = 
         if endpoint < 4 then None else
