@@ -6,7 +6,7 @@ open Threat
 exception TODO;;
 
 (* you have a board at the top of the tree
-   call get_threats on the board and you are given all the potential threats
+call get_threats on the board and you are given all the potential threats
 
    each node other than the top node is going to be a threat and a board
 
@@ -86,24 +86,31 @@ functor (B: BOARD) ->
       insertwhitelist (board.insert b tgain Black) tcost
 
     let rec gen_threat_tree (b: board) (t: threat) = 
-      if (board.isWin b) then
-	Win(b, t)
+      if (board.isWin b) then 
+        Win(b, t)
       else
-	let threatList = get_dependent_threats b t in 
-	if threatlist = [] then 
-	  Leaf(b, t)	    
-	else
-	  let tree_from_threat (x:threat) = 
-	    gen_threat_tree (gen_new_board b x) x
-	  in
-	  let treeList = 
-	    List.map tree_from_threat threatList in
-	  Node(b, t, treeList)
+        let threatList = get_dependent_threats b t in 
+          if threatlist = [] then 
+            Leaf(b, t)      
+          else
+            let tree_from_threat (x:threat) = 
+              gen_threat_tree (gen_new_board b x) x
+            in
+            let treeList = 
+              List.map tree_from_threat threatList 
+            in
+              Node(b, t, treeList)
+    
+    let rec evaluate_tree tree =
+      let rec evaluate_tree_list treelist =
+        match treelist with
+        | [] -> false
+        | hd::tl -> (evaluate_tree hd) || (evaluate_tree_list tl)
+      in
+        match tree with
+        | Win(b, t) -> True 
+        | Leaf(b, t) -> False 
+        | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
+    let rec merge =        
 
-(*
-      let treeList = List.map (fun x -> (Leaf(gen_new_board b x), x)) threatList in
-      match treeList with
-      | hd::_ -> Node(b, t, treeList)
-      | [] -> Leaf(b, t)
-*)

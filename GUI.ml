@@ -1,6 +1,7 @@
 open Event
 open Board
 open Boardstuffs
+open ImportImage
 
 module GUI =
 struct
