@@ -1,7 +1,7 @@
 open Event
 open Board
 open Boardstuffs
-open ImportImage
+(* open ImportImage *)
 
 module GUI =
 struct
@@ -66,10 +66,10 @@ struct
     with exn -> (Graphics.close_graph () ; raise exn)
 
   (** Press r or R to reset the board *)
-  let key_handler c = 
+  (* let key_handler c = 
     match c with 
       | 'r' | 'R' -> Board.reset () 
-      | _ -> ()
+      | _ -> () *)
 
   (** Handle mouse clicks **)
   let mouse_handler (move_handler: int*int -> unit) (p:int*int) =
@@ -83,7 +83,7 @@ struct
            ((world_size+2)*obj_width) (* GUI height *)
            (* Event framework initializer *)
            begin fun () ->
-             ignore(Event.add_listener key_pressed key_handler) ;
+             (* ignore(Event.add_listener key_pressed key_handler) ; *)
              ignore(Event.add_listener button_up (mouse_handler handle_move)) ;
              init ()
            end

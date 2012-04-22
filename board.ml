@@ -29,7 +29,7 @@ struct
 
   	(** Board Operations **)
 
-  	(** Reset to a blank board *)
+  	(** Reset to a blank board **)
   	let reset () : unit = 
   		Array.iteri (fun x -> Array.iteri 
   			(fun y _ -> board.(x).(y) <- (new piece Unocc))) board;
@@ -76,7 +76,7 @@ struct
     ignore ((!dglboard)#remove (x,y));
     board.(x).(y) <- (new piece Unocc)
 
-(*)
+(*
 
   (** Fold over all objects in the world. *)
   let fold (f:world_object_i -> 'a -> 'a) (i:'a) : 'a =
@@ -94,7 +94,7 @@ struct
     (*let (a,b,c,d) = board in
     List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices*)
     Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) board
-(*)
+(*
   (** True if the world contains the point (x,y). *)
   let check_bounds ((x,y):int*int) : bool = 
     x >= 0 && x < size && y >= 0 && y < size
