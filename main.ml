@@ -14,6 +14,7 @@ open Boardobject
 open Draw*)
 open GUI
 open Boardstuffs
+open BThreats 
 
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
@@ -68,5 +69,20 @@ let test_board () =
       		draw_grid ();
       		Board.indices (fun p -> (Board.get p)#draw p)
       	end ;;
+
+let evaluate_board board =
+  let threatlist = BThreats.get_threats board in
+  let update_board threat = 
+    let (tgain, _, _) = threat in
+      ((Board.insert board tgain Black), threat) 
+  in 
+  let boardlist = map update_board threatlist in
+  let treelist = map (fun (x, y) -> (BThreats.gen_threat_tree x y)) boardlist in
+  let win tlist =   
+    match tlist with 
+    | [] -> false
+    | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
+  in
+    win treelist
 
 let _ = test_board () ;;
