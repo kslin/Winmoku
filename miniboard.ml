@@ -24,7 +24,7 @@ object (self)
 
     method getsize = (List.length board)
 
-    method getmax = List.length (List.nth board 0)
+    method getlistlength = List.length (List.nth board 0)
 
     method reset = 
         board <- self#buildEmptyBoard;

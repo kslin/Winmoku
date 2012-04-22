@@ -82,7 +82,6 @@ struct
            ((world_size+2)*obj_width) (* GUI height *)
            (* Event framework initializer *)
            begin fun () ->
-             Board.reset () ;
              ignore(Event.add_listener key_pressed key_handler) ;
              ignore(Event.add_listener button_up (mouse_handler handle_move)) ;
              init ()

@@ -40,11 +40,11 @@ object (self)
         else (y, x - y)
 
     (** Helper Methods **)
-    method private buildEmptyList (n1: int) : piece list = 
-        let rec emptyList (n: int) (occ: piece list) : piece list = 
+    method private buildEmptyList (len: int) : piece list = 
+        let rec emptyList (n: int) (growlist: piece list) : piece list = 
             match n with
-                |0 -> occ
-                |_ -> emptyList (n-1) ((new piece Unocc)::occ)
-        in emptyList n1 []
+                |0 -> growlist
+                |_ -> emptyList (n-1) ((new piece Unocc)::growlist)
+        in emptyList len []
 
 end
