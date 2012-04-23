@@ -1,18 +1,9 @@
-open Board
+open Myboard
 open Threat
 
 (*This is the file that will implement threat spaced search *)
 
 exception TODO;;
-
-(* you have a board at the top of the tree
-call get_threats on the board and you are given all the potential threats
-
-   each node other than the top node is going to be a threat and a board
-
-
-*)
-
 
 module type THREATS = 
 sig
@@ -55,7 +46,7 @@ sig
   val merge : tree -> tree -> tree
 end
   
-functor (B: BOARD) -> 
+module tGenerator(B: BOARD) : THREATS =  
   struct
     type board = B.board
     type threat = threat
@@ -81,12 +72,12 @@ functor (B: BOARD) ->
       let (tgain, _, tcost) = t in
       let rec insertwhitelist (b:board) (t: index list) =
         match t with
-        | hd::tl -> insertlist (board.insert b hd White) tl
+        | hd::tl -> insertlist (B.insert b hd White) tl
         | _ -> b in
-      insertwhitelist (board.insert b tgain Black) tcost
+      insertwhitelist (B.insert b tgain Black) tcost
 
     let rec gen_threat_tree (b: board) (t: threat) = 
-      if (board.isWin b) then 
+      if (B.isWin b) then 
         Win(b, t)
       else
         let threatList = get_dependent_threats b t in 
@@ -101,16 +92,18 @@ functor (B: BOARD) ->
             in
               Node(b, t, treeList)
     
-    let rec evaluate_tree tree =
+    let rec evaluate_tree (tr: tree) =
       let rec evaluate_tree_list treelist =
         match treelist with
         | [] -> false
         | hd::tl -> (evaluate_tree hd) || (evaluate_tree_list tl)
       in
-        match tree with
+        match tr with
         | Win(b, t) -> True 
         | Leaf(b, t) -> False 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
-    let rec merge =        
+    let rec merge tree1 tree2 = tree1
+end
 
+module BThreats = tGenerator(Myboard)

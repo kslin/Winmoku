@@ -14,6 +14,7 @@ open Boardobject
 open Draw*)
 open GUI
 open Boardstuffs
+open BThreats 
 
 module MyBoard = Myboard ;;
 
@@ -70,5 +71,20 @@ let test_board () =
       		draw_grid ();
       		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p)
       	end ;;
+
+let evaluate_board board =
+  let threatlist = BThreats.get_threats board in
+  let update_board threat = 
+    let (tgain, _, _) = threat in
+      ((Board.insert board tgain Black), threat) 
+  in 
+  let boardlist = map update_board threatlist in
+  let treelist = map (fun (x, y) -> (BThreats.gen_threat_tree x y)) boardlist in
+  let win tlist =   
+    match tlist with 
+    | [] -> false
+    | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
+  in
+    win treelist
 
 let _ = test_board () ;;

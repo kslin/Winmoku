@@ -12,7 +12,7 @@ type boardtype = Horizontal | Vertical | DiagLeft | DiagRight
 
 type index = int*int 
 
-type threattype = StraightFour | Four | Three | SplitThree | WallThree
+type threattype = Five | StraightFour | Four | Three | SplitThree | WallThree
 
 (* A threat has a gain square, cost squares, and rest squares *)
 type threat = Threat of threattype * index * index list * index list 
@@ -76,6 +76,15 @@ let print_threats t = match t with
         print_string ", rest = ";
         print_index_list r;
         print_string "\n"
+    |Threat(Five,g,c,r) ->
+        print_string "Threat: Five gain = ";
+        print_index g ;
+	print_string ", cost = ";
+	print_index_list c;
+	print_string ", rest = ";
+	print_index_list r;
+	print_string "\n"
+
 
 let rec print_threat_list tl = match tl with
     |[] -> ()
