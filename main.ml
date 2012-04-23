@@ -34,6 +34,9 @@ let board_border () =
 	    (ceiling) (ceiling);
 	Graphics.set_line_width 1
 
+let game_title () = 
+	
+
 let draw_grid () = 
     Graphics.set_color (Graphics.rgb 102 51 0);
     Graphics.set_line_width 1;
@@ -70,21 +73,23 @@ let respond_click ((x,y):int*int) =
 		flush_all ();*)
 		Board.set (i,j))
 
+let draw_board () = 
+	fill_board ();
+	draw_grid ();
+	board_border ();
+	game_title ()
+
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
 		(fun () -> Board.reset ();
-					fill_board ();
-					draw_grid ();
-					board_border ();
+					draw_board();
       				Board.indices (fun p -> (Board.get p)#draw p))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
       		respond_click i;
-      		fill_board ();
-      		draw_grid ();
-      		board_border ();
+      		draw_board ();
       		Board.indices (fun p -> (Board.get p)#draw p)
       	end ;;
 
