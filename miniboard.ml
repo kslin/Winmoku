@@ -25,40 +25,6 @@ object (self)
 
     (* Methods *)
 
-    method empty = 
-        let newboard = new miniboard size in
-        (newboard#setboard (self#buildEmptyBoard);
-        newboard#setrows (self#buildRows);
-        (newboard :> board_object))
-
-    method getboard = board
-
-    method setboard b = board <- b
-
-    method getrows = rows
-
-    method setrows r = rows <- r
-
-    method getblackneighbors = black_neighbor_list
-
-    method setblackneighbors bn = black_neighbor_list <- bn
-
-    method getwhiteneighbors = white_neighbor_list
-
-    method setwhiteneighbors wn = white_neighbor_list <- wn
-
-    method getoccrows = occ_rows
-
-    method setoccrows o = occ_rows <- o
-
-    method copyself = let newboard = (new miniboard size) in
-        (newboard#setboard (self#getboard);
-        newboard#setrows (self#getrows);
-        newboard#setblackneighbors (self#getblackneighbors);
-        newboard#setwhiteneighbors (self#getwhiteneighbors);
-        newboard#setoccrows (self#getoccrows);
-        (newboard :> board_object))
-(*)
     method getsize = (List.length board)
 
     method printlistlengths = 
@@ -75,11 +41,12 @@ object (self)
     method print_rows_elt (i: index) : unit =
         let (x,y) = self#convertIndex i in
         self#print_tuple (List.nth (List.nth rows x) y) 
-          *)      
+                
 
-    method convertIndex (i:index) = i
-
-    method convertBack (ci:index) = ci
+    method empty = 
+        board <- self#buildEmptyBoard;
+        rows <- self#buildRows;
+        (self :> board_object)
 
     method getIndices = rows
 
@@ -97,9 +64,11 @@ object (self)
             try (Some ((List.nth (List.nth board x) y)#get_value))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
-    
+    method convertIndex (i:index) = i
 
-    method changeIndex (ci:index) (c:occupied) = 
+    method convertBack (ci:index) = ci
+
+    method private changeIndex (ci:index) (c:occupied) = 
     	let (x,y) = ci in
     	let rec changerow row yval = match row with
             |[] -> ()
@@ -112,39 +81,43 @@ object (self)
         changecol board 0
         
 
+    method private print_tuple (x,y) = print_string " ("; print_int x; 
+        print_string ","; print_int y; print_string ") "; flush_all ()
+
     (* Given an index and a color, insert the piece and update neighbors *)
     method insert (i:index) (c: occupied) : board_object option =
-        let newboard = self#copyself in
     	let ci = self#convertIndex i in
     	let (x,y) = ci in
     	match (self#getIndex ci, c) with
     		|(None, _) -> None
-    		|(Some Unocc, Black) -> newboard#changeIndex ci c; 
+    		|(Some Unocc, Black) -> self#changeIndex ci c; 
                 (match self#getNeighbors ci with
                     |(None,None) -> 
-                        newboard#setblackneighbors ([ci]::black_neighbor_list)
+                        black_neighbor_list <- 
+                        [self#convertBack ci]::black_neighbor_list
                     |(Some s, None) ->
-                        newboard#addBlackNeighbors s ci
+                        self#addBlackNeighbors s ci
                     |(None, Some s) ->
-                        newboard#addBlackNeighbors s ci
+                        self#addBlackNeighbors s ci
                     |(Some x, Some y) ->
-                        newboard#addMultBlackNeighbors x ci y );
+                        self#addMultBlackNeighbors x ci y );
                 (if List.mem x occ_rows then ()
-                else newboard#setoccrows (x::newboard#getoccrows) );
-                Some (newboard :> board_object)
-            |(Some Unocc, White) -> newboard#changeIndex ci c; 
+                else occ_rows <- (x::occ_rows) );
+                Some (self :> board_object)
+            |(Some Unocc, White) -> self#changeIndex ci c; 
                 (match self#getNeighbors ci with
                     |(None,None) -> 
-                        newboard#setwhiteneighbors ([ci]::white_neighbor_list)
+                        white_neighbor_list <- 
+                        [self#convertBack ci]::white_neighbor_list
                     |(Some s, None) ->
-                        newboard#addWhiteNeighbors s ci
+                        self#addWhiteNeighbors s ci
                     |(None, Some s) ->
-                        newboard#addWhiteNeighbors s ci
+                        self#addWhiteNeighbors s ci
                     |(Some x, Some y) ->
-                        newboard#addMultWhiteNeighbors x ci y );
+                        self#addMultWhiteNeighbors x ci y );
                 (if List.mem x occ_rows then ()
-                else newboard#setoccrows (x::newboard#getoccrows) );
-                Some (newboard :> board_object)
+                else occ_rows <- (x::occ_rows) );
+                Some (self :> board_object)
     		|_ -> None
 
     method remove (i: index) : bool =
@@ -152,6 +125,25 @@ object (self)
     	match self#getIndex i with
     		|None -> false
     		|_ -> self#changeIndex i Unocc; true
+
+    method getNeighbors (ci:index) = 
+    	let (x,y) = ci in
+    	match self#getIndex ci with
+    		|None -> (None, None)
+            |Some Unocc -> (None, None)
+    		|Some mycolor ->
+    	(match (self#getIndex (x,y-1)), (self#getIndex (x,y+1)) with
+    		|(None,None) -> (None, None)
+    		|(None, Some n2) -> 
+                if n2 = mycolor then (Some (x,y+1), None) else (None,None)
+    		|(Some n1, None) -> 
+                if n1 = mycolor then (Some (x,y-1), None) else (None,None)
+    		|(Some n1, Some n2) -> (match ((n1 = mycolor), n2 = mycolor) with
+    			|(false,false) -> (None,None)
+    			|(false, true) -> (Some (x,y+1), None)
+    			|(true, false) -> (Some (x,y-1), None)
+    			|_ -> (Some (x,y-1), Some (x,y+1))  ))
+
 
 
     method isWin : bool = 
@@ -298,7 +290,7 @@ object (self)
 
     (* If i1 is already part of a neighbor list, add i2 to the list.
        If not, make the two into a new neighbor list *)
-    method addBlackNeighbors (ci1: index) (ci2:index) =
+    method private addBlackNeighbors (ci1: index) (ci2:index) =
     	let rec findneighlist lst =
     		match lst with 
     			|[] -> (self#tuple_sort(ci1::ci2::[]))::black_neighbor_list
@@ -307,7 +299,7 @@ object (self)
     				else hd::(findneighlist tl)
     	in black_neighbor_list <- (findneighlist black_neighbor_list)
 
-    method addWhiteNeighbors (ci1: index) (ci2:index) =
+    method private addWhiteNeighbors (ci1: index) (ci2:index) =
         let rec findneighlist lst =
             match lst with 
                 |[] -> (self#tuple_sort(ci1::ci2::[]))::white_neighbor_list
@@ -319,7 +311,7 @@ object (self)
     (* If i1 or i2 are already in a neighbor list, add the other 2 to 
         the same list. If both are in a list, merge the lists. If 
         none are in a list, make a new neighbor list *)
-    method addMultBlackNeighbors (ci1: index) (ci2: index) (ci3: index) =
+    method private addMultBlackNeighbors (ci1: index) (ci2: index) (ci3: index) =
         let rec findneighlist lst isfirst isthird rest =
             match lst with
                 |[] -> (isfirst, isthird, rest)
@@ -343,7 +335,7 @@ object (self)
             |(x, y, r) -> 
                 black_neighbor_list <- (self#tuple_sort(ci2::(x@y)))::r
 
-    method addMultWhiteNeighbors (ci1: index) (ci2: index) (ci3: index) =
+    method private addMultWhiteNeighbors (ci1: index) (ci2: index) (ci3: index) =
         let rec findneighlist lst isfirst isthird rest =
             match lst with
                 |[] -> (isfirst, isthird, rest)
@@ -444,28 +436,7 @@ object (self)
                 |_ -> sixlist in
         iter_row 0 []
 
-(** Helper methods **)
 
-    method private getNeighbors (ci:index) = 
-        let (x,y) = ci in
-        match self#getIndex ci with
-            |None -> (None, None)
-            |Some Unocc -> (None, None)
-            |Some mycolor ->
-        (match (self#getIndex (x,y-1)), (self#getIndex (x,y+1)) with
-            |(None,None) -> (None, None)
-            |(None, Some n2) -> 
-                if n2 = mycolor then (Some (x,y+1), None) else (None,None)
-            |(Some n1, None) -> 
-                if n1 = mycolor then (Some (x,y-1), None) else (None,None)
-            |(Some n1, Some n2) -> (match ((n1 = mycolor), n2 = mycolor) with
-                |(false,false) -> (None,None)
-                |(false, true) -> (Some (x,y+1), None)
-                |(true, false) -> (Some (x,y-1), None)
-                |_ -> (Some (x,y-1), Some (x,y+1))  ))
-
-    method private print_tuple (x,y) = print_string " ("; print_int x; 
-        print_string ","; print_int y; print_string ") "; flush_all ()
 
 
 end
