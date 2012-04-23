@@ -14,6 +14,9 @@ open Boardobject
 open Draw*)
 open GUI
 open Boardstuffs
+open BThreats 
+
+module MyBoard = Myboard ;;
 
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
@@ -59,33 +62,49 @@ let round_click ((x,y):int*int) =
 	(abs (roundfloat ((float_of_int (x - obj_width))/.(float_of_int obj_width))), 
 	abs (roundfloat ((float_of_int (y - obj_width))/.(float_of_int obj_width))))
 
-let respond_click ((x,y):int*int) = 
+let respond_click (b:MyBoard.board) ((x,y):int*int) = 
 	if ( (x < floor - leeway) || (y < floor - leeway) ||
 		(x > ceiling + leeway) || (y > ceiling + leeway) )
-	then ()
-	else 
-		(let (i,j) = round_click (x,y) in
-		(*print_int i; print_string ", ";
-		print_int j; print_string "  ";
-		flush_all ();*)
-		Board.set (i,j))
+	then b
+	else MyBoard.insert b (round_click (x,y))
+
+let b = MyBoard.empty
 
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		(fun () -> Board.reset ();
-					fill_board ();
-					draw_grid ();
-					board_border ();
-      				Board.indices (fun p -> (Board.get p)#draw p))
+		(fun () -> draw_grid ();
+              fill_board ();
+              draw_grid ();
+              board_border ();
+      				MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
-      		respond_click i;
+      		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
+      		let c = respond_click b i in 
+      		(if MyBoard.getColor c = White then print_string " it's now White  ");
+      		(if MyBoard.isWin c then print_string "Win!!!! "; flush_all ());
+      		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
       		fill_board ();
-      		draw_grid ();
-      		board_border ();
-      		Board.indices (fun p -> (Board.get p)#draw p)
+          draw_grid ();
+          board_border ();
+      		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p)
       	end ;;
+
+let evaluate_board board =
+  let threatlist = BThreats.get_threats board in
+  let update_board threat = 
+    let (tgain, _, _) = threat in
+      ((Board.insert board tgain Black), threat) 
+  in 
+  let boardlist = map update_board threatlist in
+  let treelist = map (fun (x, y) -> (BThreats.gen_threat_tree x y)) boardlist in
+  let win tlist =   
+    match tlist with 
+    | [] -> false
+    | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
+  in
+    win treelist
 
 let _ = test_board () ;;

@@ -14,8 +14,8 @@ object
     method print_rows_elt : index -> unit
 
 
-    (* Resets the board to be blank *)
-    method reset : unit
+    (* Returns empty board *)
+    method empty : board_object
 
     (* Returns the list list of indices *)
     method getIndices : index list list
@@ -36,14 +36,14 @@ object
     method getPiece : index -> piece_object option
 
     (* Inserts pieces on the board *)
-    method insert : index -> occupied -> bool
+    method insert : index -> occupied -> board_object option
 
     (* Removes pieces from a board, returns false if the remove is invalid 
        This is only used for testing purposes *)
     method remove : index -> bool
 
     (* Given an index, returns a list of neighbors *)
-    method getNeighbors : index -> index list
+    method getNeighbors : index -> (index option)*(index option)
 
     (* Checks if the board has a winning configuration *)
     method isWin : bool

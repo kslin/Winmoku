@@ -11,11 +11,36 @@ open Diagrightboard
 open Diagleftboard
 open Piece
 
-module Board =
+module type BOARD =
+sig 
+	type board
+
+	val empty : board
+
+	val get : board -> index -> piece_object
+
+	val getColor : board -> occupied
+
+	val insert : board -> index -> board
+
+	val insertspecial : board -> index -> occupied -> board
+
+	val isWin : board -> bool
+
+	val getThreats : board -> threat list
+
+	val indices : board -> (index -> unit) -> unit
+end
+
+module Myboard : BOARD =
 struct
 
+	(**Board will be an array of pieces, 4 miniboards, and who's turn it is **)
+	type board = occupied*(piece_object array array)*(board_object)*
+                        (board_object)*(board_object)*(board_object)
+
   	(** Represent the board as an array of pieces**)
-  	let board : piece_object array array = 
+  	(*let board : piece_object array array = 
   		Array.make_matrix world_size world_size ((new piece Unocc))
 
   	(** The board is also represented by 4 miniboards **)
@@ -25,56 +50,63 @@ struct
   	let dglboard : board_object ref = ref (new diagleftboard world_size)
 
   	(** Keeps track of who's turn it is **)
-  	let player : occupied ref = ref Black
+  	let player : occupied ref = ref Black*)
 
   	(** Board Operations **)
 
-  	(** Reset to a blank board **)
-  	let reset () : unit = 
-  		Array.iteri (fun x -> Array.iteri 
-  			(fun y _ -> board.(x).(y) <- (new piece Unocc))) board;
-    	(!horboard)#reset;
-    	(!verboard)#reset;
-    	(!dgrboard)#reset;
-    	(!dglboard)#reset
+  	(** Reset to a blank board *)
+  	let empty : board = 
+  		let piecearray = 
+  			Array.make_matrix world_size world_size (new piece Unocc) in
+  		let horboard = (new horizontalboard world_size)#empty in
+  		let verboard = (new verticalboard world_size)#empty in
+  		let dgrboard = (new diagrightboard world_size)#empty in
+  		let dglboard = (new diagleftboard world_size)#empty in
+		(Black,piecearray,horboard,verboard,dgrboard,dglboard)
 
 
   	(** Get the piece associated with a location in the world. **)
-  	let get ((x,y):index) : piece_object = 
-    	board.(x).(y)
+  	let get (b:board) ((x,y):index) : piece_object = 
+  		let (p,pa,h,v,dr,dl) = b in
+    	pa.(x).(y)
 
-    (** Change the color of the current player **)
-   let switch_color () : unit = match !player with
-        |Black -> ignore(player := White)
-        |White -> ignore(player := Black)
-        |Unocc -> ()
+    let getColor (b:board) = 
+    	let (p,pa,h,v,dr,dl) = b in p
 
   	(** Change the status of a piece on the board to whichever color player is**)
-  	let set (i:index) : unit = 
-    	match ((!horboard)#insert i !player, (!verboard)#insert i !player, 
-          (!dgrboard)#insert i !player, (!dglboard)#insert i !player) with
-        	|(true,true,true,true) -> 
+  	let insert (b:board) (i:index) : board = 
+  		let (p,pa,h,v,dr,dl) = b in
+    	match (h#insert i p, v#insert i p, 
+          dr#insert i p, dl#insert i p) with
+        	|(Some h1,Some v1,Some dr1,Some dl1) -> 
         		(let (x,y) = i in 
-        			board.(x).(y) <- (new piece !player);
-        			switch_color ();
-        			print_threat_list !horboard#getThreats;
-        			print_threat_list !verboard#getThreats;
-        			print_threat_list !dgrboard#getThreats;
-        			print_threat_list !dglboard#getThreats;
-        			(if (!horboard#isWin ||
-        				!verboard#isWin ||
-        				!dgrboard#isWin ||
-        				!dglboard#isWin)
-        			then (print_string "Win!!!!!"; flush_all ())))
-        	|_ -> ()
+        			pa.(x).(y) <- (new piece p);
+        			(if p = Black
+        			 then (White,pa,h1,v1,dr1,dl1)
+        			 else (Black,pa,h1,v1,dr1,dl1)) )
+        	|_ -> b
+
+    let insertspecial (b:board) (i:index) (c:occupied): board = 
+  		let (p,pa,h,v,dr,dl) = b in
+    	match (h#insert i c, v#insert i c, 
+          dr#insert i c, dl#insert i c) with
+        	|(Some h1,Some v1,Some dr1,Some dl1) -> 
+        		(let (x,y) = i in 
+        			pa.(x).(y) <- (new piece c);
+        			(p,pa,h1,v1,dr1,dl1) )
+        	|_ -> b
+
+    let isWin (b:board) : bool =
+    	let (p,pa,h,v,dr,dl) = b in
+    	(h#isWin || v#isWin || dr#isWin || dl#isWin)
 
   (** Remove a piece at a location **)
-  let remove ((x,y):index) : unit = 
+  (*let remove ((x,y):index) : unit = 
     ignore ((!horboard)#remove (x,y));
     ignore ((!verboard)#remove (x,y));
     ignore ((!dgrboard)#remove (x,y));
     ignore ((!dglboard)#remove (x,y));
-    board.(x).(y) <- (new piece Unocc)
+    board.(x).(y) <- (new piece Unocc)*)
 
 (*
 
@@ -89,10 +121,16 @@ struct
       world 
       i 
 *)
+  let getThreats (b:board) : threat list = 
+  	let (p,pa,h,v,dr,dl) = b in
+  	(h#getThreats)@(v#getThreats)@(dr#getThreats)@(dl#getThreats)
+
   (** Call a function for all pieces in the world. *)
-  let indices (f:int*int -> unit) : unit =
+  let indices (b:board) (f:int*int -> unit) : unit =
+  	let (p,pa,h,v,dr,dl) = b in
     (*let (a,b,c,d) = board in
     List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices*)
+
     Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) board
 (*
   (** True if the world contains the point (x,y). *)

@@ -1,7 +1,7 @@
 open Event
 open Board
 open Boardstuffs
-(* open ImportImage *)
+(*open ImportImage*)
 
 module GUI =
 struct
@@ -66,6 +66,7 @@ struct
     with exn -> (Graphics.close_graph () ; raise exn)
 
   (** Press r or R to reset the board *)
+
   (* let key_handler c = 
     match c with 
       | 'r' | 'R' -> Board.reset () 
