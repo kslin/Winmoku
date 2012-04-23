@@ -10,6 +10,7 @@
 
 open Board
 open Boardobject
+open ImportImage
 (*open Tree
 open Draw*)
 open GUI

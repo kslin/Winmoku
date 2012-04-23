@@ -10,6 +10,7 @@ CAMLDOC = ocamldoc
 
 FILES = \
 	event.ml \
+	ImportImage.ml\
 	boardstuffs.ml \
 	pieceobject.ml \
 	boardobject.ml \
