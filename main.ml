@@ -93,7 +93,6 @@ let debug_func_button () = ()
 let debug_board () = 
   debug_func_button ()
 
-
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
@@ -102,14 +101,16 @@ let test_board () =
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
-
+        if i > ceiling then
+          
+        else (
       		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
       		let c = respond_click b i in 
       		(if MyBoard.getColor c = White then print_string " it's now White  ");
       		(if MyBoard.isWin c then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
       		draw_board ();
-      		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p)
+      		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p))
       	end ;;
 
 let evaluate_board board =
