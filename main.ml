@@ -25,6 +25,9 @@ let gridarrayver = Array.make world_size (0,0,0,0);;
 let floor = obj_width * 2
 let ceiling = (world_size + 1) * (obj_width)
 
+(* Stores the color *)
+let piece_color = ref (Unocc)
+
 (* Fills the board background with color *)
 let fill_board () = 
     Graphics.set_color (Graphics.rgb 204 153 51);
@@ -44,6 +47,15 @@ let board_title () =
   Graphics.moveto  ((world_size + 3) * obj_width / 2) ((world_size+7) * obj_width);
   Graphics.draw_string "Gomooku"
 
+let cur_player () = 
+  let player : string = 
+    match !piece_color with
+      | Unocc -> "-"
+      | White -> "White"
+      | Black -> "Black" in
+  Graphics.moveto (obj_width * 15) ((world_size+3) * obj_width);
+  Graphics.draw_string ("Current Player:" ^ player)
+
 (* Draws the playing grid of the board *)
 let draw_grid () = 
     Graphics.set_color (Graphics.rgb 102 51 0);
@@ -56,9 +68,6 @@ let draw_grid () =
     		   ((x+2)*obj_width),(ceiling))) 
     	gridarrayver;
     Graphics.draw_segments gridarrayver
-
-(* Stores the color *)
-let piece_color = ref (Unocc)
 
 (** defines leeway for the click **)
 let leeway = obj_width / 4;;
@@ -88,7 +97,8 @@ let draw_board () =
   fill_board ();
   draw_grid ();
   board_border ();
-  board_title ()
+  board_title ();
+  cur_player ()
 
 
 (* Evaluate board function *)
@@ -159,7 +169,11 @@ let test_board () =
         (* If mouse click is above the playing grid, checks the click position to do other things
         such as running a debugging function *)
         if (snd i) > ceiling then (
-          respond_click_debug bor i
+          respond_click_debug bor i;
+          Graphics.clear_graph ();
+          draw_board ();
+          debug_board ();
+          Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x)
 
 
         )          
