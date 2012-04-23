@@ -11,7 +11,7 @@ object (self)
 
 	method set_value newval = value <- newval
 
-	method draw (i:index) = match v with
+	method draw (i:index) = match (self#get_value) with
 		|Black -> self#circle i obj_width obj_width Graphics.black
 		|White -> self#circle i obj_width obj_width Graphics.white
 		|Unocc -> ()

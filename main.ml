@@ -40,7 +40,6 @@ let board_border () =
 
 (* Displays game title *)
 let board_title () = 
-  Graphics.set_text_size 5;
   Graphics.moveto  ((world_size + 3) * obj_width / 2) ((world_size+7) * obj_width);
   Graphics.draw_string "Gomooku"
 
@@ -57,6 +56,9 @@ let draw_grid () =
     	gridarrayver;
     Graphics.draw_segments gridarrayver
 
+(* Stores the color *)
+let piece_color = ref (Unocc)
+
 (** defines leeway for the click **)
 let leeway = obj_width / 4;;
 
@@ -70,18 +72,13 @@ let round_click ((x,y):int*int) =
 	(abs (roundfloat ((float_of_int (x - (2*obj_width)))/.(float_of_int obj_width))), 
 	abs (roundfloat ((float_of_int (y - (2*obj_width)))/.(float_of_int obj_width))))
 
-let print_color (b:Myboard.board) = match Myboard.getColor b with
-	|Black -> print_string " Black "; flush_all ()
-	|White -> print_string " White "; flush_all ()
-	|Unocc -> ()
-
 let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
 
 	if ( (x < floor - leeway) || (y < floor - leeway) ||
 		(x > ceiling + leeway) || (y > ceiling + leeway) )
 	then b
-	else (print_color b; print_color (Myboard.insert b (round_click (x,y)));
-		(Myboard.insert b (round_click (x,y))))
+	else (
+		(Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
 let bor = Myboard.empty
 
@@ -110,21 +107,44 @@ let evaluate_board board =
   in
     win treelist
 
-(* A handles clicks to to run functions: eval *)
+(* A handles clicks to to run functions: eval, change piece color *)
 let respond_click_debug (b:Myboard.board) ((x,y):int*int) = 
   if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
         print_string (string_of_bool result); flush_all ())
+  else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
+    && (y < ((world_size+4) * obj_width)))
+  then ((piece_color := White))
+  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) && (y > ((world_size+3) * obj_width)) 
+    && (y < ((world_size+4) * obj_width))) 
+  then ((piece_color := Black))
+  else ()
 
 (*  button for eval function *)
 let debug_button_eval () =
   Graphics.set_color Graphics.red;
+  Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
+  Graphics.draw_string "Debug function eval";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+
+(* Sets white color for next piece *)
+let color_choose_white () =
+  Graphics.set_color Graphics.black;
+  Graphics.moveto  (obj_width) ((world_size+4) * obj_width);
+  Graphics.draw_string "Change piece color";
+  Graphics.draw_rect (obj_width ) ((world_size+3) * obj_width) (obj_width) (obj_width)
+
+(* Sets black color for next piece *)
+let color_choose_black () =
+  Graphics.set_color Graphics.black;
+  Graphics.fill_rect (obj_width * 2) ((world_size+3) * obj_width) (obj_width) (obj_width)
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  debug_button_eval ()
+  debug_button_eval ();
+  color_choose_black ();
+  color_choose_white ()
 
 let test_board () =
 	GUI.run_game
@@ -147,7 +167,7 @@ let test_board () =
       		(*(if MyBoard.getColor (respond_click bor i) = MyBoard.getColor (respond_click bor i) then print_string " equal  ");
       		(if MyBoard.getColor (respond_click bor i) = Black then print_string " it's Black3  ");*)
       		ignore(bor = respond_click bor i);
-      		(if Myboard.getColor bor = White then print_string " it's now White  ");
+      		(*(if Myboard.getColor bor = White then print_string " it's now White  "; flush_all ()); *)
       		(if Myboard.isWin bor then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
           debug_board ();

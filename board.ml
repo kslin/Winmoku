@@ -21,6 +21,8 @@ sig
 
 	val getColor : board -> occupied
 
+  val printcolor : board -> unit
+
 	val insert : board -> index -> board
 
 	val insertspecial : board -> index -> occupied -> board
@@ -73,6 +75,12 @@ struct
     let getColor (b:board) = 
     	let (p,_,_,_,_,_) = b in p
 
+    let printcolor (b:board) =  
+      match getColor b with
+        |Black -> print_string " (Black) "; flush_all ()
+        |White -> print_string " (White) "; flush_all ()
+        |Unocc -> ()
+
   	(** Change the status of a piece on the board to whichever color player is**)
   	let insert (b:board) (i:index) : board = 
   		let (p,pa,h,v,dr,dl) = b in
@@ -82,9 +90,9 @@ struct
         		print_string "worked";
         		(let (x,y) = i in 
         			pa.(x).(y) <- (new piece p);
-        			((*if p = Black
-        			 then *)(White,pa,h1,v1,dr1,dl1)
-        			 (*else (Black,pa,h1,v1,dr1,dl1)) *) ))
+        			(if p = Black
+        			 then (White,pa,h1,v1,dr1,dl1)
+        			 else (Black,pa,h1,v1,dr1,dl1)) )
         	|_ -> (print_string "here's the problem"; b)
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
@@ -94,7 +102,7 @@ struct
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
         		(let (x,y) = i in 
         			pa.(x).(y) <- (new piece c);
-        			(p,pa,h1,v1,dr1,dl1) )
+        			(p,pa,h1,v1,dr1,dl1))
         	|_ -> b
 
     let isWin (b:board) : bool =
