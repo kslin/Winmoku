@@ -60,7 +60,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let dependent_threats (ts: threats) (t: threat) = 
       let Threat(_, tgain, _, _) = t in
       let dependent x = 
-        let Threat(_, _ , trest, _) = x in
+        let Threat(_, _, trest, _) = x in
         List.exists (fun y -> (tgain = y)) trest in
       List.filter dependent ts 
 
@@ -98,7 +98,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | hd::tl -> (evaluate_tree hd) || (evaluate_tree_list tl)
       in
         match tr with
-        | Win(b, t) -> true 
+        | Win(b, t) -> true
         | Leaf(b, t) -> false 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
