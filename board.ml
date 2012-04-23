@@ -21,7 +21,7 @@ sig
 
 	val getColor : board -> occupied
 
-  val printcolor : board -> unit
+    val printcolor : board -> unit
 
 	val insert : board -> index -> board
 
@@ -96,14 +96,16 @@ struct
         	|_ -> (print_string "here's the problem"; b)
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
+  		print_string "hiiiii "; flush_all ();
   		let (p,pa,h,v,dr,dl) = b in
     	match (h#insert i c, v#insert i c, 
           dr#insert i c, dl#insert i c) with
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
+        		print_string "worked";
         		(let (x,y) = i in 
         			pa.(x).(y) <- (new piece c);
         			(p,pa,h1,v1,dr1,dl1))
-        	|_ -> b
+        	|_ -> (print_string "here's the problem"; b)
 
     let isWin (b:board) : bool =
     	let (_,_,h,v,dr,dl) = b in
