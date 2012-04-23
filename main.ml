@@ -86,9 +86,12 @@ let draw_board () =
   board_border ();
   board_title ()
 
+(* A button to run a function *)
+let debug_func_button () = ()
+
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  ()
+  debug_func_button ()
 
 
 let test_board () =
@@ -99,6 +102,7 @@ let test_board () =
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
+
       		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
       		let c = respond_click b i in 
       		(if MyBoard.getColor c = White then print_string " it's now White  ");
