@@ -88,7 +88,7 @@ let draw_board () =
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  run_func_button ();
+  ()
 
 
 let test_board () =
