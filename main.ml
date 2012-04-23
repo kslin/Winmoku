@@ -31,6 +31,9 @@ let fill_board () =
     Graphics.fill_rect obj_width obj_width 
     	(ceiling) (ceiling)
 
+let test_piece () = 
+  Graphics.draw_image (Graphics.make_image (ImportImage.import_image "blackpiece.png")) 0 0 
+
 (* Draws board border *)
 let board_border () =
 	Graphics.set_line_width 6;
@@ -88,7 +91,8 @@ let draw_board () =
   fill_board ();
   draw_grid ();
   board_border ();
-  board_title ()
+  board_title ();
+  test_piece ()
 
 
 (* Evaluate board function *)

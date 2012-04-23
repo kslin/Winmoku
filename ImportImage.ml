@@ -5,14 +5,14 @@
 module ImportImage =
 struct
   let import_image filename : int array array = 
-    let color_matrix = Array.make_matrix 12 12 0 in
+    let color_matrix = Array.make_matrix 64 64 0 in
     let chan = open_in filename in
     begin
       (try
         let counter1 = ref 0 in
-          while !counter1 < 12 do
+          while !counter1 < 64 do
             let counter2 = ref 0 in
-            while !counter2 < 12 do 
+            while !counter2 < 64 do 
               begin 
                 let r = int_of_char(input_char chan) in
                 let g = int_of_char(input_char chan) in
