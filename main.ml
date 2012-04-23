@@ -24,12 +24,13 @@ let gridarrayver = Array.make world_size (0,0,0,0);;
 let floor = obj_width * 2
 let ceiling = (world_size + 1) * (obj_width)
 
-
+(* Fills the board background with color *)
 let fill_board () = 
     Graphics.set_color (Graphics.rgb 204 153 51);
     Graphics.fill_rect obj_width obj_width 
     	(ceiling) (ceiling)
 
+(* Draws board border *)
 let board_border () =
 	Graphics.set_line_width 6;
 	Graphics.set_color (Graphics.rgb 102 51 0);
@@ -37,6 +38,13 @@ let board_border () =
 	    (ceiling) (ceiling);
 	Graphics.set_line_width 1
 
+(* Displays game title *)
+let board_title () = 
+  Graphics.set_text_size 5;
+  Graphics.moveto  ((world_size + 3) * obj_width / 2) ((world_size+7) * obj_width);
+  Graphics.draw_string "Gomooku"
+
+(* Draws the playing grid of the board *)
 let draw_grid () = 
     Graphics.set_color (Graphics.rgb 102 51 0);
     Graphics.set_line_width 1;
@@ -62,6 +70,7 @@ let round_click ((x,y):int*int) =
 	(abs (roundfloat ((float_of_int (x - obj_width))/.(float_of_int obj_width))), 
 	abs (roundfloat ((float_of_int (y - obj_width))/.(float_of_int obj_width))))
 
+(* Responds to a mouse click by inserting the index with the correct color on the board *)
 let respond_click (b:MyBoard.board) ((x,y):int*int) = 
 	if ( (x < floor - leeway) || (y < floor - leeway) ||
 		(x > ceiling + leeway) || (y > ceiling + leeway) )
@@ -70,15 +79,22 @@ let respond_click (b:MyBoard.board) ((x,y):int*int) =
 
 let b = MyBoard.empty
 
-let 
+(* Function to draw basic components of board by compiling various functions *)
+let draw_board () =   
+  fill_board ();
+  draw_grid ();
+  board_border ();
+  board_title ()
+
+(* Shows buttons and other displays for function testing purposes *)
+let debug_board () = 
+  run_func_button ();
+
 
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		(fun () -> draw_grid ();
-              fill_board ();
-              draw_grid ();
-              board_border ();
+		(fun () -> draw_board ();
       				MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
@@ -88,9 +104,7 @@ let test_board () =
       		(if MyBoard.getColor c = White then print_string " it's now White  ");
       		(if MyBoard.isWin c then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
-      		fill_board ();
-          draw_grid ();
-          board_border ();
+      		draw_board ();
       		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p)
       	end ;;
 
