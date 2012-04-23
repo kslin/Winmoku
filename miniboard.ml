@@ -282,7 +282,8 @@ object (self)
                  Some Black, Some Unocc, Some Unocc) ->
                     [Threat(Three, c, [b;e], lst);
                      Threat(SplitThree, b, [a;c;e], lst);
-                     Threat(SplitThree, e, [b;c;f], lst)] )
+                     Threat(SplitThree, e, [b;c;f], lst)] 
+                |_ -> [] )
             |_ -> raise ERROR
 
                 

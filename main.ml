@@ -16,7 +16,7 @@ open GUI
 open Boardstuffs
 open Threats
 
-module MyBoard = Myboard ;;
+(*module MyBoard = Myboard ;;*)
 
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
@@ -67,17 +67,23 @@ let roundfloat (f:float) : int =
 
 (** Finds the closest index that is next to the click **)
 let round_click ((x,y):int*int) = 
-	(abs (roundfloat ((float_of_int (x - obj_width))/.(float_of_int obj_width))), 
-	abs (roundfloat ((float_of_int (y - obj_width))/.(float_of_int obj_width))))
+	(abs (roundfloat ((float_of_int (x - (2*obj_width)))/.(float_of_int obj_width))), 
+	abs (roundfloat ((float_of_int (y - (2*obj_width)))/.(float_of_int obj_width))))
 
-(* Responds to a mouse click by inserting the index with the correct color on the board *)
-let respond_click (b:MyBoard.board) ((x,y):int*int) = 
+let print_color (b:Myboard.board) = match Myboard.getColor b with
+	|Black -> print_string " Black "; flush_all ()
+	|White -> print_string " White "; flush_all ()
+	|Unocc -> ()
+
+let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
+
 	if ( (x < floor - leeway) || (y < floor - leeway) ||
 		(x > ceiling + leeway) || (y > ceiling + leeway) )
 	then b
-	else MyBoard.insert b (round_click (x,y))
+	else (print_color b; print_color (Myboard.insert b (round_click (x,y)));
+		(Myboard.insert b (round_click (x,y))))
 
-let b = MyBoard.empty
+let bor = Myboard.empty
 
 (* Function to draw basic components of board by compiling various functions *)
 let draw_board () =   
@@ -96,21 +102,28 @@ let debug_board () =
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		(fun () -> draw_board ();
-      				MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p))
+		(fun () -> draw_grid ();
+              fill_board ();
+              draw_grid ();
+              board_border ();
+      				Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
-        if i > ceiling then
+
+        if i > ceiling then ()
           
         else (
-      		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
-      		let c = respond_click b i in 
-      		(if MyBoard.getColor c = White then print_string " it's now White  ");
-      		(if MyBoard.isWin c then print_string "Win!!!! "; flush_all ());
+      		(*(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");*)
+      		(*(if MyBoard.getColor (respond_click bor i) = MyBoard.getColor (respond_click bor i) then print_string " equal  ");
+      		(if MyBoard.getColor (respond_click bor i) = Black then print_string " it's Black3  ");*)
+      		ignore(bor = respond_click bor i);
+      		(if Myboard.getColor bor = White then print_string " it's now White  ");
+      		(if Myboard.isWin bor then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
       		draw_board ();
-      		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p))
+      		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p))
+
       	end ;;
 
 let evaluate_board board =

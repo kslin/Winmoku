@@ -79,12 +79,13 @@ struct
     	match (h#insert i p, v#insert i p, 
           dr#insert i p, dl#insert i p) with
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
+        		print_string "worked";
         		(let (x,y) = i in 
         			pa.(x).(y) <- (new piece p);
-        			(if p = Black
-        			 then (White,pa,h1,v1,dr1,dl1)
-        			 else (Black,pa,h1,v1,dr1,dl1)) )
-        	|_ -> b
+        			((*if p = Black
+        			 then *)(White,pa,h1,v1,dr1,dl1)
+        			 (*else (Black,pa,h1,v1,dr1,dl1)) *) ))
+        	|_ -> (print_string "here's the problem"; b)
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
