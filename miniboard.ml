@@ -228,8 +228,8 @@ object (self)
                     |_ -> [])
             |_ -> raise ERROR
 
-    method private handle_twos (lst: index list) : threat list = 
-        match lst with
+    method private handle_twos (twos: index list) : threat list = 
+        match twos with
             |(x1,y1)::(x2,y2)::[] -> let (a,b,c,d,e,f) = 
                         (self#convertBack (x1,y1-3), self#convertBack (x1,y1-2), 
                          self#convertBack (x1,y1-1), self#convertBack (x2,y2+1), 
@@ -301,23 +301,26 @@ object (self)
     method private handle_ones (lst: index list) : threat list = 
         match lst with
             |(x,y)::[] -> let (a,b,c,d,e,f) = 
-                        ((x,y-2),(x,y-1),(x,y+1),(x,y+2),(x,y+3),(x,y+4)) in
-                (match (self#getIndex a, self#getIndex b,
-                        self#getIndex c, self#getIndex d,
-                        self#getIndex e, self#getIndex f) with
+                        (self#convertBack (x,y-2),self#convertBack (x,y-1),
+                         self#convertBack (x,y+1),self#convertBack (x,y+2),
+                         self#convertBack (x,y+3),self#convertBack (x,y+4)) in
+                let lst = [self#convertBack (x,y)] in
+                (match (self#getIndex (x,y-2), self#getIndex (x,y-1),
+                        self#getIndex (x,y+1), self#getIndex (x,y+2),
+                        self#getIndex (x,y+3), self#getIndex (x,y+4)) with
                 |((None|Some White), Some Unocc, Some Unocc,
                  Some Black, Some Unocc, Some Unocc) ->
-                    [Threat(WallThree, c, [b;e], lst);
-                     Threat(SplitThree, e, [b;c;f], lst)]
+                    [Threat(WallThree, c, [b;e], lst@[d]);
+                     Threat(SplitThree, e, [b;c;f], lst@[d])]
                 |(Some Unocc, Some Unocc, Some Unocc,
                  Some Black, Some Unocc, (None|Some White)) ->
-                    [Threat(WallThree, c, [b;d], lst);
-                     Threat(SplitThree, b, [a;c;f], lst);]
+                    [Threat(WallThree, c, [b;d], lst@[d]);
+                     Threat(SplitThree, b, [a;c;f], lst@[d]);]
                 |(Some Unocc, Some Unocc, Some Unocc,
                  Some Black, Some Unocc, Some Unocc) ->
                     [Threat(Three, c, [b;e], lst);
-                     Threat(SplitThree, b, [a;c;e], lst);
-                     Threat(SplitThree, e, [b;c;f], lst)] 
+                     Threat(SplitThree, b, [a;c;e], lst@[d]);
+                     Threat(SplitThree, e, [b;c;f], lst@[d])] 
                 |_ -> [] )
             |_ -> raise ERROR
 
