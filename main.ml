@@ -70,6 +70,8 @@ let respond_click (b:MyBoard.board) ((x,y):int*int) =
 
 let b = MyBoard.empty
 
+let 
+
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
