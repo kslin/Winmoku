@@ -29,7 +29,10 @@ let piece_color = ref (Unocc)
 let bor = Myboard.empty
 
 (** defines leeway for the click **)
-let leeway = obj_width / 4;;
+let leeway = obj_width / 4
+
+(* Stores if current board already won *)
+let won_board = ref false
 
 (* Fills the board background with color *)
 let board_fill () = 
@@ -160,14 +163,13 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-		(fun () -> draw_board ();
+    (fun () -> draw_board ();
               debug_board ();
       				Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
 		begin fun (i:int*int) -> 
-      		(*Graphics.clear_graph () ; *)
-      		(* draw loop *)
         (* If mouse click is in the area above the playing grid, checks the 
         click position to do other things such as running a debugging function*)
+        if !won_board then () else (
         if (snd i) > ceiling then (
           respond_click_header bor i;
           Graphics.clear_graph ();
@@ -183,12 +185,13 @@ let test_board () =
               | Unocc -> "-"
               | White -> "WHITE"
               | Black -> "BLACK" in
+            won_board := true;
             (Graphics.set_color Graphics.red);
             Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
             Graphics.draw_string (player ^ " " ^ "WON!!!")));
           debug_board ();
       		draw_board ();
-      		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p))
+      		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p)))
 
       	end ;;
 
