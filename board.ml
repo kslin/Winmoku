@@ -67,11 +67,11 @@ struct
 
   	(** Get the piece associated with a location in the world. **)
   	let get (b:board) ((x,y):index) : piece_object = 
-  		let (p,pa,h,v,dr,dl) = b in
+  		let (_,pa,_,_,_,_) = b in
     	pa.(x).(y)
 
     let getColor (b:board) = 
-    	let (p,pa,h,v,dr,dl) = b in p
+    	let (p,_,_,_,_,_) = b in p
 
   	(** Change the status of a piece on the board to whichever color player is**)
   	let insert (b:board) (i:index) : board = 
@@ -97,7 +97,7 @@ struct
         	|_ -> b
 
     let isWin (b:board) : bool =
-    	let (p,pa,h,v,dr,dl) = b in
+    	let (_,_,h,v,dr,dl) = b in
     	(h#isWin || v#isWin || dr#isWin || dl#isWin)
 
   (** Remove a piece at a location **)
@@ -122,16 +122,16 @@ struct
       i 
 *)
   let getThreats (b:board) : threat list = 
-  	let (p,pa,h,v,dr,dl) = b in
+  	let (_,_,h,v,dr,dl) = b in
   	(h#getThreats)@(v#getThreats)@(dr#getThreats)@(dl#getThreats)
 
   (** Call a function for all pieces in the world. *)
   let indices (b:board) (f:int*int -> unit) : unit =
-  	let (p,pa,h,v,dr,dl) = b in
+  	let (_,pa,_,_,_,_) = b in
     (*let (a,b,c,d) = board in
     List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices*)
 
-    Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) board
+    Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) pa
 (*
   (** True if the world contains the point (x,y). *)
   let check_bounds ((x,y):int*int) : bool = 

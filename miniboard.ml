@@ -201,7 +201,7 @@ object (self)
             |(x1,y1)::(x2,y2)::[] -> let (a,b,c,d,e,f) = 
                         ((x1,y1-3), (x1,y1-2), (x1,y1-1), 
                         (x2,y2+1), (x2,y2+2), (x2,y2+3)) in
-                match (self#getIndex a, self#getIndex b,
+                (match (self#getIndex a, self#getIndex b,
                         self#getIndex c, self#getIndex d,
                         self#getIndex e, self#getIndex f) with
                     |(_,_,(None|Some White),
@@ -230,8 +230,8 @@ object (self)
                      Some Unocc, Some Unocc, (None|Some White)) ->
                         [Threat(WallThree, d, [c;f], lst)]
                     |((None|Some White), Some Unocc, Some Unocc,
-                     Some Unocc, (None|Some White),_,_) ->
-                        [Threat(WallThree, c, [b,d], lst)]
+                     Some Unocc, (None|Some White), _ ) ->
+                        [Threat(WallThree, c, [b;d], lst)]
                     |(_,(None|Some White), Some Unocc,
                      Some Unocc, Some Unocc, Some Unocc) ->
                         [Threat(WallThree, d, [c;e;f], lst);

@@ -14,7 +14,7 @@ open Boardobject
 open Draw*)
 open GUI
 open Boardstuffs
-open BThreats 
+open Threats
 
 module MyBoard = Myboard ;;
 

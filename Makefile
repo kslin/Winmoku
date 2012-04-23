@@ -21,6 +21,7 @@ FILES = \
 	diagleftboard.ml \
 	board.ml \
 	GUI.ml \
+	threats.ml \
 	main.ml \
 
 OBJECTS = $(FILES:.ml=.cmo)
