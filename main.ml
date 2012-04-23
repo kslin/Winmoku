@@ -21,16 +21,31 @@ module MyBoard = Myboard ;;
 let gridarrayhor = Array.make world_size (0,0,0,0);;
 let gridarrayver = Array.make world_size (0,0,0,0);;
 
-let floor = obj_width
-let ceiling = world_size * obj_width
+let floor = obj_width * 2
+let ceiling = (world_size + 1) * (obj_width)
+
+
+let fill_board () = 
+    Graphics.set_color (Graphics.rgb 204 153 51);
+    Graphics.fill_rect obj_width obj_width 
+    	(ceiling) (ceiling)
+
+let board_border () =
+	Graphics.set_line_width 6;
+	Graphics.set_color (Graphics.rgb 102 51 0);
+	Graphics.draw_rect obj_width obj_width  
+	    (ceiling) (ceiling);
+	Graphics.set_line_width 1
 
 let draw_grid () = 
-    Array.iteri (fun x _ -> gridarrayhor.(x) <- (obj_width,((x+1)*obj_width),
-    		   ((world_size)*obj_width),((x+1)*obj_width))) 
+    Graphics.set_color (Graphics.rgb 102 51 0);
+    Graphics.set_line_width 1;
+    Array.iteri (fun x _ -> gridarrayhor.(x) <- (floor,((x+2)*obj_width),
+    		   ceiling, ((x+2)*obj_width))) 
     	gridarrayhor;
     Graphics.draw_segments gridarrayhor;
-    Array.iteri (fun x _ -> gridarrayver.(x) <- (((x+1)*obj_width), obj_width,
-    		   ((x+1)*obj_width),((world_size)*obj_width))) 
+    Array.iteri (fun x _ -> gridarrayver.(x) <- (((x+2)*obj_width), floor,
+    		   ((x+2)*obj_width),(ceiling))) 
     	gridarrayver;
     Graphics.draw_segments gridarrayver
 
@@ -59,6 +74,9 @@ let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
 		(fun () -> draw_grid ();
+              fill_board ();
+              draw_grid ();
+              board_border ();
       				MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p))
 		begin fun (i:int*int) -> 
       		(*Graphics.clear_graph () ; *)
@@ -68,7 +86,9 @@ let test_board () =
       		(if MyBoard.getColor c = White then print_string " it's now White  ");
       		(if MyBoard.isWin c then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
-      		draw_grid ();
+      		fill_board ();
+          draw_grid ();
+          board_border ();
       		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p)
       	end ;;
 

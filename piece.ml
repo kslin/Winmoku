@@ -13,7 +13,7 @@ object (self)
 
 	method draw (i:index) = match v with
 		|Black -> self#circle i obj_width obj_width Graphics.black
-		|White -> self#unf_circle i obj_width obj_width Graphics.black
+		|White -> self#circle i obj_width obj_width Graphics.white
 		|Unocc -> ()
 
 	method private circle ((x,y):int*int) (width:int) (height:int)
