@@ -13,6 +13,27 @@ object
 
     method print_rows_elt : index -> unit
 
+    method copyself : board_object
+
+    method getboard : piece_object list list
+
+    method setboard : piece_object list list -> unit
+
+    method getrows : index list list 
+
+    method setrows : index list list -> unit
+
+    method getblackneighbors : index list list
+
+    method setblackneighbors : index list list -> unit
+
+    method getwhiteneighbors : index list list
+
+    method setwhiteneighbors: index list list -> unit
+
+    method getoccrows : int list
+
+    method setoccrows : int list -> unit
 
     (* Returns empty board *)
     method empty : board_object

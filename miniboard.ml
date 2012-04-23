@@ -25,7 +25,35 @@ object (self)
 
     (* Methods *)
 
+    method getboard = board
+
+    method setboard b = board <- b
+
+    method getrows = rows
+
+    method setrows r = rows <- r
+
+    method getblackneighbors = black_neighbor_list
+
+    method setblackneighbors bn = black_neighbor_list <- bn
+
+    method getwhiteneighbors = white_neighbor_list
+
+    method setwhiteneighbors wn = white_neighbor_list <- wn
+
+    method getoccrows = occ_rows
+
+    method setoccrows o = occ_rows <- o
+
     method getsize = (List.length board)
+
+    method copyself = let newboard = (new miniboard size) in
+        (newboard#setboard (self#getboard);
+        newboard#setrows (self#getrows);
+        newboard#setblackneighbors (self#getblackneighbors);
+        newboard#setwhiteneighbors (self#getwhiteneighbors);
+        newboard#setoccrows (self#getoccrows);
+        (newboard :> board_object))
 
     method printlistlengths = 
         let rec rec_print n = match n with
