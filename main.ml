@@ -92,40 +92,8 @@ let draw_board () =
   board_border ();
   board_title ()
 
-(* A button to run a function *)
-let debug_func_button () = ()
 
-(* Shows buttons and other displays for function testing purposes *)
-let debug_board () = 
-  debug_func_button ()
-
-let test_board () =
-	GUI.run_game
-		(* Initialize the board to be empty *)
-		(fun () -> draw_grid ();
-              fill_board ();
-              draw_grid ();
-              board_border ();
-      				Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
-		begin fun (i:int*int) -> 
-      		(*Graphics.clear_graph () ; *)
-      		(* draw loop *)
-
-        if i > ceiling then ()
-          
-        else (
-      		(*(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");*)
-      		(*(if MyBoard.getColor (respond_click bor i) = MyBoard.getColor (respond_click bor i) then print_string " equal  ");
-      		(if MyBoard.getColor (respond_click bor i) = Black then print_string " it's Black3  ");*)
-      		ignore(bor = respond_click bor i);
-      		(if Myboard.getColor bor = White then print_string " it's now White  ");
-      		(if Myboard.isWin bor then print_string "Win!!!! "; flush_all ());
-      		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
-      		draw_board ();
-      		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p))
-
-      	end ;;
-
+(* Evaluate board function *)
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
   let update_board threat = 
@@ -141,5 +109,51 @@ let evaluate_board board =
     | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
   in
     win treelist
+
+(* A handles clicks to to run functions: eval *)
+let respond_click_debug (b:Myboard.board) ((x,y):int*int) = 
+  if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
+    && (y < ((world_size+6) * obj_width)))
+  then (let result = evaluate_board b in
+        print_string (string_of_bool result); flush_all ())
+
+(*  button for eval function *)
+let debug_button_eval () =
+  Graphics.set_color Graphics.red;
+  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+
+(* Shows buttons and other displays for function testing purposes *)
+let debug_board () = 
+  debug_button_eval ()
+
+let test_board () =
+	GUI.run_game
+		(* Initialize the board to be empty *)
+		(fun () -> draw_board ();
+              debug_board ();
+      				Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
+		begin fun (i:int*int) -> 
+      		(*Graphics.clear_graph () ; *)
+      		(* draw loop *)
+        (* If mouse click is above the playing grid, checks the click position to do other things
+        such as running a debugging function *)
+        if (snd i) > ceiling then (
+          respond_click_debug bor i
+
+
+        )          
+        else (
+      		(*(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");*)
+      		(*(if MyBoard.getColor (respond_click bor i) = MyBoard.getColor (respond_click bor i) then print_string " equal  ");
+      		(if MyBoard.getColor (respond_click bor i) = Black then print_string " it's Black3  ");*)
+      		ignore(bor = respond_click bor i);
+      		(if Myboard.getColor bor = White then print_string " it's now White  ");
+      		(if Myboard.isWin bor then print_string "Win!!!! "; flush_all ());
+      		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
+          debug_board ();
+      		draw_board ();
+      		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p))
+
+      	end ;;
 
 let _ = test_board () ;;
