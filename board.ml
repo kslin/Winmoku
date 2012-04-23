@@ -23,6 +23,8 @@ sig
 
 	val insert : board -> index -> board
 
+	val insertspecial : board -> index -> occupied -> board
+
 	val isWin : board -> bool
 
 	val getThreats : board -> threat list
@@ -82,6 +84,16 @@ struct
         			(if p = Black
         			 then (White,pa,h1,v1,dr1,dl1)
         			 else (Black,pa,h1,v1,dr1,dl1)) )
+        	|_ -> b
+
+    let insertspecial (b:board) (i:index) (c:occupied): board = 
+  		let (p,pa,h,v,dr,dl) = b in
+    	match (h#insert i c, v#insert i c, 
+          dr#insert i c, dl#insert i c) with
+        	|(Some h1,Some v1,Some dr1,Some dl1) -> 
+        		(let (x,y) = i in 
+        			pa.(x).(y) <- (new piece c);
+        			(p,pa,h1,v1,dr1,dl1) )
         	|_ -> b
 
     let isWin (b:board) : bool =

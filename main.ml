@@ -63,12 +63,12 @@ let test_board () =
       		(*Graphics.clear_graph () ; *)
       		(* draw loop *)
       		(if MyBoard.getColor (respond_click b i) = White then print_string " it's White  ");
-      		let b = respond_click b i;
-      		(if MyBoard.getColor b = White then print_string " it's White  ");
-      		(if MyBoard.isWin b then print_string "Win!!!! "; flush_all ());
+      		let c = respond_click b i in 
+      		(if MyBoard.getColor c = White then print_string " it's now White  ");
+      		(if MyBoard.isWin c then print_string "Win!!!! "; flush_all ());
       		(*(if MyBoard.getColor b = White then print_string " it's White  ");*)
       		draw_grid ();
-      		MyBoard.indices b (fun p -> (MyBoard.get b p)#draw p)
+      		MyBoard.indices c (fun p -> (MyBoard.get c p)#draw p)
       	end ;;
 
 let _ = test_board () ;;

@@ -177,7 +177,7 @@ object (self)
             |(x1,y1)::(x2,y2)::(x3,y3)::[] -> 
                 (match (self#getIndex (x1,y1-2), self#getIndex (x1, y1-1),
                 self#getIndex (x3,y3+1), self#getIndex (x3,y3+2)) with
-                    |((None|Some White), (None|Some White), Some Unocc, Some Unocc) ->
+                    |(-, (None|Some White), Some Unocc, Some Unocc) ->
                         [Threat(Four, (x3,y3+1), [(x3,y3+2)], lst);
                          Threat(Four, (x3,y3+2), [(x3,y3+1)], lst)]
                     |((None|Some White), Some Unocc, Some Unocc, (None|Some White)) ->
@@ -185,51 +185,81 @@ object (self)
                          Threat(Four, (x3,y3+1), [(x1,y1-1)], lst)]
                     |((None|Some White), Some Unocc, Some Unocc, Some Unocc) ->
                         [Threat(StraightFour, (x3,y3+1), [(x1,y1-1);(x3,y3+2)], lst)]
-                    |(Some Unocc, Some Unocc, (None|Some White), (None|Some White)) ->
+                    |(Some Unocc, Some Unocc, (None|Some White), _) ->
                         [Threat(Four, (x1,y1-1), [(x1,y1-2)], lst);
                          Threat(Four, (x1,y1-2), [(x1,y1-1)], lst)]
                     |(Some Unocc, Some Unocc, Some Unocc, (None|Some White)) ->
                         [Threat(StraightFour, (x1,y1-1), [(x1,y1-2);(x3,y3+1)], lst)]
                     |(Some Unocc, Some Unocc, Some Unocc, Some Unocc) ->
-                        [Threat(Four, (x1,y1-2), [(x1,y1-1)], lst);
-                         Threat(Four, (x3,y3+2), [(x3,y3+1)], lst);
-                         Threat(StraightFour, (x1,y1-1), [(x1,y1-2);(x3,y3+1)], lst);
+                        [Threat(StraightFour, (x1,y1-1), [(x1,y1-2);(x3,y3+1)], lst);
                          Threat(StraightFour, (x3,y3+1), [(x1,y1-1);(x3,y3+2)], lst)]
                     |_ -> [])
             |_ -> raise ERROR
 
     method private handle_twos (lst: index list) : threat list = 
         match lst with
-            |(x1,y1)::(x2,y2)::[] ->
-                (match (self#getIndex (x1,y1-3), self#getIndex (x1,y1-2),
-                        self#getIndex (x1,y1-1), self#getIndex (x2,y2+1),
-                        self#getIndex (x2,y2+2), self#getIndex (x2,y2+3)) with
-                    |((None|Some White),(None|Some White),(None|Some White),
+            |(x1,y1)::(x2,y2)::[] -> let (a,b,c,d,e,f) = 
+                        ((x1,y1-3), (x1,y1-2), (x1,y1-1), 
+                        (x2,y2+1), (x2,y2+2), (x2,y2+3)) in
+                match (self#getIndex a, self#getIndex b,
+                        self#getIndex c, self#getIndex d,
+                        self#getIndex e, self#getIndex f) with
+                    |(_,_,(None|Some White),
                      Some Unocc, Some Black, Some Unocc) ->
-                        [Threat(Four, (x2,y2+1), [(x2,y2+3)], lst);
-                         Threat(Four, (x2,y2+3), [(x2,y2+1)], lst)]
+                        [Threat(Four, d, [f], lst);
+                         Threat(Four, f, [d], lst)]
                     |(Some Unocc, Some Black, Some Unocc,
-                     (None|Some White),(None|Some White),(None|Some White)) ->
-                        [Threat(Four, (x1,y1-1), [(x1,y1-3)], lst);
-                         Threat(Four, (x1,y1-3), [(x1,y1-1)], lst)]
+                     (None|Some White),_,_) ->
+                        [Threat(Four, c, [a], lst);
+                         Threat(Four, a, [c], lst)]
                     |((None|Some White), Some Black, Some Unocc,
                      Some Unocc, _, _) -> 
-                        [Threat(Four, (x1,y1-1), [(x2,y2+1)], lst);
-                         Threat(Four, (x2,y2+1), [(x1,y1-1)], lst)]
+                        [Threat(Four, c, [d], lst);
+                         Threat(Four, d, [c], lst)]
                     |(_,_,Some Unocc,
                      Some Unocc, Some Black, (None|Some White)) ->
-                        [Threat(Four, (x1,y1-1), [(x2,y2+1)], lst);
-                         Threat(Four, (x2,y2+1), [(x1,y1-1)], lst)]
+                        [Threat(Four, c, [d], lst);
+                         Threat(Four, d, [c], lst)]
                     |(_,_,Some Unocc,
                      Some Unocc, Some Black, Some Unocc) ->
-                        [Threat(Four, (x1,y1-1), [(x2,y2+1)], lst);
-                         Threat(Four, (x2,y2+3), [(x2,y2+1)], lst);
-                         Threat(StraightFour, (x2,y2+1), [(x1,y1-1);(x2,y2+3)], lst)]
-                    (*|(Some Unocc, Some Black, Some Unocc,
+                        [Threat(StraightFour, d, [c;f], lst)]
+                    |(Some Unocc, Some Black, Some Unocc,
                      Some Unocc, _, _) ->
-                        [Threat(Four, (x1,y1-3), [(x1,y1-1)], lst);
-                         Threat(Four, (x2,y))]*)
-
+                        [Threat(StraightFour, c, [a;d], lst)]
+                    |(_, (None|Some White), Some Unocc,
+                     Some Unocc, Some Unocc, (None|Some White)) ->
+                        [Threat(WallThree, d, [c;f], lst)]
+                    |((None|Some White), Some Unocc, Some Unocc,
+                     Some Unocc, (None|Some White),_,_) ->
+                        [Threat(WallThree, c, [b,d], lst)]
+                    |(_,(None|Some White), Some Unocc,
+                     Some Unocc, Some Unocc, Some Unocc) ->
+                        [Threat(WallThree, d, [c;e;f], lst);
+                         Threat(SplitThree, e, [c;d;f], lst)]
+                    |(Some Unocc, Some Unocc, Some Unocc,
+                     Some Unocc, (None|Some White), _) ->
+                        [Threat(WallThree, c, [a;b;d], lst);
+                         Threat(SplitThree, b, [a;c;d], lst)]
+                    |((None|Some White), Some Unocc, Some Unocc,
+                     Some Unocc, Some Unocc, (None|Some White)) ->
+                        [Threat(WallThree, c, [b;d;e], lst);
+                         Threat(WallThree, d, [b;c;e], lst)]
+                    |((None|Some White), Some Unocc, Some Unocc,
+                     Some Unocc, Some Unocc, Some Unocc) ->
+                        [Threat(WallThree, c, [b;d;e],lst);
+                         Threat(Three, d, [c;e],lst);
+                         Threat(SplitThree, e, [c;d;f],lst)]
+                    |(Some Unocc, Some Unocc, Some Unocc,
+                     Some Unocc, Some Unocc, (None|Some White)) ->
+                        [Threat(WallThree, d, [b;c;e],lst);
+                         Threat(Three, c, [b;d],lst);
+                         Threat(SplitThree, b, [a;c;d],lst)]
+                    |(Some Unocc, Some Unocc, Some Unocc,
+                     Some Unocc, Some Unocc, Some Unocc) ->
+                        [Threat(Three, c, [b;d],lst);
+                         Threat(Three, d, [c;e],lst);
+                         Threat(SplitThree, b, [a;c;d], lst);
+                         Threat(SplitThree, e, [c;d;f], lst)]
                     |_ -> [])
             |_ -> raise ERROR 
 
