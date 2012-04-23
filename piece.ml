@@ -19,13 +19,13 @@ object (self)
 	method private circle ((x,y):int*int) (width:int) (height:int)
              (bg:Graphics.color) : unit =
     	Graphics.set_color bg ;
-    	Graphics.fill_circle ((x+1)*width) ((y+1)*height) 
+    	Graphics.fill_circle ((x+2)*width) ((y+2)*height) 
                          (min width height / 2) 
 
     method private unf_circle ((x,y):int*int) (width:int) (height:int)
              (bg:Graphics.color) : unit =
     	Graphics.set_color bg ;
-    	Graphics.draw_circle ((x+1)*width) ((y+1)*height) 
+    	Graphics.draw_circle ((x+2)*width) ((y+2)*height) 
                          (min width height / 2) 
 
 end

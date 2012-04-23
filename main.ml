@@ -59,8 +59,8 @@ let roundfloat (f:float) : int =
 
 (** Finds the closest index that is next to the click **)
 let round_click ((x,y):int*int) = 
-	(abs (roundfloat ((float_of_int (x - obj_width))/.(float_of_int obj_width))), 
-	abs (roundfloat ((float_of_int (y - obj_width))/.(float_of_int obj_width))))
+	(abs (roundfloat ((float_of_int (x - (2*obj_width)))/.(float_of_int obj_width))), 
+	abs (roundfloat ((float_of_int (y - (2*obj_width)))/.(float_of_int obj_width))))
 
 let print_color (b:Myboard.board) = match Myboard.getColor b with
 	|Black -> print_string " Black "; flush_all ()
