@@ -1,5 +1,5 @@
-open Myboard
-open Threat
+open Board
+open Boardstuffs
 
 (*This is the file that will implement threat spaced search *)
 
@@ -44,12 +44,13 @@ sig
 
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
-end
+end 
   
-module tGenerator(B: BOARD) : THREATS =  
+module TGenerator =
+  functor (B: BOARD) -> 
   struct
     type board = B.board
-    type threat = threat
+    type threat = Boardstuffs.threat
     type threats = threat list
     type tree = 
       | Node of board * threat * (tree list)
@@ -59,29 +60,29 @@ module tGenerator(B: BOARD) : THREATS =
     let get_threats = B.getThreats
 
     let dependent_threats (ts: threats) (t: threat) = 
-      let (tgain, _, _) = t in
+      let Threat(_, tgain, _, _) = t in
       let dependent x = 
-        let (_ , trest, _) = x in
+        let Threat(_, _, trest, _) = x in
         List.exists (fun y -> (tgain = y)) trest in
-      List.filter dependent threats 
+      List.filter dependent ts 
 
     let get_dependent_threats (b: board) (t: threat) =
       dependent_threats (get_threats b) t
 
     let gen_new_board (b: board) (t:threat) =
-      let (tgain, _, tcost) = t in
+      let Threat(_, tgain, _, tcost) = t in
       let rec insertwhitelist (b:board) (t: index list) =
         match t with
-        | hd::tl -> insertlist (B.insert b hd White) tl
+        | hd::tl -> insertwhitelist (B.insertspecial b hd White) tl
         | _ -> b in
-      insertwhitelist (B.insert b tgain Black) tcost
+      insertwhitelist (B.insertspecial b tgain Black) tcost
 
     let rec gen_threat_tree (b: board) (t: threat) = 
       if (B.isWin b) then 
         Win(b, t)
       else
         let threatList = get_dependent_threats b t in 
-          if threatlist = [] then 
+          if threatList = [] then 
             Leaf(b, t)      
           else
             let tree_from_threat (x:threat) = 
@@ -99,11 +100,11 @@ module tGenerator(B: BOARD) : THREATS =
         | hd::tl -> (evaluate_tree hd) || (evaluate_tree_list tl)
       in
         match tr with
-        | Win(b, t) -> True 
-        | Leaf(b, t) -> False 
+        | Win(b, t) -> true
+        | Leaf(b, t) -> false 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
     let rec merge tree1 tree2 = tree1
 end
 
-module BThreats = tGenerator(Myboard)
+module BThreats = TGenerator(Myboard)
