@@ -95,12 +95,13 @@ let test_board () =
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
   let update_board threat = 
-    let (tgain, _, _) = threat in
-      ((Board.insert board tgain Black), threat) 
+    let Threat(_, tgain, _, _) = threat in
+      ((Myboard.insertspecial board tgain Black), threat) 
   in 
-  let boardlist = map update_board threatlist in
-  let treelist = map (fun (x, y) -> (BThreats.gen_threat_tree x y)) boardlist in
-  let win tlist =   
+  let boardlist = List.map update_board threatlist in
+  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y)) 
+                          boardlist in
+  let rec win tlist =   
     match tlist with 
     | [] -> false
     | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)

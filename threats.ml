@@ -3,8 +3,6 @@ open Boardstuffs
 
 (*This is the file that will implement threat spaced search *)
 
-exception TODO;;
-
 module type THREATS = 
 sig
   
@@ -17,15 +15,13 @@ sig
   type threats
   
   type tree
-  
-  val empty : tree
 
   (* Given a board returns the threats associated with it *)
   val get_threats: board -> threats
   
   (* Given a collection of threats xs and a threat y 
      returns the threats in xs that are dependent on y *)
-  val dependent_threats : threats -> threat -> threat
+  val dependent_threats : threats -> threat -> threats
 
   (* Given a board and the threat whose gain square was the last move
      made on the board returns all threats dependent on the given threat*)
@@ -44,10 +40,12 @@ sig
 
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
-end 
-  
-module TGenerator =
-  functor (B: BOARD) -> 
+
+end
+
+module TGenerator(B: BOARD):THREATS with type board = B.board 
+                                    and type threat = Boardstuffs.threat 
+                                    and type threats = threat list =
   struct
     type board = B.board
     type threat = Boardstuffs.threat
@@ -55,7 +53,7 @@ module TGenerator =
     type tree = 
       | Node of board * threat * (tree list)
       | Leaf of board * threat   
-      | Win of board * threat 
+      | Win of board * threat    
 
     let get_threats = B.getThreats
 

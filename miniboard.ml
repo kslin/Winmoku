@@ -263,53 +263,27 @@ object (self)
                     |_ -> [])
             |_ -> raise ERROR 
 
-    method private handle_ones (lst: index list) : threat list = raise TODO
-
-    (* Determines if a row has threats in it and returns the threats *)
-    (*method private containsThreats (lst: index list) : threat list = 
-    	if List.length lst < 5 then []
-        else let sixlist = self#hasContSix lst in
-    	    (*let rec findfives flst = match flst with
-                |[] -> flst
-                |hd::tl -> let ((a,aind),(b,bind),
-                                (c,cind),(d,dind),
-                                (e,eind)) = hd in 
-                    (match (aind,bind,cind,dind,eind) with
-                        |(Unocc,Black,Black,Unocc,Unocc) -> 
-                            (Threat (d,[a,e],[b,c]))::(findfives tl)
-                        |(Unocc,Unocc,Black,Black,Unocc) ->
-                            (b,[a,e],[c,d])::(findfives tl)
-                        |(Unocc,Black,Unocc,Black,Unocc) ->
-                            (c,[a,e],[b,d])::(findfives tl) 
-                        |_ -> findfives tl ) in *)
-
-            let rec findsixes slst : threat list = match slst with
-                |[] -> []
-                |hd::tl -> let ((a,aind),(b,bind),
-                                (c,cind),(d,dind),
-                                (e,eind),(f,find)) = hd in 
-                (match (aind,bind,cind,dind,eind,find) with
-                    |(Unocc,Black,Black,Black,Unocc,Unocc) -> 
-                (Threat (StraightFour,e,[a;f],[b;c;d]))::(findsixes tl) 
-                    |(Unocc,Unocc, Black,Black,Black,Unocc) -> 
-                (Threat (StraightFour,b,[a;f],[c;d;e]))::(findsixes tl) 
-                    |(Unocc,Black,Unocc,Black,Black,Unocc) -> 
-                (Threat (StraightFour,c,[a;f],[b;d;e]))::(findsixes tl) 
-                    |(Unocc,Black,Black,Unocc,Black,Unocc) -> 
-                (Threat (StraightFour,d,[a;f],[b;c;e]))::(findsixes tl)
-                    |(Unocc,Black,Black,Unocc,Unocc,Unocc) ->
-                (Threat (SplitThree,e,[a;d;f],[b;c]))::(findsixes tl)
-                    |(Unocc,Unocc,Black,Unocc,Black,Unocc) ->
-                (Threat (SplitThree,b,[a;d;f],[c;e]))::(findsixes tl)
-                    |(Unocc,Black,Unocc,Unocc,Black,Unocc) ->
-                (Threat (SplitThree,c,[a;d;f],[b;e]))::
-                (Threat (SplitThree,d,[a;c;f],[b;e]))::(findsixes tl)
-                    |(Unocc,Unocc,Unocc,Black,Black,Unocc) ->
-                (Threat (SplitThree,b,[a;c;f],[d;e]))::(findsixes tl)
-                    |(Unocc,Black,Unocc,Black,Unocc,Unocc) ->
-                (Threat (SplitThree,e,[a;c;f],[b;d]))::(findsixes tl)
-                    |_ -> findsixes tl ) in
-        (findsixes sixlist) *)
+    method private handle_ones (lst: index list) : threat list = 
+        match lst with
+            |(x,y)::[] -> let (a,b,c,d,e,f) = 
+                        ((x,y-2),(x,y-1),(x,y+1),(x,y+2),(x,y+3),(x,y+4)) in
+                (match (self#getIndex a, self#getIndex b,
+                        self#getIndex c, self#getIndex d,
+                        self#getIndex e, self#getIndex f) with
+                |((None|Some White), Some Unocc, Some Unocc,
+                 Some Black, Some Unocc, Some Unocc) ->
+                    [Threat(WallThree, c, [b;e], lst);
+                     Threat(SplitThree, e, [b;c;f], lst)]
+                |(Some Unocc, Some Unocc, Some Unocc,
+                 Some Black, Some Unocc, (None|Some White)) ->
+                    [Threat(WallThree, c, [b;d], lst);
+                     Threat(SplitThree, b, [a;c;f], lst);]
+                |(Some Unocc, Some Unocc, Some Unocc,
+                 Some Black, Some Unocc, Some Unocc) ->
+                    [Threat(Three, c, [b;e], lst);
+                     Threat(SplitThree, b, [a;c;e], lst);
+                     Threat(SplitThree, e, [b;c;f], lst)] )
+            |_ -> raise ERROR
 
                 
 
