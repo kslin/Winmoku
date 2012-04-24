@@ -211,7 +211,7 @@ let test_board () =
 		            draw_all ();
                 Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
   		    (* If mouse clicks on board area, make a move *)          
-  		    else (ignore(ref_bor := respond_click bor i);
+  		    else (ignore(ref_bor := (respond_click bor i));
                 Graphics.clear_graph ();
 		  		      (if (Myboard.isWin bor)
 	  		        then (
