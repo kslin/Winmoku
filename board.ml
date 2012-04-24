@@ -102,6 +102,8 @@ struct
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
+  		(*((h#copyself)#insert i p, (v#copyself)#insert i p, 
+          (dr#copyself)#insert i p, (dl#copyself)#insert i p)*)
     	match (h#insert i c, v#insert i c, 
           dr#insert i c, dl#insert i c) with
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
