@@ -223,7 +223,7 @@ let test_board () =
 		        	(Graphics.set_color Graphics.red);
 		        	Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
 		        	Graphics.draw_string (player ^ " " ^ "WON!!!")  ))
-		  		else draw_all () ) ) ) 
-
+		  		else draw_all () ) ) ) ;
+	draw_all ()
 
 let _ = test_board () ;;
