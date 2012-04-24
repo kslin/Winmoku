@@ -11,4 +11,6 @@ object
 
 	method draw : index -> unit
 
+	method clone : piece_object
+
 end

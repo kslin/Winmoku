@@ -190,29 +190,31 @@ let test_board () =
         won_board := false; draw_all ()
       | _ -> () 
     ) 
-    (* function for handling mouse click events *)
-		(fun (i:int*int) -> 
-        (* If mouse click is in the area above the playing grid, checks the 
-        click position to do other things such as running a debugging function*)
-        if !won_board then () else (
-        if (snd i) > ceiling then (
-          respond_click_header bor i;
-          draw_all ())
-        (* If mouse clicks on board area, make a move *)          
-        else (
-      		ignore(bor = respond_click bor i);
-      		(if Myboard.isWin bor then (
-            let player : string = 
-              match !piece_color with
-              | Unocc -> "-"
-              | White -> "WHITE"
-              | Black -> "BLACK" in
-            won_board := true;
-            (Graphics.set_color Graphics.red);
-            Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-            Graphics.draw_string (player ^ " " ^ "WON!!!")));
-      		draw_all ()
 
-      	end ;;
+    (* function for handling mouse click events *)
+	(fun (i:int*int) -> 
+    (* If mouse click is in the area above the playing grid, checks the 
+        click position to do other things such as running a debugging function*)
+        if !won_board 
+        then () 
+    	else (if (snd i) > ceiling 
+		    then (
+		      respond_click_header bor i;
+		      draw_all ())
+		    (* If mouse clicks on board area, make a move *)          
+		    else (ignore(bor = respond_click bor i);
+		  		(if Myboard.isWin bor 
+		  		then (
+		  			draw_all ();
+		        	let player : string = 
+		          		match !piece_color with
+		          			| Unocc -> "-"
+		          			| White -> "WHITE"
+		          			| Black -> "BLACK" in
+		        	won_board := true;
+		        	(Graphics.set_color Graphics.red);
+		        	Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+		        	Graphics.draw_string (player ^ " " ^ "WON!!!")  ))
+		  		else draw_all () ) ) ) 
 
 let _ = test_board () ;;

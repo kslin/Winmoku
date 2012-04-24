@@ -16,6 +16,8 @@ object (self)
 		|White -> self#circle i obj_width obj_width Graphics.white
 		|Unocc -> ()
 
+	method clone = (new piece value)
+
 	method private circle ((x,y):int*int) (width:int) (height:int)
              (bg:Graphics.color) : unit =
     	Graphics.set_color bg ;
