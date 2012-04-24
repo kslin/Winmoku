@@ -191,6 +191,8 @@ let test_board () =
             Graphics.draw_string (player ^ " " ^ "WON!!!")));
           debug_board ();
       		draw_board ();
+      		bor = Myboard.empty;
+      		draw_board ();
       		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p)))
 
       	end ;;
