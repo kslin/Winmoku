@@ -26,7 +26,7 @@ let ceiling = (world_size + 1) * (obj_width)
 let piece_color = ref (Unocc)
 
 (* Stores the current board *)
-let bor  = Myboard.empty
+let bor = Myboard.empty
 
 (* Ref to point to board *)
 let ref_bor = ref bor
@@ -185,13 +185,13 @@ let test_board () =
     (* function for handling key presses *)
     (fun (c:char) -> 
       match c with 
-      | 'r' -> ignore (ref_bor := (Myboard.get_empty ())); 
+      | 'r' -> ignore (ref_bor := (Myboard.empty)); 
         (* print_string (string_of_bool (bor = Myboard.empty)); flush_all (); *)
         won_board := false; 
         Graphics.clear_graph ();
         draw_all (); 
         Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x)
-      | 'R' -> ignore (ref_bor := (Myboard.get_empty ())); 
+      | 'R' -> ignore (ref_bor := (Myboard.empty)); 
         won_board := false; 
         Graphics.clear_graph ();
         draw_all (); 
