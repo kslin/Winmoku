@@ -115,7 +115,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
     (x > ceiling + leeway) || (y > ceiling + leeway) )
   then b
   else (
-    (Myboard.insertspecial b (round_click (x,y))) !piece_color)
+    (Myboard.insert b (round_click (x,y))) !piece_color)
 
 (* Evaluate board function *)
 let evaluate_board board =

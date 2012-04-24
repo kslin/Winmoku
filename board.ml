@@ -25,7 +25,7 @@ sig
 
   val printcolor : board -> unit
 
-	val insert : board -> index -> board
+	val insert : board -> index -> occupied -> board
 
 	val insertspecial : board -> index -> occupied -> board
 
@@ -86,19 +86,17 @@ struct
         |White -> print_string " (White) "; flush_all ()
         |Unocc -> ()
 
-  	(** Change the status of a piece on the board to whichever color player is**)
-  	let insert (b:board) (i:index) : board = 
-  		let (p,pa,h,v,dr,dl) = b in
-    	match (h#insert i p, v#insert i p, 
-          dr#insert i p, dl#insert i p) with
-        	|(Some h1,Some v1,Some dr1,Some dl1) -> 
-        		print_string "worked";
-        		(let (x,y) = i in 
-        			pa.(x).(y) <- (new piece p);
-        			(if p = Black
-        			 then (White,pa,h1,v1,dr1,dl1)
-        			 else (Black,pa,h1,v1,dr1,dl1)) )
-        	|_ -> (print_string "here's the problem"; b)
+  	(** Insert a piece into the board with the specified position and color **)
+  	let insert (b:board) (i:index) (c:occupied): board = 
+      let (p,pa,h,v,dr,dl) = b in
+      match (h#insert i c, v#insert i c, 
+          dr#insert i c, dl#insert i c) with
+          |(Some h1,Some v1,Some dr1,Some dl1) -> 
+            (let (x,y) = i in 
+              pa.(x).(y) <- (new piece c);
+              (c,pa,h1,v1,dr1,dl1))
+          |_ -> b
+
 
     let pieceMatrixCopy (m: piece_object array array) =
       let copy = Array.make 0 m.(0) in
