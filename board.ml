@@ -100,14 +100,30 @@ struct
         			 else (Black,pa,h1,v1,dr1,dl1)) )
         	|_ -> (print_string "here's the problem"; b)
 
+    let pieceMatrixCopy (m: piece_object array array) =
+      let copy = Array.make 0 m.(0) in
+      let deepcopy (pieceobject : piece_object) =
+        pieceobject#clone
+      in 
+      let rowcopy row =
+        let nrow = Array.make 1 (Array.map deepcopy (Array.copy row)) in
+          (ignore (copy = (Array.append copy nrow)); () )
+      in
+        ( Array.iter rowcopy m; copy ) 
+
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
-    	match (h#insert i c, v#insert i c, 
-          dr#insert i c, dl#insert i c) with
+      let newh = h#copyself in
+      let newv = v#copyself in
+      let newdr = dr#copyself in
+      let newdl = dl#copyself in
+      let newpa = pieceMatrixCopy pa in
+    	match (newh#insert i c, newv#insert i c, 
+             newdr#insert i c, newdl#insert i c) with
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
         		(let (x,y) = i in 
         			pa.(x).(y) <- (new piece c);
-        			(p,pa,h1,v1,dr1,dl1))
+        			(p,newpa,h1,v1,dr1,dl1))
         	|_ -> b
 
     let isWin (b:board) : bool =
