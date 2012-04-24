@@ -22,6 +22,14 @@ object (self)
                         ((emptyList (size - abs(size - n1)) [])::b)
         in emptyDiag ((2*size) - 1) []
 
+    method copyself = let newboard = (new diagleftboard size) in
+        (newboard#setboard (self#getboard);
+        newboard#setrows (self#getrows);
+        newboard#setblackneighbors (self#getblackneighbors);
+        newboard#setwhiteneighbors (self#getwhiteneighbors);
+        newboard#setoccrows (self#getoccrows);
+        (newboard :> board_object))
+
     method convertIndex ci = 
         let (x,y) = ci in
         if y > x

@@ -25,4 +25,12 @@ object (self)
                 in build_rows (n-1) ((build_row size [])::b ) )
         in (build_rows size [])
 
+    method copyself = let newboard = (new verticalboard size) in
+        (newboard#setboard (self#getboard);
+        newboard#setrows (self#getrows);
+        newboard#setblackneighbors (self#getblackneighbors);
+        newboard#setwhiteneighbors (self#getwhiteneighbors);
+        newboard#setoccrows (self#getoccrows);
+        (newboard :> board_object))
+
 end

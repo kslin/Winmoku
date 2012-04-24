@@ -12,7 +12,7 @@ object (self)
 
 	val mutable board : piece_object list list = [[]]
 
-    val mutable rows = []
+    val mutable rows : index list list = []
 
     (* Stores the lists of black neighbors *)
     val mutable black_neighbor_list : index list list = []
@@ -25,36 +25,39 @@ object (self)
 
     (* Methods *)
 
+    method private copylist (lst: index list) = 
+        List.map (fun x -> x) lst
+
+    method private copyintlist (lst: int list) = 
+        List.map (fun x -> x) lst        
+
+    method private copylistlist (lst: index list list) = 
+        List.map (fun x -> (List.map (fun y -> y) x)) lst
+
     method getboard = 
         List.map (fun x -> (List.map (fun y -> y#clone) x)) board 
 
     method setboard b = board <- b
 
-    method getrows = rows
+    method getrows = self#copylistlist rows
 
     method setrows r = rows <- r
 
-    method getblackneighbors = black_neighbor_list
+    method getblackneighbors = self#copylistlist black_neighbor_list
 
     method setblackneighbors bn = black_neighbor_list <- bn
 
-    method getwhiteneighbors = white_neighbor_list
+    method getwhiteneighbors = self#copylistlist white_neighbor_list
 
     method setwhiteneighbors wn = white_neighbor_list <- wn
 
-    method getoccrows = occ_rows
+    method getoccrows = self#copyintlist occ_rows
 
     method setoccrows o = occ_rows <- o
 
     method getsize = (List.length board)
 
-    method copyself = let newboard = (new miniboard size) in
-        (newboard#setboard (self#getboard);
-        newboard#setrows (self#getrows);
-        newboard#setblackneighbors (self#getblackneighbors);
-        newboard#setwhiteneighbors (self#getwhiteneighbors);
-        newboard#setoccrows (self#getoccrows);
-        (newboard :> board_object))
+    method copyself = (new miniboard size)
 
     method printlistlengths = 
         let rec rec_print n = match n with
@@ -88,7 +91,7 @@ object (self)
             try (Some ((List.nth (List.nth board x) y)))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
-	method private getIndex (ci:index) : occupied option = 
+	  method private getIndex (ci:index) : occupied option = 
         let (x,y) = ci in
             try (Some ((List.nth (List.nth board x) y)#get_value))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
@@ -115,10 +118,12 @@ object (self)
 
     (* Given an index and a color, insert the piece and update neighbors *)
     method insert (i:index) (c: occupied) : board_object option =
+        print_int (List.length occ_rows);
+        flush_all ();
     	let ci = self#convertIndex i in
     	let (x,y) = ci in
     	match (self#getIndex ci, c) with
-    		|(None, _) -> None
+    		|(None, _) -> (self#print_tuple i; self#print_tuple ci; flush_all (); None)
     		|(Some Unocc, Black) -> self#changeIndex ci c; 
                 (match self#getNeighbors ci with
                     |(None,None) -> 
