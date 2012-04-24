@@ -172,23 +172,30 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 
 (* Compiles everything to be drawn in window *)
 let draw_all () : unit =
-  Graphics.clear_graph ();
   draw_board ();
-  debug_board ();
-  Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x)
+  debug_board ()
 
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-    (fun () ->draw_all ())
+    (fun () ->
+      Graphics.clear_graph ();
+      draw_all ();
+      Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
     (* function for handling key presses *)
     (fun (c:char) -> 
       match c with 
-      | 'r' -> ignore (bor = (Myboard.get_empty ())); 
-        print_string (string_of_bool (bor = Myboard.empty)); flush_all (); 
-        won_board := false; draw_all ()
-      | 'R' -> ignore (bor = (Myboard.get_empty ())); 
-        won_board := false; draw_all ()
+      | 'r' -> ignore (ref_bor := (Myboard.get_empty ())); 
+        (* print_string (string_of_bool (bor = Myboard.empty)); flush_all (); *)
+        won_board := false; 
+        Graphics.clear_graph ();
+        draw_all (); 
+        Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x)
+      | 'R' -> ignore (ref_bor := (Myboard.get_empty ())); 
+        won_board := false; 
+        Graphics.clear_graph ();
+        draw_all (); 
+        Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x)
       | _ -> () 
     ) 
     (* function for handling mouse click events *)
@@ -198,7 +205,9 @@ let test_board () =
         if !won_board then () else (
         if (snd i) > ceiling then (
           respond_click_header bor i;
-          draw_all ())
+          Graphics.clear_graph ();
+          draw_all ();
+          Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
         (* If mouse clicks on board area, make a move *)          
         else (
       		ignore(bor = respond_click bor i);
@@ -212,6 +221,7 @@ let test_board () =
             (Graphics.set_color Graphics.red);
             Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
             Graphics.draw_string (player ^ " " ^ "WON!!!")));
-          draw_all () )))
+          draw_all ();
+          Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x) )))
 
 let _ = test_board () ;;
