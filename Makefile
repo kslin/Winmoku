@@ -8,32 +8,50 @@ CAMLDOC = ocamldoc
 %.cmo: %.ml
 	$(CAMLC) $(CAMLFLAGS) -c $<
 
-FILES = \
+# FILES = \
+# 	event.ml \
+# 	ImportImage.ml\
+# 	boardstuffs.ml \
+# 	pieceobject.ml \
+# 	boardobject.ml \
+# 	miniboard.ml \
+# 	piece.ml \
+# 	horizontalboard.ml \
+# 	verticalboard.ml \
+# 	diagrightboard.ml \
+# 	diagleftboard.ml \
+# 	board.ml \
+# 	GUI.ml \
+# 	threats.ml \
+# 	main.ml \
+
+SECONDFILES = \
 	event.ml \
 	ImportImage.ml\
 	boardstuffs.ml \
 	pieceobject.ml \
-	boardobject.ml \
-	miniboard.ml \
 	piece.ml \
-	horizontalboard.ml \
-	verticalboard.ml \
-	diagrightboard.ml \
-	diagleftboard.ml \
-	board.ml \
-	GUI.ml \
-	threats.ml \
-	main.ml \
+	boardcomp.ml
 
-OBJECTS = $(FILES:.ml=.cmo)
+#OBJECTS = $(FILES:.ml=.cmo)
 
-$(PROG)_basic: $(OBJECTS)
-	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) -o $(PROG)_basic
+SECONDOBJECTS = $(SECONDFILES:.ml=.cmo)
 
-build_basic: $(PROG)_basic
+# $(PROG)_basic: $(OBJECTS)
+# 	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) -o $(PROG)_basic
 
-run_basic: build_basic
-	@./$(PROG)_basic
+# build_basic: $(PROG)_basic
+
+# run_basic: build_basic
+# 	@./$(PROG)_basic
+
+$(PROG)_second: $(SECONDOBJECTS)
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(SECONDOBJECTS) -o $(PROG)_second
+
+build_second: $(PROG)_second
+
+run_second: build_second
+	@./$(PROG)_second
 
 #board: $(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS)
 	# ocamlc -c event.ml
