@@ -184,7 +184,8 @@ let test_board () =
     (* function for handling key presses *)
     (fun (c:char) -> 
       match c with 
-      | 'r' -> ignore (bor = (Myboard.get_empty ()); print_string (string_of_bool (bor = Myboard.empty)); flush_all ()); 
+      | 'r' -> ignore (bor = (Myboard.get_empty ())); 
+        print_string (string_of_bool (bor = Myboard.empty)); flush_all (); 
         won_board := false; draw_all ()
       | 'R' -> ignore (bor = (Myboard.get_empty ())); 
         won_board := false; draw_all ()
