@@ -25,7 +25,8 @@ object (self)
 
     (* Methods *)
 
-    method getboard = board
+    method getboard = 
+        List.map (fun x -> (List.map (fun y -> y#clone) x)) board 
 
     method setboard b = board <- b
 
@@ -320,7 +321,7 @@ object (self)
                  Some Black, Some Unocc, Some Unocc) ->
                     [Threat(Three, c, [b;e], lst);
                      Threat(SplitThree, b, [a;c;e], lst@[d]);
-                     Threat(SplitThree, e, [b;c;f], lst@[d])] 
+                     Threat(SplitThree, e, [b;c;f], lst@[d])]
                 |_ -> [] )
             |_ -> raise ERROR
 
