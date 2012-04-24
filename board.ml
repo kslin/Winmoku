@@ -2,14 +2,8 @@ exception Error
 
 open Event
 open Miniboard
-open Pieceobject
 open Boardstuffs
-open Boardobject
-open Horizontalboard
-open Verticalboard
-open Diagrightboard
-open Diagleftboard
-open Piece
+open Boardcomp
 
 module type BOARD =
 sig 
@@ -23,7 +17,7 @@ sig
 
 	val getColor : board -> occupied
 
-  val printcolor : board -> unit
+    val printcolor : board -> unit
 
 	val insert : board -> index -> board
 
@@ -35,6 +29,8 @@ sig
 
 	val indices : board -> (index -> unit) -> unit
 end
+
+module HorizontalBoard = BoardComp (HorizontalBoardArg)
 
 module Myboard : BOARD =
 struct
