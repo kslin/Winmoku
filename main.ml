@@ -26,7 +26,10 @@ let ceiling = (world_size + 1) * (obj_width)
 let piece_color = ref (Unocc)
 
 (* Stores the current board *)
-let bor = Myboard.empty
+let bor  = Myboard.empty
+
+(* Ref to point to board *)
+let ref_bor = ref bor
 
 (** defines leeway for the click **)
 let leeway = obj_width / 4
@@ -50,7 +53,8 @@ let board_border () =
 
 (* Displays game title *)
 let board_title () = 
-  Graphics.moveto  ((world_size + 3) * obj_width / 2) ((world_size+7) * obj_width);
+  Graphics.moveto  ((world_size + 3) * obj_width / 2) 
+    ((world_size+7) * obj_width);
   Graphics.draw_string "GOMOOKU"
 
 (* Displays the player currently making a move *)
@@ -69,12 +73,14 @@ let board_set_white () =
   Graphics.moveto  (obj_width) ((world_size+4) * obj_width);
   Graphics.draw_string "Change piece color";
   Graphics.set_color Graphics.black;
-  Graphics.draw_rect (obj_width ) ((world_size+3) * obj_width) (obj_width) (obj_width)
+  Graphics.draw_rect (obj_width ) ((world_size+3) * obj_width) 
+    (obj_width) (obj_width)
 
 (* Sets black color for next piece *)
 let board_set_black () =
   Graphics.set_color Graphics.black;
-  Graphics.fill_rect (obj_width * 2) ((world_size+3) * obj_width) (obj_width) (obj_width)
+  Graphics.fill_rect (obj_width * 2) ((world_size+3) * obj_width) (obj_width) 
+    (obj_width)
 
 (* Draws the playing grid of the board *)
 let draw_grid () = 
@@ -104,19 +110,6 @@ let roundfloat (f:float) : int =
 	if remainder < 0.5 then int_of_float f
 	else (int_of_float f) + 1 
 
-(** Finds the closest index that is next to the click **)
-let round_click ((x,y):int*int) = 
-	(abs (roundfloat ((float_of_int (x - (2*obj_width)))/.(float_of_int obj_width))), 
-	abs (roundfloat ((float_of_int (y - (2*obj_width)))/.(float_of_int obj_width))))
-
-let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
-
-	if ( (x < floor - leeway) || (y < floor - leeway) ||
-		(x > ceiling + leeway) || (y > ceiling + leeway) )
-	then b
-	else (
-		(Myboard.insertspecial b (round_click (x,y))) !piece_color)
-
 (* Evaluate board function *)
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
@@ -139,43 +132,72 @@ let debug_button_eval () =
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
   Graphics.draw_string "Debug function eval";
-  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) 
+    (obj_width)
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   debug_button_eval ()
 
+(** Finds the closest index that is next to the click **)
+let round_click ((x,y):int*int) = 
+  (abs (roundfloat ((float_of_int (x - (2*obj_width)))/.(float_of_int obj_width))), 
+  abs (roundfloat ((float_of_int (y - (2*obj_width)))/.(float_of_int obj_width))))
+
+let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
+
+  if ( (x < floor - leeway) || (y < floor - leeway) ||
+    (x > ceiling + leeway) || (y > ceiling + leeway) )
+  then b
+  else (
+    (Myboard.insertspecial b (round_click (x,y))) !piece_color)
+
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
-  if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  if ((x > obj_width) && (x < 3 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
         print_string (string_of_bool result); flush_all ())
-  else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
+  else if ((x > obj_width) && (x < 2 * obj_width) 
+    && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
-  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) && (y > ((world_size+3) * obj_width)) 
+  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) 
+    && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width))) 
   then ((piece_color := Black))
   else ()
 
+(* Compiles everything to be drawn in window *)
+let draw_all () : unit =
+  Graphics.clear_graph ();
+  draw_board ();
+  debug_board ();
+  Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x)
+
 let test_board () =
 	GUI.run_game
 		(* Initialize the board to be empty *)
-    (fun () -> draw_board ();
-              debug_board ();
-      				Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
-		begin fun (i:int*int) -> 
+    (fun () ->draw_all ())
+    (* function for handling key presses *)
+    (fun (c:char) -> 
+      match c with 
+      | 'r' -> ignore (bor = (Myboard.get_empty ()); print_string (string_of_bool (bor = Myboard.empty)); flush_all ()); 
+        won_board := false; draw_all ()
+      | 'R' -> ignore (bor = (Myboard.get_empty ())); 
+        won_board := false; draw_all ()
+      | _ -> () 
+    ) 
+    (* function for handling mouse click events *)
+		(fun (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
         click position to do other things such as running a debugging function*)
         if !won_board then () else (
         if (snd i) > ceiling then (
           respond_click_header bor i;
-          Graphics.clear_graph ();
-          draw_board ();
-          debug_board ();
-          Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
+          draw_all ())
         (* If mouse clicks on board area, make a move *)          
         else (
       		ignore(bor = respond_click bor i);
@@ -189,11 +211,7 @@ let test_board () =
             (Graphics.set_color Graphics.red);
             Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
             Graphics.draw_string (player ^ " " ^ "WON!!!")));
-          debug_board ();
-      		draw_board ();
-      		bor = Myboard.empty;
-      		draw_board ();
-      		Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p)))
+      		draw_all ()
 
       	end ;;
 

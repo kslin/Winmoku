@@ -17,6 +17,8 @@ sig
 
 	val empty : board
 
+  val get_empty: unit -> board
+
 	val get : board -> index -> piece_object
 
 	val getColor : board -> occupied
@@ -65,6 +67,9 @@ struct
   		let dgrboard = (new diagrightboard world_size)#empty in
   		let dglboard = (new diagleftboard world_size)#empty in
 		(Black,piecearray,horboard,verboard,dgrboard,dglboard)
+
+    let get_empty () = 
+      empty 
 
 
   	(** Get the piece associated with a location in the world. **)
