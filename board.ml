@@ -95,10 +95,17 @@ struct
         			 else (Black,pa,h1,v1,dr1,dl1)) )
         	|_ -> (print_string "here's the problem"; b)
 
+    let pieceMatrixCopy (m: piece_object array array) =
+      let copy =  
+
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
-    	match (h#insert i c, v#insert i c, 
-          dr#insert i c, dl#insert i c) with
+      let newh = h#copyself in
+      let newv = v#copyself in
+      let newdr = dr#copyself in
+      let newdl = dl#copyself in
+    	match (newh#insert i c, newv#insert i c, 
+             newdr#insert i c, newdl#insert i c) with
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
         		(let (x,y) = i in 
         			pa.(x).(y) <- (new piece c);
