@@ -19,7 +19,7 @@ sig
 
   val printcolor : board -> unit
 
-	val insert : board -> index -> board
+	val insert : board -> index -> occupied -> board
 
 	val insertspecial : board -> index -> occupied -> board
 
@@ -93,6 +93,7 @@ struct
         |White -> print_string " (White) "; flush_all ()
         |Unocc -> ()
 
+<<<<<<< .merge_file_p9ZszC
     let print_occ c = match c with
         |Black -> print_string " Black "; flush_all ()
         |White -> print_string " White "; flush_all ()
@@ -114,6 +115,30 @@ struct
         			 then (White,newPieceArray,h1,v1,dr1,dl1)
         			 else (Black,newPieceArray,h1,v1,dr1,dl1)) )
         	|_ -> (print_string "here's the problem1"; b)
+=======
+  	(** Insert a piece into the board with the specified position and color **)
+  	let insert (b:board) (i:index) (c:occupied): board = 
+      let (p,pa,h,v,dr,dl) = b in
+      match (h#insert i c, v#insert i c, 
+          dr#insert i c, dl#insert i c) with
+          |(Some h1,Some v1,Some dr1,Some dl1) -> 
+            (let (x,y) = i in 
+              pa.(x).(y) <- (new piece c);
+              (c,pa,h1,v1,dr1,dl1))
+          |_ -> b
+
+
+    let pieceMatrixCopy (m: piece_object array array) =
+      let copy = Array.make 0 m.(0) in
+      let deepcopy (pieceobject : piece_object) =
+        pieceobject#clone
+      in 
+      let rowcopy row =
+        let nrow = Array.make 1 (Array.map deepcopy (Array.copy row)) in
+          (ignore (copy = (Array.append copy nrow)); () )
+      in
+        ( Array.iter rowcopy m; copy ) 
+>>>>>>> .merge_file_F1L3MR
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
