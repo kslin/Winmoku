@@ -91,7 +91,7 @@ object (self)
             try (Some ((List.nth (List.nth board x) y)))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
-	  method private getIndex (ci:index) : occupied option = 
+	method private getIndex (ci:index) : occupied option = 
         let (x,y) = ci in
             try (Some ((List.nth (List.nth board x) y)#get_value))
                 with Failure "nth"|Invalid_argument "List.nth" -> None

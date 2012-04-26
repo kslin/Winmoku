@@ -330,8 +330,8 @@ struct
                     convertBack (x3,y3+1),convertBack (x3,y3+2)) in
                 let lst = [convertBack (x1,y1);convertBack (x2,y2);
                            convertBack (x3,y3)] in
-                (match (getIndex bor (x1,y1-2), getIndex bor b,
-                getIndex bor c, getIndex bor d) with
+                (match (getIndex bor (x1,y1-2), getIndex bor (x1,y1-1),
+                getIndex bor (x3,y3+1), getIndex bor (x3,y3+2)) with
                     |(_, (None|Some White), Some Unocc, Some Unocc) ->
                         [Threat(Four, c, [d], lst);
                          Threat(Four, d, [c], lst)]
@@ -419,7 +419,7 @@ struct
                          Threat(SplitThree, b, [a;c;d], lst);
                          Threat(SplitThree, e, [c;d;f], lst)]
                     |_ -> [])
-            |_ -> raise ERROR 
+            |_ -> raise ERROR
 
     let handle_ones (bor:boardcomp) (lst: index list) : threat list = 
         match lst with
@@ -447,10 +447,9 @@ struct
                 |_ -> [] )
             |_ -> raise ERROR
 
-    let containsThreats (bor:boardcomp) (lst: index list) : threat list =
+    let getThreats (bor:boardcomp): threat list =
         let (_,_,bn,_) = bor in
-        if List.length lst < 5 then []
-        else (let rec rec_findthreats threats lst = match lst with
+        let rec rec_findthreats threats lst = match lst with
             |[] -> threats
             |hd::tl -> 
                 if List.length hd = 3 
@@ -460,11 +459,7 @@ struct
                 else if List.length hd = 1
                 then rec_findthreats ((handle_ones bor hd)@threats) tl
                 else [] 
-            in rec_findthreats [] bn )
-
-    let getThreats (b:boardcomp) = 
-        let (_,rows,bn,_) = b in
-        List.flatten (List.map (fun x -> containsThreats b x) bn)
+            in rec_findthreats [] bn
 
     
 

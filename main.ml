@@ -190,6 +190,7 @@ let test_board () =
           (* If mouse clicks on board area, make a move *)          
           else (
             let newbor = respond_click bor i in
+            let threats = Myboard.getThreats newbor in
             (if Myboard.isWin newbor 
             then (
               let player : string = 
@@ -205,6 +206,10 @@ let test_board () =
             debug_board ();
             draw_board ();
             Myboard.indices newbor;
+            List.iter (print_threats) threats;
+            print_string "threats: "; print_int (List.length threats);
+            print_string "\n";
+            flush_all ();
             newbor
           )
         )
