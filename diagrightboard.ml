@@ -13,7 +13,7 @@ object (self)
                 |0 -> b
                 |_ -> emptyDiag (n-1)            
                     ((self#buildEmptyList (size - abs(size - n)) )::b)
-        in emptyDiag ((2*size) - 1) [];
+        in emptyDiag ((2*size) - 1) []
 
     method buildRows = 
         let rec emptyDiag (n1: int) (b: index list list)=
