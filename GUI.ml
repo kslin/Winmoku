@@ -65,11 +65,13 @@ struct
       event_loop ()
     with exn -> (Graphics.close_graph () ; raise exn)
 
-  (* Handle key presses *)
-  let key_handler (press_handler : char -> unit) (c: char) =
-    press_handler c
-
   let bor = ref Myboard.empty
+
+  (* Handle key presses *)
+  let key_handler (reset:Myboard.board -> unit) (c: char) =
+     match c with
+      |'r'|'R' -> (bor := Myboard.empty; reset !bor)
+      |_ -> ()
 
   (** Handle mouse clicks **)
   let mouse_handler (move_handler: Myboard.board -> int*int -> Myboard.board) 
@@ -79,13 +81,13 @@ struct
 
   (** Start the graphical environment initialized to the size of the world.
       Handle clock and input events necessary to run the simulation. *)
-  let run_game (init:Myboard.board -> unit) (* (handle_press :char -> unit) *)
+  let run_game (init:Myboard.board -> unit) (reset:Myboard.board -> unit)
     (handle_move: Myboard.board -> int*int -> Myboard.board) : unit =
     run_ui ((world_size+3)*obj_width) (* GUI width *)
            ((world_size+8)*obj_width) (* GUI height *)
            (* Event framework initializer *)
            begin fun () ->
-             (* ignore(Event.add_listener key_pressed (key_handler handle_press)); *)
+             ignore(Event.add_listener key_pressed (key_handler reset));
              ignore(Event.add_listener button_up (mouse_handler handle_move)) ;
              init !bor
            end

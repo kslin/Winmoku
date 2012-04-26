@@ -19,7 +19,7 @@ sig
 
   val printcolor : board -> unit
 
-	val insert : board -> index -> occupied -> board
+	val insert : board -> index -> board
 
 	val insertspecial : board -> index -> occupied -> board
 

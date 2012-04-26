@@ -111,7 +111,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
     (x > ceiling + leeway) || (y > ceiling + leeway) )
   then b
   else (
-    (Myboard.insert b (round_click (x,y))) !piece_color)
+    (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
 (* Evaluate board function *)
 let evaluate_board board =
@@ -159,9 +159,18 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
-    begin fun (bor:Myboard.board) -> draw_board ();
-              debug_board ();
-              Myboard.indices bor
+    begin fun (bor:Myboard.board) -> 
+      draw_board ();
+      debug_board ();
+      Myboard.indices bor
+    end
+    begin fun (bor:Myboard.board) -> 
+      Graphics.clear_graph ();
+      piece_color := Unocc;
+      won_board := false;
+      draw_board ();
+      debug_board ();
+      Myboard.indices bor
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
