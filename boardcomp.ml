@@ -1,7 +1,6 @@
 exception ERROR
 
 open Boardstuffs
-open Pieceobject
 
 module type BOARDCOMP =
 sig 
@@ -9,11 +8,15 @@ sig
 
 	val empty : boardcomp
 
+    val getIndex : boardcomp -> index -> occupied option
+
 	val getIndices : boardcomp -> index list list
 
 	val convertIndex : index -> index 
 
 	val convertBack : index -> index 
+
+    val getPieceArray : boardcomp -> occupied list list
 
 	val insert : boardcomp -> index -> occupied -> boardcomp option
 
@@ -178,19 +181,33 @@ module BoardComp (B:BOARD_ARG) : BOARDCOMP =
 struct
 
     type boardcomp = (occupied list list)*(index list list)*
-                    (index list list)*(index list list)*(int list)
+                    (index list list)*(index list list)
 
-    let empty : boardcomp = (B.buildEmptyBoard () , B.buildRows (),[],[],[]) 
+    let empty : boardcomp = (B.buildEmptyBoard () , B.buildRows (),[],[]) 
 
     let getIndices (b:boardcomp) = 
-        let (_,rows,_,_,_) = b in rows
+        let (_,rows,_,_) = b in rows
 
     let convertIndex i = B.convert i
 
     let convertBack ci = B.revert ci
 
+    let print_occ c = match c with
+        |Black -> print_string " Black "; flush_all ()
+        |White -> print_string " White "; flush_all ()
+        |Unocc -> print_string " Unocc "; flush_all ()
+
+    let print_tuple (x,y) = 
+        print_string " ("; print_int x; 
+        print_string ","; 
+        print_int y; 
+        print_string ") "; 
+        flush_all ()
+
+    let getPieceArray (b:boardcomp) = let (pa,_,_,_) = b in pa
+
     let getIndex (b:boardcomp) (ci:index) : occupied option = 
-        let (pieces,_,_,_,_) = b in
+        let (pieces,_,_,_) = b in
         let (x,y) = ci in
             try (Some ((List.nth (List.nth pieces x) y)))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
@@ -212,12 +229,12 @@ struct
                     else hd::(insertRows tl (row+1))
         in insertRows lst 0
 
-    let getNeighbors (b:boardcomp) (ci:index) : (index option)*(index option) = 
+    let getNeighbors (b:boardcomp) (ci:index) (c:occupied): 
+        (index option)*(index option) = 
         let (x,y) = ci in
-        match getIndex b ci with
-            |None -> (None, None)
-            |Some Unocc -> (None, None)
-            |Some mycolor ->
+        match c with
+            |Unocc -> (None, None)
+            |mycolor ->
         (match (getIndex b (x,y-1)), (getIndex b (x,y+1)) with
             |(None,None) -> (None, None)
             |(None, Some n2) -> 
@@ -233,16 +250,16 @@ struct
     let tuple_sort (lst: index list) = 
         List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 
 
-    let addNeighbors (bn: index list list) (ci1: index) (ci2:index) =
+    let addNeighbors (neighlist: index list list) (ci1: index) (ci2:index) =
         let rec findneighlist lst =
             match lst with 
-                |[] -> (tuple_sort(ci1::ci2::[]))::bn
+                |[] -> (tuple_sort(ci1::ci2::[]))::neighlist
                 |hd::tl -> 
                     if List.mem ci1 hd then (tuple_sort(ci2::hd))::tl
                     else hd::(findneighlist tl)
-        in findneighlist bn
+        in findneighlist neighlist
 
-    let addMultNeighbors (bn: index list list) 
+    let addMultNeighbors (neighlist: index list list) 
                     (ci1: index) (ci2: index) (ci3: index) =
         let rec findneighlist lst isfirst isthird rest =
             match lst with
@@ -256,9 +273,9 @@ struct
                         findneighlist tl isfirst hd rest
                     |(true, true) -> 
                         raise ERROR)
-        in match findneighlist bn [] [] [] with
+        in match findneighlist neighlist [] [] [] with
             |([], [], r) -> 
-                (tuple_sort(ci1::ci2::ci3::[]))::bn
+                (tuple_sort(ci1::ci2::ci3::[]))::neighlist
             |(x, [], r) -> 
                 (tuple_sort(ci2::ci3::x))::r
             |([], y, r) -> 
@@ -267,49 +284,39 @@ struct
                 (tuple_sort(ci2::(x@y)))::r
 
     let insert (b:boardcomp) (i:index) (c: occupied) : boardcomp option =
-        let (pieces,rows,bn,wn,occ) = b in 
+        let (pieces,rows,bn,wn) = b in 
         let ci = convertIndex i in
         let (x,y) = ci in
         match (getIndex b ci, c) with
             |(None, _) -> (None)
             |(Some Unocc, Black) -> 
                 let newpieces = insertPieces pieces ci c in 
-                (match (getNeighbors b ci) with
+                (match (getNeighbors b ci c) with
                     |(None,None) -> 
-                        (if List.mem x occ 
-                        then Some (newpieces,rows,([ci]::bn),wn,occ)
-                        else Some (newpieces,rows,([ci]::bn),wn,(x::occ)) )
+                        Some (newpieces,rows,([ci]::bn),wn) 
                     |(Some s, None)|(None, Some s) ->
                         let newbn = addNeighbors bn s ci in
-                        (if List.mem x occ 
-                        then Some (newpieces,rows,newbn,wn,occ)
-                        else Some (newpieces,rows,newbn,wn,(x::occ)) )
+                        Some (newpieces,rows,newbn,wn)
                     |(Some n1, Some n2) ->
                         let newbn = addMultNeighbors bn n1 ci n2 in
-                        (if List.mem x occ 
-                        then Some (newpieces,rows,newbn,wn,occ)
-                        else Some (newpieces,rows,newbn,wn,(x::occ)) )  )
+                        Some (newpieces,rows,newbn,wn)
+                )
             |(Some Unocc, White) -> 
                 let newpieces = insertPieces pieces ci c in 
-                (match getNeighbors b ci with
+                (match (getNeighbors b ci c) with
                     |(None,None) -> 
-                        (if List.mem x occ 
-                        then Some (newpieces,rows,([ci]::bn),wn,occ)
-                        else Some (newpieces,rows,([ci]::bn),wn,(x::occ)) )
+                        Some (newpieces,rows,([ci]::bn),wn)
                     |(Some s, None)|(None, Some s) ->
                         let newwn = addNeighbors wn s ci in
-                        (if List.mem x occ
-                        then Some (newpieces,rows,bn,newwn,occ)
-                        else Some (newpieces,rows,bn,newwn,(x::occ)) )
+                        Some (newpieces,rows,bn,newwn)
                     |(Some n1, Some n2) ->
                         let newwn = addMultNeighbors wn n1 ci n2 in
-                        (if List.mem x occ
-                        then Some (newpieces,rows,bn,newwn,occ)
-                        else Some (newpieces,rows,bn,newwn,(x::occ)) )  )
+                        Some (newpieces,rows,bn,newwn)
+                )
             |_ -> None
 
     let isWin (b:boardcomp) = 
-        let (pieces,rows,bn,wn,occ) = b in
+        let (pieces,rows,bn,wn) = b in
         let rec checkNeighbors lst = match lst with
             |[] -> false
             |hd::tl -> if List.length hd > 4 then true
@@ -441,7 +448,7 @@ struct
             |_ -> raise ERROR
 
     let containsThreats (bor:boardcomp) (lst: index list) : threat list =
-        let (_,_,bn,_,_) = bor in
+        let (_,_,bn,_) = bor in
         if List.length lst < 5 then []
         else (let rec rec_findthreats threats lst = match lst with
             |[] -> threats
@@ -456,8 +463,8 @@ struct
             in rec_findthreats [] bn )
 
     let getThreats (b:boardcomp) = 
-        let (_,rows,_,_,occ) = b in
-        List.flatten (List.map (fun x -> containsThreats b (List.nth rows x)) occ)
+        let (_,rows,bn,_) = b in
+        List.flatten (List.map (fun x -> containsThreats b x) bn)
 
     
 

@@ -9,7 +9,6 @@
  * first move from that sequence, and send board to draw.                   *)
 
 open Board
-open Boardobject
 open ImportImage
 open GUI
 open Boardstuffs
@@ -24,9 +23,6 @@ let ceiling = (world_size + 1) * (obj_width)
 
 (* Stores the color *)
 let piece_color = ref (Unocc)
-
-(* Stores the current board *)
-let bor = Myboard.empty
 
 (** defines leeway for the click **)
 let leeway = obj_width / 4
@@ -163,36 +159,47 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
-    (fun () -> draw_board ();
+    begin fun (bor:Myboard.board) -> draw_board ();
               debug_board ();
-              Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
-    begin fun (i:int*int) -> 
+              Myboard.indices bor
+    end
+    begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
         click position to do other things such as running a debugging function*)
-        if !won_board then () else (
-        if (snd i) > ceiling then (
-          respond_click_header bor i;
-          Graphics.clear_graph ();
-          draw_board ();
-          debug_board ();
-          Myboard.indices bor (fun x -> (Myboard.get bor x)#draw x))
-        (* If mouse clicks on board area, make a move *)          
+        if !won_board 
+        then bor 
         else (
-          ignore(bor = respond_click bor i);
-          (if Myboard.isWin bor then (
-            let player : string = 
-              match !piece_color with
-              | Unocc -> "-"
-              | White -> "WHITE"
-              | Black -> "BLACK" in
-            won_board := true;
-            (Graphics.set_color Graphics.red);
-            Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-            Graphics.draw_string (player ^ " " ^ "WON!!!")));
-          debug_board ();
-          draw_board ();
-          Myboard.indices bor (fun p -> (Myboard.get bor p)#draw p)))
-
-        end ;;
+          if (snd i) > ceiling 
+          then (
+            respond_click_header bor i;
+            Graphics.clear_graph ();
+            draw_board ();
+            debug_board ();
+            Myboard.indices bor;
+            bor
+          )
+          (* If mouse clicks on board area, make a move *)          
+          else (
+            let newbor = respond_click bor i in
+            (if Myboard.isWin newbor 
+            then (
+              let player : string = 
+                match !piece_color with
+                | Unocc -> "-"
+                | White -> "WHITE"
+                | Black -> "BLACK" in
+              won_board := true;
+              (Graphics.set_color Graphics.red);
+              Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+              Graphics.draw_string (player ^ " " ^ "WON!!!")
+            ));
+            debug_board ();
+            draw_board ();
+            Myboard.indices newbor;
+            newbor
+          )
+        )
+    end 
+  ;;
 
 let _ = test_board () ;;

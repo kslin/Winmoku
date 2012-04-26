@@ -1,9 +1,9 @@
 exception Error
 
 open Event
-open Miniboard
 open Boardstuffs
 open Boardcomp
+open Graphics
 
 module type BOARD =
 sig 
@@ -13,11 +13,11 @@ sig
 
   val get_empty: unit -> board
 
-	val get : board -> index -> piece_object
+	val get : board -> index -> occupied
 
 	val getColor : board -> occupied
 
-    val printcolor : board -> unit
+  val printcolor : board -> unit
 
 	val insert : board -> index -> board
 
@@ -27,17 +27,21 @@ sig
 
 	val getThreats : board -> threat list
 
-	val indices : board -> (index -> unit) -> unit
+	val indices : board -> unit
 end
 
 module HorizontalBoard = BoardComp (HorizontalBoardArg)
+module VerticalBoard = BoardComp (VerticalBoardArg)
+module DiagRightBoard = BoardComp (DiagRightBoardArg)
+module DiagLeftBoard = BoardComp (DiagLeftBoardArg)
 
 module Myboard : BOARD =
 struct
 
 	(**Board will be an array of pieces, 4 miniboards, and who's turn it is **)
-	type board = occupied*(piece_object array array)*(board_object)*
-                        (board_object)*(board_object)*(board_object)
+	type board = occupied*(occupied list list)*(HorizontalBoard.boardcomp)*
+                        (VerticalBoard.boardcomp)*(DiagRightBoard.boardcomp)*
+                        (DiagLeftBoard.boardcomp)
 
   	(** Represent the board as an array of pieces**)
   	(*let board : piece_object array array = 
@@ -56,12 +60,19 @@ struct
 
   	(** Reset to a blank board *)
   	let empty : board = 
-  		let piecearray = 
-  			Array.make_matrix world_size world_size (new piece Unocc) in
-  		let horboard = (new horizontalboard world_size)#empty in
-  		let verboard = (new verticalboard world_size)#empty in
-  		let dgrboard = (new diagrightboard world_size)#empty in
-  		let dglboard = (new diagleftboard world_size)#empty in
+        let buildEmptyBoard () = 
+            let rec build_board n b = match n with
+                |0 -> b
+                |_ -> (let rec build_row m r = match m with
+                    |0 -> r
+                    |_ -> build_row (m-1) (Unocc::r)
+                    in build_board (n-1) ((build_row world_size [])::b ) )
+            in(build_board world_size [])
+        in let piecearray = buildEmptyBoard () in
+  		let horboard = HorizontalBoard.empty in
+  		let verboard = VerticalBoard.empty in
+  		let dgrboard = DiagRightBoard.empty in
+  		let dglboard = DiagLeftBoard.empty in
 		(Black,piecearray,horboard,verboard,dgrboard,dglboard)
 
     let get_empty () = 
@@ -69,9 +80,9 @@ struct
 
 
   	(** Get the piece associated with a location in the world. **)
-  	let get (b:board) ((x,y):index) : piece_object = 
+  	let get (b:board) ((x,y):index) : occupied = 
   		let (_,pa,_,_,_,_) = b in
-    	pa.(x).(y)
+      List.nth (List.nth pa x) y
 
     let getColor (b:board) = 
     	let (p,_,_,_,_,_) = b in p
@@ -82,49 +93,42 @@ struct
         |White -> print_string " (White) "; flush_all ()
         |Unocc -> ()
 
+    let print_occ c = match c with
+        |Black -> print_string " Black "; flush_all ()
+        |White -> print_string " White "; flush_all ()
+        |Unocc -> print_string " Unocc "; flush_all ()
+
+    let deopt x = match x with
+        |None -> raise ERROR
+        |Some s -> s
+
   	(** Change the status of a piece on the board to whichever color player is**)
   	let insert (b:board) (i:index) : board = 
   		let (p,pa,h,v,dr,dl) = b in
-    	match (h#insert i p, v#insert i p, 
-          dr#insert i p, dl#insert i p) with
+    	match (HorizontalBoard.insert h i p, VerticalBoard.insert v i p, 
+          DiagRightBoard.insert dr i p, DiagLeftBoard.insert dl i p) with
         	|(Some h1,Some v1,Some dr1,Some dl1) -> 
-        		print_string "worked";
-        		(let (x,y) = i in 
-        			pa.(x).(y) <- (new piece p);
+        		print_string "worked1";
+        		(let newPieceArray = VerticalBoard.getPieceArray v1 in 
         			(if p = Black
-        			 then (White,pa,h1,v1,dr1,dl1)
-        			 else (Black,pa,h1,v1,dr1,dl1)) )
-        	|_ -> (print_string "here's the problem"; b)
-
-    let pieceMatrixCopy (m: piece_object array array) =
-      let copy = Array.make 0 m.(0) in
-      let deepcopy (pieceobject : piece_object) =
-        pieceobject#clone
-      in 
-      let rowcopy row =
-        let nrow = Array.make 1 (Array.map deepcopy (Array.copy row)) in
-          (ignore (copy = (Array.append copy nrow)); () )
-      in
-        ( Array.iter rowcopy m; copy ) 
+        			 then (White,newPieceArray,h1,v1,dr1,dl1)
+        			 else (Black,newPieceArray,h1,v1,dr1,dl1)) )
+        	|_ -> (print_string "here's the problem1"; b)
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
-        let newh = h#copyself in
-        let newv = v#copyself in
-        let newdr = dr#copyself in
-        let newdl = dl#copyself in
-        let newpa = pieceMatrixCopy pa in
-    	match (newh#insert i c, newv#insert i c, 
-             newdr#insert i c, newdl#insert i c) with
-        	|(Some h1,Some v1,Some dr1,Some dl1) -> 
-        		(let (x,y) = i in 
-        			pa.(x).(y) <- (new piece c);
-        			(p,newpa,h1,v1,dr1,dl1))
-        	|_ -> b
+      let (x,y) = i in
+      match (HorizontalBoard.insert h i c, VerticalBoard.insert v i c, 
+          DiagRightBoard.insert dr i c, DiagLeftBoard.insert dl i c) with
+          |(Some h1,Some v1,Some dr1,Some dl1) -> 
+            (let newPieceArray = VerticalBoard.getPieceArray v1 in 
+              (p,newPieceArray,h1,v1,dr1,dl1)) 
+          |_ -> (print_string "here's the problem"; flush_all (); b)
 
     let isWin (b:board) : bool =
     	let (_,_,h,v,dr,dl) = b in
-    	(h#isWin || v#isWin || dr#isWin || dl#isWin)
+    	(HorizontalBoard.isWin h || VerticalBoard.isWin v || 
+      DiagRightBoard.isWin dr || DiagLeftBoard.isWin dl)
 
   (** Remove a piece at a location **)
   (*let remove ((x,y):index) : unit = 
@@ -149,15 +153,32 @@ struct
 *)
   let getThreats (b:board) : threat list = 
   	let (_,_,h,v,dr,dl) = b in
-  	(h#getThreats)@(v#getThreats)@(dr#getThreats)@(dl#getThreats)
+  	(HorizontalBoard.getThreats h)@(VerticalBoard.getThreats v)@
+    (DiagRightBoard.getThreats dr)@(DiagLeftBoard.getThreats dl)
+
+  let circle ((x,y):int*int) (width:int) (height:int)
+             (bg:Graphics.color) : unit =
+      Graphics.set_color bg ;
+      Graphics.fill_circle ((x+2)*width) ((y+2)*height) 
+                         (min width height / 2) 
+
+  let draw (occ: occupied) (i: index) = match occ with
+    |Black -> circle i obj_width obj_width Graphics.black
+    |White -> circle i obj_width obj_width Graphics.white
+    |Unocc -> ()
+
+  let rec indices_row (lst: occupied list) (r: int) (n:int) = 
+    match lst with
+      |[] -> ()
+      |hd::tl -> draw hd (r,n); indices_row tl r (n+1)
 
   (** Call a function for all pieces in the world. *)
-  let indices (b:board) (f:int*int -> unit) : unit =
+  let indices (b:board) : unit =
   	let (_,pa,_,_,_,_) = b in
-    (*let (a,b,c,d) = board in
-    List.iter (fun x -> List.iter (fun y -> f y) x) a#getIndices*)
-
-    Array.iteri (fun x -> Array.iteri (fun y _ -> f (x,y))) pa
+    let rec traverseRows rows n = match rows with
+      |[] -> ()
+      |hd::tl -> indices_row hd n 0; traverseRows tl (n+1)
+    in traverseRows pa 0
 (*
   (** True if the world contains the point (x,y). *)
   let check_bounds ((x,y):int*int) : bool = 

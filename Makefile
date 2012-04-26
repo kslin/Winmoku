@@ -29,9 +29,12 @@ SECONDFILES = \
 	event.ml \
 	ImportImage.ml\
 	boardstuffs.ml \
-	pieceobject.ml \
-	piece.ml \
-	boardcomp.ml
+	boardcomp.ml \
+	board.ml \
+	GUI.ml \
+	threats.ml \
+	main.ml
+
 
 #OBJECTS = $(FILES:.ml=.cmo)
 
