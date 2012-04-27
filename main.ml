@@ -117,23 +117,16 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
   let update_board threat = 
-    let Threat(_, (x,y), a, _) = threat in
-      (print_string ((string_of_int x) ^ "," ^ (string_of_int y) ^ ":");
-       flush_all ();
-       List.map (fun z -> let (c,d) = z in
-       begin  
-         print_string ((string_of_int c) ^ "," ^ (string_of_int d) ^ "|");
-         flush_all ();
-       end) a;
-      ((Myboard.insertspecial board (x,y) Black), threat))
+    ((BThreats.gen_new_board board threat), threat)
   in 
   let boardlist = List.map update_board threatlist in
-  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y)) 
+  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
                           boardlist in 
   let rec win tlist =   
     match tlist with 
-    | [] -> false
-    | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
+    | [] -> None
+    | hd::tl -> (if BThreats.evaluate_tree hd = None then (win tl)
+                else BThreats.evaluate_tree hd)
   in
     win treelist
       
@@ -149,13 +142,20 @@ let debug_button_eval () =
 let debug_board () = 
   debug_button_eval ()
 
+let rec print_threatlist tlist = 
+  match tlist with
+  | [] -> ()
+  | hd::tl -> (print_threats hd; print_threatlist tl)
+
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
   if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
-        print_string (string_of_bool result); flush_all ())
+        match result with
+        | None -> (print_string "None"; flush_all();)
+        | Some tlist -> print_threatlist tlist)
   else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
