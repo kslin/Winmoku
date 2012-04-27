@@ -117,18 +117,26 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
   let update_board threat = 
-    let Threat(_, tgain, _, _) = threat in
-      ((Myboard.insertspecial board tgain Black), threat) 
+    let Threat(_, (x,y), a, _) = threat in
+      (print_string ((string_of_int x) ^ "," ^ (string_of_int y) ^ ":");
+       flush_all ();
+       List.map (fun z -> let (c,d) = z in
+       begin  
+         print_string ((string_of_int c) ^ "," ^ (string_of_int d) ^ "|");
+         flush_all ();
+       end) a;
+      ((Myboard.insertspecial board (x,y) Black), threat))
   in 
   let boardlist = List.map update_board threatlist in
   let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y)) 
-                          boardlist in
+                          boardlist in 
   let rec win tlist =   
     match tlist with 
     | [] -> false
     | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
   in
     win treelist
+      
 
 (*  button for eval function *)
 let debug_button_eval () =
