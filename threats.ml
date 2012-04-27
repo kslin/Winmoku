@@ -33,10 +33,10 @@ sig
 
   (* Given a board and the threat whose gain square was the last move
      made on the board returns the threat tree from that board *)
-  val gen_threat_tree : board -> threat -> tree
+  val gen_threat_tree : board -> threat -> threats -> tree
   
   (* Evaluates the tree to see if it results in a winning threat sequence *)
-  val evaluate_tree : tree -> bool
+  val evaluate_tree : tree -> threats option
 
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
@@ -53,7 +53,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     type tree = 
       | Node of board * threat * (tree list)
       | Leaf of board * threat   
-      | Win of board * threat    
+      | Win of board * threat * threats    
 
     let get_threats = B.getThreats
 
@@ -75,17 +75,17 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | _ -> b in
       insertwhitelist (B.insertspecial b tgain Black) tcost
 
-    let rec gen_threat_tree (b: board) (t: threat) = 
+    let rec gen_threat_tree (b: board) (t: threat) (tlist: threats) = 
       let Threat(ttype, _, _, _) = t in
       if (B.isWin b != None) || (ttype = StraightFour) then 
-        Win(b, t)
-      else
+        Win(b, t, t::tlist)
+      else 
         let threatList = get_dependent_threats b t in 
           if threatList = [] then 
             Leaf(b, t)      
           else
             let tree_from_threat (x:threat) = 
-              gen_threat_tree (gen_new_board b x) x
+              gen_threat_tree (gen_new_board b x) x (t::tlist)
             in
             let treeList = 
               List.map tree_from_threat threatList 
@@ -95,12 +95,13 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let rec evaluate_tree (tr: tree) =
       let rec evaluate_tree_list treelist =
         match treelist with
-        | [] -> false
-        | hd::tl -> (evaluate_tree hd) || (evaluate_tree_list tl)
+        | [] -> None
+        | hd::tl -> (if evaluate_tree hd = None then (evaluate_tree_list tl)
+                     else evaluate_tree hd)
       in
         match tr with
-        | Win(b, t) -> true
-        | Leaf(b, t) -> false 
+        | Win(b, t, tlist) -> Some tlist
+        | Leaf(b, t) -> None 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
     let rec merge tree1 tree2 = tree1
