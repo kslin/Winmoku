@@ -35,7 +35,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   then b
   else (
     (Myboard.insertspecial b (round_click (x,y))) White)
-
+ (*)
 (* Evaluate board function *)
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
@@ -59,6 +59,7 @@ let evaluate_board board =
     | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
   in
     win treelist
+  *)
       
 
 (*  button for eval function *)
@@ -72,6 +73,7 @@ let debug_button_eval () =
 let debug_board () = 
   debug_button_eval ()
 
+(*)
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
@@ -80,12 +82,16 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   then (let result = evaluate_board b in
         print_string (string_of_bool result); flush_all ())
   else ()
+*)
 
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
   match Myboard.nextWin b with
     |Some s -> s
     |None -> (Random.int (world_size-1), Random.int (world_size-1))
+
+(* First move of the game *)
+let firstmove = ((world_size/2), (world_size/2))
 
 (* Run the board *)
 let test_board () =
@@ -94,7 +100,7 @@ let test_board () =
     begin fun (bor:Myboard.board) -> 
       draw_board ();
       debug_board ();
-      let newbor = Myboard.insertspecial bor (next_move bor) Black in
+      let newbor = Myboard.insertspecial bor firstmove Black in
       Myboard.indices newbor;
       newbor
     end
@@ -103,7 +109,10 @@ let test_board () =
       won_board := false;
       draw_board ();
       debug_board ();
-      let newbor = Myboard.insertspecial bor (next_move bor) Black in
+      let newbor = Myboard.insertspecial Myboard.empty firstmove Black in
+      Graphics.clear_graph ();
+      draw_board ();
+      debug_board ();
       Myboard.indices newbor;
       newbor
     end
@@ -115,7 +124,6 @@ let test_board () =
         else (
           if (snd i) > ceiling 
           then (
-            respond_click_header bor i;
             Graphics.clear_graph ();
             draw_board ();
             debug_board ();

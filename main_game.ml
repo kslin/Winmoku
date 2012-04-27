@@ -55,7 +55,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   then b
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
-
+(*)
 (* Evaluate board function *)
 let evaluate_board board =
   let threatlist = BThreats.get_threats board in
@@ -79,7 +79,7 @@ let evaluate_board board =
     | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
   in
     win treelist
-      
+  *)    
 
 (*  button for eval function *)
 let debug_button_eval () =
@@ -91,7 +91,7 @@ let debug_button_eval () =
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   debug_button_eval ()
-
+(*)
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
@@ -100,7 +100,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   then (let result = evaluate_board b in
         print_string (string_of_bool result); flush_all ())
   else ()
-
+*)
 (* Run the board *)
 let test_board () =
   GUI.run_game
@@ -115,10 +115,12 @@ let test_board () =
       Graphics.clear_graph ();
       piece_color := Unocc;
       won_board := false;
+      Graphics.clear_graph ();
       draw_board ();
       debug_board ();
-      Myboard.indices bor;
-      bor
+      let newbor = Myboard.empty in
+      Myboard.indices newbor;
+      newbor
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
@@ -128,7 +130,6 @@ let test_board () =
         else (
           if (snd i) > ceiling 
           then (
-            respond_click_header bor i;
             Graphics.clear_graph ();
             draw_board ();
             debug_board ();

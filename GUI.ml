@@ -73,7 +73,7 @@ struct
   (* Handle key presses *)
   let key_handler (reset:Myboard.board -> Myboard.board) (c: char) =
      match c with
-      |'r'|'R' -> bor := (reset !bor)
+      |'r'|'R' -> (bor := reset !bor)
       |_ -> ()
 
   (** Handle mouse clicks **)

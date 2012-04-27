@@ -15,7 +15,6 @@ open Boardstuffs
 open Threats
 open Mainhelpers
 
-
 (* Stores the color *)
 let piece_color = ref (Unocc)
 
@@ -116,10 +115,12 @@ let test_board () =
       Graphics.clear_graph ();
       piece_color := Unocc;
       won_board := false;
+      Graphics.clear_graph ();
       draw_board ();
       debug_board ();
-      Myboard.indices bor;
-      bor
+      let newbor = Myboard.empty in
+      Myboard.indices newbor;
+      newbor
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 

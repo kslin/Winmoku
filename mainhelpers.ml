@@ -55,39 +55,37 @@ let draw_grid () =
 
 (* Draws the coordinates for the board *)
 let draw_coord () =
-  let leeway1 = 5 in
-  let leeway2 = 10 in
+  let leeway1 = 2 in
+  let leeway2 = 5 in
   Graphics.moveto ((obj_width * 2)-leeway1) ((obj_width*2)-15);
-  Graphics.draw_string "0";
-  Graphics.moveto ((obj_width * 3)-leeway1) ((obj_width*2)-15);
   let rec draw_x n =
     if n = world_size 
     then () 
     else(
-      let num = string_of_int n in
+      let num = List.nth letters n in
       Graphics.draw_string num;
       Graphics.moveto ((obj_width * (n+3))-leeway1) ((obj_width*2)-15);
       draw_x (n+1)
     )
   in 
   let rec draw_y n =
-    if n = world_size 
+    if n = world_size + 1
     then () 
     else if n < 10 
     then (
       let num = string_of_int n in
       Graphics.draw_string (" " ^ num);
-      Graphics.moveto ((obj_width * 2)-15) ((obj_width * (n+3))-leeway2);
+      Graphics.moveto ((obj_width * 2)-15) ((obj_width * (n+2))-leeway2);
       draw_y (n+1)
     )
     else(
       let num = string_of_int n in
       Graphics.draw_string num;
-      Graphics.moveto ((obj_width * 2)-15) ((obj_width * (n+3))-leeway2);
+      Graphics.moveto ((obj_width * 2)-15) ((obj_width * (n+2))-leeway2);
       draw_y (n+1)
     )
-  in draw_x 1; 
-  Graphics.moveto ((obj_width*2)-15) ((obj_width * 3)-leeway2);
+  in draw_x 0; 
+  Graphics.moveto ((obj_width*2)-15) ((obj_width * 2)-leeway2);
   draw_y 1
 
 (* Rounds a float to the nearest int *)

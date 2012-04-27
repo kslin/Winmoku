@@ -38,12 +38,16 @@ let deopt x = match x with
         |None -> raise ERROR
         |Some s -> s
 
+(* List of letters to be drawn *)
+let letters = ["A";"B";"C";"D";"E";"F";"G";"H";"I";"J";
+              "K";"L";"M";"N";"O";"P";"Q";"R";"S"]
+
 (** Prints an index **)
 let print_index i = let (x,y) = i in
     print_string "(";
-    print_int x;
+    print_string (List.nth letters x);
     print_string ", ";
-    print_int y;
+    print_int (y+1);
     print_string ") ";
     flush_all () 
 
