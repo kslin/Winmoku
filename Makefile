@@ -48,6 +48,8 @@ SECONDOBJECTS = $(SECONDFILES:.ml=.cmo)
 # run_basic: build_basic
 # 	@./$(PROG)_basic
 
+all: clean run_second
+
 $(PROG)_second: $(SECONDOBJECTS)
 	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(SECONDOBJECTS) -o $(PROG)_second
 
