@@ -60,7 +60,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let dependent_threats (ts: threats) (t: threat) = 
       let Threat(_, tgain, _, _) = t in
       let dependent x = 
-        let Threat(_, _, trest, _) = x in
+        let Threat(_, _, _, trest) = x in
         List.exists (fun y -> (tgain = y)) trest in
       List.filter dependent ts 
 
@@ -68,7 +68,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       dependent_threats (get_threats b) t
 
     let gen_new_board (b: board) (t:threat) =
-      let Threat(_, tgain, _, tcost) = t in
+      let Threat(_, tgain, tcost, _) = t in
       let rec insertwhitelist (b:board) (t: index list) =
         match t with
         | hd::tl -> insertwhitelist (B.insertspecial b hd White) tl
