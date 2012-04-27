@@ -77,7 +77,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     let rec gen_threat_tree (b: board) (t: threat) = 
       let Threat(ttype, _, _, _) = t in
-      if (B.isWin b) || (ttype = StraightFour) then 
+      if (B.isWin b != None) || (ttype = StraightFour) then 
         Win(b, t)
       else
         let threatList = get_dependent_threats b t in 
