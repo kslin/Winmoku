@@ -68,9 +68,9 @@ struct
   let bor = ref Myboard.empty
 
   (* Handle key presses *)
-  let key_handler (reset:Myboard.board -> unit) (c: char) =
+  let key_handler (reset:Myboard.board -> Myboard.board) (c: char) =
      match c with
-      |'r'|'R' -> (bor := Myboard.empty; reset !bor)
+      |'r'|'R' -> bor := (reset !bor)
       |_ -> ()
 
   (** Handle mouse clicks **)
@@ -81,15 +81,16 @@ struct
 
   (** Start the graphical environment initialized to the size of the world.
       Handle clock and input events necessary to run the simulation. *)
-  let run_game (init:Myboard.board -> unit) (reset:Myboard.board -> unit)
-    (handle_move: Myboard.board -> int*int -> Myboard.board) : unit =
+  let run_game (init:Myboard.board -> Myboard.board) 
+              (reset:Myboard.board -> Myboard.board)
+             (handle_move: Myboard.board -> int*int -> Myboard.board) : unit =
     run_ui ((world_size+3)*obj_width) (* GUI width *)
            ((world_size+8)*obj_width) (* GUI height *)
            (* Event framework initializer *)
            begin fun () ->
              ignore(Event.add_listener key_pressed (key_handler reset));
              ignore(Event.add_listener button_up (mouse_handler handle_move)) ;
-             init !bor
+             bor := (init !bor)
            end
 
 end

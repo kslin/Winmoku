@@ -20,9 +20,11 @@ sig
 
 	val insert : boardcomp -> index -> occupied -> boardcomp option
 
-	val isWin : boardcomp -> bool
+	val isWin : boardcomp -> occupied option
 
 	val getThreats : boardcomp -> threat list
+
+    val nextWin : boardcomp -> index option
 end
 
 module type BOARD_ARG =
@@ -197,13 +199,6 @@ struct
         |White -> print_string " White "; flush_all ()
         |Unocc -> print_string " Unocc "; flush_all ()
 
-    let print_tuple (x,y) = 
-        print_string " ("; print_int x; 
-        print_string ","; 
-        print_int y; 
-        print_string ") "; 
-        flush_all ()
-
     let getPieceArray (b:boardcomp) = let (pa,_,_,_) = b in pa
 
     let getIndex (b:boardcomp) (ci:index) : occupied option = 
@@ -286,7 +281,6 @@ struct
     let insert (b:boardcomp) (i:index) (c: occupied) : boardcomp option =
         let (pieces,rows,bn,wn) = b in 
         let ci = convertIndex i in
-        let (x,y) = ci in
         match (getIndex b ci, c) with
             |(None, _) -> (None)
             |(Some Unocc, Black) -> 
@@ -315,13 +309,17 @@ struct
                 )
             |_ -> None
 
-    let isWin (b:boardcomp) = 
-        let (pieces,rows,bn,wn) = b in
+    let isWin (b:boardcomp) : occupied option = 
+        let (_,_,bn,wn) = b in
         let rec checkNeighbors lst = match lst with
             |[] -> false
             |hd::tl -> if List.length hd > 4 then true
                 else checkNeighbors tl in
-        (checkNeighbors bn) || (checkNeighbors wn)
+        match (checkNeighbors bn, checkNeighbors wn) with
+            |(false, false) -> None
+            |(true, false) -> Some Black
+            |(false, true) -> Some White
+            |(true, true) -> raise ERROR
 
     let handle_threes (bor:boardcomp) (threes: index list) : threat list =
         match threes with
@@ -460,6 +458,30 @@ struct
                 then rec_findthreats ((handle_ones bor hd)@threats) tl
                 else [] 
             in rec_findthreats [] bn
+
+    let checkFour (b:boardcomp) (lst:index list) : index option =
+        match lst with
+            |[(x1,y1);n2;n3;(x4,y4)] -> 
+                if getIndex b (x1,y1-1) = Some Unocc
+                then Some (convertBack (x1,y1-1))
+                else if getIndex b (x4,y4+1) = Some Unocc
+                then Some (convertBack (x4,y4+1))
+                else None
+            |_ -> raise ERROR
+
+    let nextWin (b:boardcomp) : index option = 
+        let (_,_,bn,wn) = b in
+        let rec checkNeighbors lst = match lst with
+            |[] -> None
+            |hd::tl -> 
+                if List.length hd = 4 
+                then (match checkFour b hd with
+                    |None -> checkNeighbors tl
+                    |Some s -> Some s)
+                else checkNeighbors tl in
+        match checkNeighbors bn with
+            |None -> checkNeighbors wn
+            |Some s -> Some s
 
     
 

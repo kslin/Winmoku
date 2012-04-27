@@ -8,24 +8,7 @@ CAMLDOC = ocamldoc
 %.cmo: %.ml
 	$(CAMLC) $(CAMLFLAGS) -c $<
 
-# FILES = \
-# 	event.ml \
-# 	ImportImage.ml\
-# 	boardstuffs.ml \
-# 	pieceobject.ml \
-# 	boardobject.ml \
-# 	miniboard.ml \
-# 	piece.ml \
-# 	horizontalboard.ml \
-# 	verticalboard.ml \
-# 	diagrightboard.ml \
-# 	diagleftboard.ml \
-# 	board.ml \
-# 	GUI.ml \
-# 	threats.ml \
-# 	main.ml \
-
-SECONDFILES = \
+FILES = \
 	event.ml \
 	ImportImage.ml\
 	boardstuffs.ml \
@@ -33,30 +16,40 @@ SECONDFILES = \
 	board.ml \
 	GUI.ml \
 	threats.ml \
-	main.ml
+	mainhelpers.ml
 
 
-#OBJECTS = $(FILES:.ml=.cmo)
+OBJECTS = $(FILES:.ml=.cmo)
 
-SECONDOBJECTS = $(SECONDFILES:.ml=.cmo)
+all: clean run_basic
 
-# $(PROG)_basic: $(OBJECTS)
-# 	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) -o $(PROG)_basic
+$(PROG)_basic: $(OBJECTS) main.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main.cmo -o $(PROG)_basic
 
-# build_basic: $(PROG)_basic
+build_basic: $(PROG)_basic
 
-# run_basic: build_basic
-# 	@./$(PROG)_basic
+run_basic: build_basic
+	@./$(PROG)_basic
 
-all: clean run_second
 
-$(PROG)_second: $(SECONDOBJECTS)
-	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(SECONDOBJECTS) -o $(PROG)_second
 
-build_second: $(PROG)_second
+$(PROG)_game: $(OBJECTS) main_game.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main_game.cmo -o $(PROG)_game
 
-run_second: build_second
-	@./$(PROG)_second
+build_game: $(PROG)_game
+
+run_game: build_game
+	@./$(PROG)_game
+
+
+$(PROG)_compete: $(OBJECTS) main_compete.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main_compete.cmo -o $(PROG)_compete
+
+build_compete: $(PROG)_compete
+
+run_compete: build_compete
+	@./$(PROG)_compete
+
 
 #board: $(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS)
 	# ocamlc -c event.ml
