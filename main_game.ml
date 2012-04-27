@@ -44,7 +44,8 @@ let draw_board () =
   draw_grid ();
   board_border ();
   board_title ();
-  board_player ()
+  board_player ();
+  draw_coord ()
 
 (* Respond to a click, insert pieces if the click is near an index *)
 let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
@@ -100,6 +101,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         print_string (string_of_bool result); flush_all ())
   else ()
 
+(* Run the board *)
 let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)

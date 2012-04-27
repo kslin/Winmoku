@@ -1,3 +1,5 @@
+exception ERROR
+
 open Event
 
 (** Dimensions **)
@@ -8,8 +10,10 @@ let obj_width : int = 25
 (** The world has size x size positions *)
 let world_size : int = 19
 
-(** The floor and ceiling of the board visually **)
+(** The floor of the board **)
 let floor : int = obj_width * 2
+
+(** The ceiling of the board **)
 let ceiling : int = (world_size + 1) * (obj_width)
 
 (** Type for an index **)
@@ -24,7 +28,17 @@ type threat = Threat of threattype * index * index list * index list
 (** A space can be black, white, or unoccupied **)
 type occupied = Black | White | Unocc 
 
-(** A helper function that prints an index **)
+
+(************************)
+(*** Helper functions ***)
+(************************)
+
+(* Deoptionalize an option *)
+let deopt x = match x with
+        |None -> raise ERROR
+        |Some s -> s
+
+(** Prints an index **)
 let print_index i = let (x,y) = i in
     print_string "(";
     print_int x;
@@ -39,6 +53,16 @@ let rec print_index_list il = match il with
     |hd::tl -> print_index hd;
         print_string "; ";
         print_index_list tl
+
+(** Sorts a list of tuples **)
+let tuple_sort (lst: index list) = 
+        List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 
+
+(* Prints the color of a space *)
+let print_occ c = match c with
+        |Black -> print_string " Black "; flush_all ()
+        |White -> print_string " White "; flush_all ()
+        |Unocc -> print_string " Unocc "; flush_all ()
 
 (** Prints threats **)
 let print_threats t = match t with

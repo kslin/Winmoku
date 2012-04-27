@@ -6,7 +6,10 @@ open Boardstuffs
 module GUI =
 struct
 
+  (** Keeps track of the mouse state **)
   let mouse_state = ref false
+
+  (** Keeps track of the mouse position **)
   let mouse_pos = ref (0,0) 
 
   (** Events **)

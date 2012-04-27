@@ -102,6 +102,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   then ((piece_color := Black))
   else ()
 
+(* Run the board *)
 let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)

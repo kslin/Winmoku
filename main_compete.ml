@@ -24,7 +24,8 @@ let draw_board () =
   board_fill ();
   draw_grid ();
   board_border ();
-  board_title ()
+  board_title ();
+  draw_coord ()
 
 (* Respond to a click, insert pieces if the click is near an index *)
 let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
@@ -80,11 +81,13 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         print_string (string_of_bool result); flush_all ())
   else ()
 
+(* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
   match Myboard.nextWin b with
     |Some s -> s
     |None -> (Random.int (world_size-1), Random.int (world_size-1))
 
+(* Run the board *)
 let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
@@ -122,50 +125,26 @@ let test_board () =
           (* If mouse clicks on board area, make a move *)          
           else (
             let newbor1 = respond_click bor i in
-            let next = next_move newbor1 in
-            let newbor2 = Myboard.insertspecial newbor1 next Black in
-            let threats = Myboard.getThreats newbor1 in
-            Graphics.clear_graph ();
             match Myboard.isWin newbor1 with
               |Some s ->
-                let player : string = 
-                match s with
-                  | Unocc -> "-"
-                  | White -> "WHITE"
-                  | Black -> "BLACK" in
                 won_board := true;
                 (Graphics.set_color Graphics.red);
                 Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-                Graphics.draw_string (player ^ " " ^ "WON!!!");
+                Graphics.draw_string ("WHITE WON!!!");
                 Myboard.indices newbor1;
-                debug_board ();
-                draw_board ();
-                List.iter (print_threats) threats;
-                print_string "threats: "; print_int (List.length threats);
-                print_string "\n";
-                flush_all ();
                 newbor1
               |None -> 
+                let next = next_move newbor1 in
+                let newbor2 = Myboard.insertspecial newbor1 next Black in
                 (match Myboard.isWin newbor2 with
                   |Some s ->
-                    let player : string = 
-                    match s with
-                      | Unocc -> "-"
-                      | White -> "WHITE"
-                      | Black -> "BLACK" in
                     won_board := true;
                     (Graphics.set_color Graphics.red);
                     Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-                    Graphics.draw_string (player ^ " " ^ "WON!!!")
+                    Graphics.draw_string ("BLACK WON!!!")
                   |None -> ()
                 );
                 Myboard.indices newbor2;
-                debug_board ();
-                draw_board ();
-                List.iter (print_threats) threats;
-                print_string "threats: "; print_int (List.length threats);
-                print_string "\n";
-                flush_all ();
                 newbor2
           )
         )

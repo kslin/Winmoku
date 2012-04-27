@@ -2,42 +2,62 @@ exception ERROR
 
 open Boardstuffs
 
+(* Module for representing one component of the whole board
+    For example, the horizontal component *)
 module type BOARDCOMP =
 sig 
+    (* Defines the type boardcomp *)
 	type boardcomp
 
+    (* Returns an empty board*)
 	val empty : boardcomp
 
+    (* Given an board and index, returns the color of that index *)
     val getIndex : boardcomp -> index -> occupied option
 
+    (* Given a board, return its representation of the indices*)
 	val getIndices : boardcomp -> index list list
 
+    (* Given a universal index, converts to the local index *)
 	val convertIndex : index -> index 
 
+    (* Converts a local index back into a universal index *)
 	val convertBack : index -> index 
 
+    (* Gets the pieces of a board *)
     val getPieceArray : boardcomp -> occupied list list
 
+    (* Insert a piece into the board *)
 	val insert : boardcomp -> index -> occupied -> boardcomp option
 
+    (* Determines if the board has a winning configuration *)
 	val isWin : boardcomp -> occupied option
 
+    (* Returns all the threats on the board *)
 	val getThreats : boardcomp -> threat list
 
+    (* Determines if there can be a win the next turn *)
     val nextWin : boardcomp -> index option
+
 end
 
+(* Arguments to construct a BOARDCOMP *)
 module type BOARD_ARG =
 sig
+    (* Builds an empty board of pieces *)
 	val buildEmptyBoard : unit -> occupied list list
 
+    (* Builds an empty list list of indices *)
 	val buildRows : unit -> index list list
 
+    (* Function for converting a universal index to a local one *)
 	val convert : index -> index
 
+    (* Function for converting a local index back to a universal one *)
 	val revert : index -> index
 end
 
+(* Arg for a horizontal BOARDCOMP *)
 module HorizontalBoardArg : BOARD_ARG =
 struct
 
@@ -65,6 +85,7 @@ struct
 
 end
 
+(* Arg for a vertical BOARDCOMP *)
 module VerticalBoardArg : BOARD_ARG =
 struct
 	let buildEmptyBoard () = 
@@ -91,6 +112,7 @@ struct
 
 end
 
+(* Arg for a diagonal right BOARDCOMP *)
 module DiagRightBoardArg : BOARD_ARG =
 struct
 
@@ -135,6 +157,7 @@ struct
 
 end
 
+(* Arg for a diagonal left BOARDCOMP *)
 module DiagLeftBoardArg : BOARD_ARG =
 struct
 
@@ -179,6 +202,7 @@ struct
 
 end
 
+(* Functor for making the different kinds of boardcomps *)
 module BoardComp (B:BOARD_ARG) : BOARDCOMP =
 struct
 
@@ -194,11 +218,6 @@ struct
 
     let convertBack ci = B.revert ci
 
-    let print_occ c = match c with
-        |Black -> print_string " Black "; flush_all ()
-        |White -> print_string " White "; flush_all ()
-        |Unocc -> print_string " Unocc "; flush_all ()
-
     let getPieceArray (b:boardcomp) = let (pa,_,_,_) = b in pa
 
     let getIndex (b:boardcomp) (ci:index) : occupied option = 
@@ -207,6 +226,7 @@ struct
             try (Some ((List.nth (List.nth pieces x) y)))
                 with Failure "nth"|Invalid_argument "List.nth" -> None
 
+    (* Helper function for insertPieces *)
     let insertIntoRow (lst: occupied list) (r: int) (c:occupied) =
         let rec rec_insert row col =
             match row with
@@ -215,6 +235,9 @@ struct
                     else hd::(rec_insert tl (col+1))
         in rec_insert lst 0
 
+    (***********************************)
+    (*** Helper functions for insert ***)
+    (***********************************)
     let insertPieces (lst: occupied list list) (ci:index) (c:occupied) =
         let (x,y) = ci in 
         let rec insertRows rows row =
@@ -241,9 +264,6 @@ struct
                 |(false, true) -> (Some (x,y+1), None)
                 |(true, false) -> (Some (x,y-1), None)
                 |_ -> (Some (x,y-1), Some (x,y+1))  ))
-
-    let tuple_sort (lst: index list) = 
-        List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 
 
     let addNeighbors (neighlist: index list list) (ci1: index) (ci2:index) =
         let rec findneighlist lst =
@@ -277,6 +297,9 @@ struct
                 (tuple_sort(ci1::ci2::y))::r
             |(x, y, r) -> 
                 (tuple_sort(ci2::(x@y)))::r
+
+    (*********************************)
+    (*********************************)
 
     let insert (b:boardcomp) (i:index) (c: occupied) : boardcomp option =
         let (pieces,rows,bn,wn) = b in 
@@ -321,6 +344,7 @@ struct
             |(false, true) -> Some White
             |(true, true) -> raise ERROR
 
+    (* Helper function for getThreats, handles the three-in-a-row *)
     let handle_threes (bor:boardcomp) (threes: index list) : threat list =
         match threes with
             |(x1,y1)::(x2,y2)::(x3,y3)::[] -> let (a,b,c,d) = 
@@ -349,6 +373,7 @@ struct
                     |_ -> [])
             |_ -> raise ERROR
 
+    (* Helper function for getThreats, handles the two-in-a-row *)
     let handle_twos (bor:boardcomp) (twos: index list) : threat list = 
         match twos with
             |(x1,y1)::(x2,y2)::[] -> let (a,b,c,d,e,f) = 
@@ -419,6 +444,7 @@ struct
                     |_ -> [])
             |_ -> raise ERROR
 
+    (* Helper function for getThreats, handles the singleton *)
     let handle_ones (bor:boardcomp) (lst: index list) : threat list = 
         match lst with
             |(x,y)::[] -> let (a,b,c,d,e,f) = 
@@ -459,6 +485,7 @@ struct
                 else [] 
             in rec_findthreats [] bn
 
+    (* Helper function for nextWin, checks if a four can be a win *)
     let checkFour (b:boardcomp) (lst:index list) : index option =
         match lst with
             |[(x1,y1);n2;n3;(x4,y4)] -> 

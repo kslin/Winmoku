@@ -7,36 +7,42 @@ open Graphics
 
 module type BOARD =
 sig 
+    (* Defines the type of the board *)
 	type board
 
+    (* Returns an empty board *)
 	val empty : board
 
-  val get_empty: unit -> board
-
+    (* Returns the color of a particular index *)
 	val get : board -> index -> occupied
 
-	val getColor : board -> occupied
-
-  val printcolor : board -> unit
-
+    (** Inserts a piece on the board of the color specified by the board *)
 	val insert : board -> index -> board
 
+    (** Inserts a piece on the board of the color specified by the user *)
 	val insertspecial : board -> index -> occupied -> board
 
+    (* Determines if the board has a winning configuration *)
 	val isWin : board -> occupied option
 
+    (* Gets the threats of the board *)
 	val getThreats : board -> threat list
 
+    (* Determines if the board has a win next turn *)
     val nextWin : board -> index option
 
+    (* Draws the pieces *)
 	val indices : board -> unit
+
 end
 
+(** The 4 BoardComps used by BOARD **)
 module HorizontalBoard = BoardComp (HorizontalBoardArg)
 module VerticalBoard = BoardComp (VerticalBoardArg)
 module DiagRightBoard = BoardComp (DiagRightBoardArg)
 module DiagLeftBoard = BoardComp (DiagLeftBoardArg)
 
+(** Module for describing the entire board **)
 module Myboard : BOARD =
 struct
 
@@ -45,8 +51,6 @@ struct
                         (VerticalBoard.boardcomp)*(DiagRightBoard.boardcomp)*
                         (DiagLeftBoard.boardcomp)
 
-
-  	(** Reset to a blank board *)
   	let empty : board = 
         let buildEmptyBoard () = 
             let rec build_board n b = match n with
@@ -63,34 +67,10 @@ struct
   		let dglboard = DiagLeftBoard.empty in
 		(Black,piecearray,horboard,verboard,dgrboard,dglboard)
 
-    let get_empty () = 
-      empty 
-
-
-  	(** Get the piece associated with a location in the world. **)
   	let get (b:board) ((x,y):index) : occupied = 
   		let (_,pa,_,_,_,_) = b in
       List.nth (List.nth pa x) y
 
-    let getColor (b:board) = 
-    	let (p,_,_,_,_,_) = b in p
-
-    let printcolor (b:board) =  
-      match getColor b with
-        |Black -> print_string " (Black) "; flush_all ()
-        |White -> print_string " (White) "; flush_all ()
-        |Unocc -> ()
-
-    let print_occ c = match c with
-        |Black -> print_string " Black "; flush_all ()
-        |White -> print_string " White "; flush_all ()
-        |Unocc -> print_string " Unocc "; flush_all ()
-
-    let deopt x = match x with
-        |None -> raise ERROR
-        |Some s -> s
-
-  	(** Change the status of a piece on the board to whichever color player is**)
   	let insert (b:board) (i:index) : board = 
   		let (p,pa,h,v,dr,dl) = b in
     	match (HorizontalBoard.insert h i p, VerticalBoard.insert v i p, 
@@ -101,6 +81,7 @@ struct
         			 then (White,newPieceArray,h1,v1,dr1,dl1)
         			 else (Black,newPieceArray,h1,v1,dr1,dl1)) )
         	|_ -> b
+
 
     let insertspecial (b:board) (i:index) (c:occupied): board = 
   		let (p,pa,h,v,dr,dl) = b in
@@ -136,21 +117,31 @@ struct
                     |Some s -> Some s
                     |None -> DiagLeftBoard.nextWin dl
 
+    (************************************)
+    (*** Helper functions for indices ***)
+    (************************************)
+
+    (* Draws a circle *)
     let circle ((x,y):int*int) (width:int) (height:int)
              (bg:Graphics.color) : unit =
         Graphics.set_color bg ;
         Graphics.fill_circle ((x+2)*width) ((y+2)*height) 
                          (min width height / 2) 
 
+    (* Draws a different color circle depending on the color of the piece *)
     let draw (occ: occupied) (i: index) = match occ with
         |Black -> circle i obj_width obj_width Graphics.black
         |White -> circle i obj_width obj_width Graphics.white
         |Unocc -> ()
 
+    (* Draws a row *)
     let rec indices_row (lst: occupied list) (r: int) (n:int) = 
         match lst with
             |[] -> ()
             |hd::tl -> draw hd (r,n); indices_row tl r (n+1)
+
+    (*********************************)
+    (*********************************)
 
     (** Call a function for all pieces in the world. *)
     let indices (b:board) : unit =
