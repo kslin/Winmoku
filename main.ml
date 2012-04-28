@@ -75,9 +75,16 @@ let debug_button_eval () =
   Graphics.draw_string "Debug function eval";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
 
+let debug_button_threat () =
+  Graphics.set_color Graphics.blue;
+  Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
+  Graphics.draw_string "Debug function threat";
+  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  debug_button_eval ()
+  debug_button_eval ();
+  debug_button_threat ()
 
 let rec print_threatlist tlist = 
   match tlist with

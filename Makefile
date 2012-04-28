@@ -70,5 +70,5 @@ gomooku:
 	ocamlc -g -o gomoku_final main.cmo
 	
 clean: 
-	rm -f *.cmi *.cmo gomoku_final gomooku_basic
+	rm -f *.cmi *.cmo gomoku_final gomooku_basic gomooku_game gomooku_compete
 

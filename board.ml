@@ -69,7 +69,7 @@ struct
 
   	let get (b:board) ((x,y):index) : occupied = 
   		let (_,pa,_,_,_,_) = b in
-      List.nth (List.nth pa x) y
+		List.nth (List.nth pa x) y
 
   	let insert (b:board) (i:index) : board = 
   		let (p,pa,h,v,dr,dl) = b in
