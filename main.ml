@@ -85,8 +85,8 @@ let button_threat () =
   Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
 
 let button_playalgo () = () (*
-  Graphics.set_color Graphics.blue;
-  Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
+  Graphics.set_color Graphics.green;
+  Graphics.moveto  (obj_width *9) ((world_size+6) * obj_width);
   Graphics.draw_string "Show Threats";
   Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width) *)
 
