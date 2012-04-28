@@ -117,7 +117,7 @@ module DiagRightBoardArg : BOARD_ARG =
 struct
 
     let buildEmptyList (len: int) : occupied list = 
-        let rec emptyList (n: int) (growlist: occupied list) : occupied list = 
+        let rec emptyList (n: int) (growlist: occupied list) = 
             match n with
                 |0 -> growlist
                 |_ -> emptyList (n-1) (Unocc::growlist)
@@ -140,7 +140,7 @@ struct
                         |0 -> ind
                         |_ -> emptyList (n2-1) ((n1-1,n2-1)::ind))
                     in emptyDiag (n1-1)            
-                        ((emptyList (world_size - abs(world_size - n1)) [])::b)
+                    ((emptyList (world_size - abs(world_size - n1)) [])::b)
         in emptyDiag ((2*world_size) - 1) []
 
     let convert i = 
@@ -162,7 +162,7 @@ module DiagLeftBoardArg : BOARD_ARG =
 struct
 
     let buildEmptyList (len: int) : occupied list = 
-        let rec emptyList (n: int) (growlist: occupied list) : occupied list = 
+        let rec emptyList (n: int) (growlist: occupied list) = 
             match n with
                 |0 -> growlist
                 |_ -> emptyList (n-1) (Unocc::growlist)
@@ -173,7 +173,7 @@ struct
             match n with
                 |0 -> b
                 |_ -> emptyDiag (n-1)            
-                    ((buildEmptyList (world_size - abs(world_size - n)) )::b)
+                ((buildEmptyList (world_size - abs(world_size - n)) )::b)
         in emptyDiag ((2*world_size) - 1) []
 
     let buildRows () = 
@@ -185,7 +185,7 @@ struct
                         |0 -> ind
                         |_ -> emptyList (n2-1) ((n1-1,n2-1)::ind)
                     in emptyDiag (n1-1)            
-                        ((emptyList (world_size - abs(world_size - n1)) [])::b)
+                    ((emptyList (world_size - abs(world_size - n1)) [])::b)
         in emptyDiag ((2*world_size) - 1) []
 
     let convert i = 
@@ -357,15 +357,18 @@ struct
                     |(_, (None|Some White), Some Unocc, Some Unocc) ->
                         [Threat(Four, c, [d], lst);
                          Threat(Four, d, [c], lst)]
-                    |((None|Some White), Some Unocc, Some Unocc, (None|Some White)) ->
+                    |((None|Some White), Some Unocc, 
+                        Some Unocc, (None|Some White)) ->
                         [Threat(Four, b, [c], lst);
                          Threat(Four, c, [b], lst)]
-                    |((None|Some White), Some Unocc, Some Unocc, Some Unocc) ->
+                    |((None|Some White), Some Unocc, 
+                        Some Unocc, Some Unocc) ->
                         [Threat(StraightFour, c, [b;d], lst)]
                     |(Some Unocc, Some Unocc, (None|Some White), _) ->
                         [Threat(Four, b, [a], lst);
                          Threat(Four, a, [b], lst)]
-                    |(Some Unocc, Some Unocc, Some Unocc, (None|Some White)) ->
+                    |(Some Unocc, Some Unocc, 
+                        Some Unocc, (None|Some White)) ->
                         [Threat(StraightFour, b, [a;c], lst)]
                     |(Some Unocc, Some Unocc, Some Unocc, Some Unocc) ->
                         [Threat(StraightFour, b, [a;c], lst);
@@ -496,18 +499,88 @@ struct
                 else None
             |_ -> raise ERROR
 
+    (* Helper function for nextWin, checks if a three can be a win *)
+    let checkThree (b:boardcomp) (lst:index list) (c:occupied): index option =
+        match c with
+            |Black -> (match lst with
+                |[(x1,y1);n2;(x3,y3)] -> 
+                    (match (getIndex b (x1, y1-2), getIndex b (x1,y1-1)) with
+                        |(Some Black, Some Unocc) -> 
+                            Some (convertBack (x1,y1-1))
+                        |_ -> 
+                            (match (getIndex b (x3,y3+1), 
+                                    getIndex b (x3, y3+2)) with
+                                |(Some Unocc, Some Black) -> 
+                                    Some (convertBack (x3,y3+1))
+                                |_ -> None))
+                |_ -> raise ERROR)
+            |White -> (match lst with
+                |[(x1,y1);n2;(x3,y3)] -> 
+                    (match (getIndex b (x1, y1-2), 
+                            getIndex b (x1,y1-1)) with
+                        |(Some White, Some Unocc) -> 
+                            Some (convertBack (x1,y1-1))
+                        |_ -> 
+                            (match (getIndex b (x3,y3+1), 
+                                    getIndex b (x3, y3+2)) with
+                                |(Some Unocc, Some White) -> 
+                                    Some (convertBack (x3,y3+1))
+                                |_ -> None))
+                |_ -> raise ERROR)
+            |_ -> raise ERROR
+
+    (* Helper function for nextWin, checks if a two can be a win *)
+    let checkTwo (b:boardcomp) (lst:index list) (c:occupied) : index option =
+        match c with
+            |Black -> (match lst with
+                |[(x1,y1);(x2,y2)] -> 
+                    (match (getIndex b (x1, y1-3), 
+                            getIndex b (x1,y1-2),
+                            getIndex b (x1,y1-1)) with
+                        |(Some Black, Some Black, Some Unocc) -> 
+                            Some (convertBack (x1,y1-1))
+                        |_ -> 
+                            (match (getIndex b (x2,y2+1), 
+                                    getIndex b (x2, y2+2), 
+                                    getIndex b (x2, y2+3)) with
+                                |(Some Unocc, Some Black, Some Black) -> 
+                                    Some (convertBack (x2,y2+1))
+                                |_ -> None))
+                |_ -> raise ERROR)
+            |White -> (match lst with
+                |[(x1,y1);(x2,y2)] -> 
+                    (match (getIndex b (x1,y1-3), 
+                            getIndex b (x1,y1-2),
+                            getIndex b (x1,y1-1)) with
+                        |(Some White, Some White, Some Unocc) -> 
+                            Some (convertBack (x1,y1-1))
+                        |_ -> 
+                            (match (getIndex b (x2,y2+1), 
+                                    getIndex b (x2,y2+2), 
+                                    getIndex b (x2,y2+3)) with
+                                |(Some Unocc, Some White, Some White) -> 
+                                    Some (convertBack (x2,y2+1))
+                                |_ -> None))
+                |_ -> raise ERROR)
+            |_ -> raise ERROR
+
     let nextWin (b:boardcomp) : index option = 
         let (_,_,bn,wn) = b in
-        let rec checkNeighbors lst = match lst with
+        let rec checkNeighbors lst c = match lst with
             |[] -> None
-            |hd::tl -> 
-                if List.length hd = 4 
-                then (match checkFour b hd with
-                    |None -> checkNeighbors tl
+            |hd::tl -> match List.length hd with 
+                |4 -> (match checkFour b hd with
+                    |None -> checkNeighbors tl c
                     |Some s -> Some s)
-                else checkNeighbors tl in
-        match checkNeighbors bn with
-            |None -> checkNeighbors wn
+                |3 -> (match checkThree b hd c with
+                    |None -> checkNeighbors tl c
+                    |Some s -> Some s)
+                |2 -> (match checkTwo b hd c with
+                    |None -> checkNeighbors tl c
+                    |Some s -> Some s)
+                |_ -> checkNeighbors tl c
+        in match checkNeighbors bn Black with
+            |None -> checkNeighbors wn White
             |Some s -> Some s
 
     
