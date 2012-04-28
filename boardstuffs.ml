@@ -154,5 +154,5 @@ let print_gain t = match t with
 
 let rec print_gainlist tl = match tl with
     |[] -> ()
-    |hd::tl -> print_gains hd;
+    |hd::tl -> print_gain hd;
         print_gainlist tl
