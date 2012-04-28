@@ -54,7 +54,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       | Node of board * threat * (tree list)
       | Leaf of board * threat   
       | Win of board * threat * threats    
-
+      | Loss
     let get_threats = B.getThreats
 
     let dependent_threats (ts: threats) (t: threat) = 
@@ -77,9 +77,11 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     let rec gen_threat_tree (b: board) (t: threat) (tlist: threats) = 
       let Threat(ttype, _, _, _) = t in
-      if (B.isWin b != None) || (ttype = StraightFour) then 
+      if (B.isWin b == Some Black) || (ttype = StraightFour) then 
         Win(b, t, t::tlist)
-      else 
+      else if (B.isWin b == Some White) then
+        Loss 
+      else
         let threatList = get_dependent_threats b t in 
           if threatList = [] then 
             Leaf(b, t)      
@@ -96,17 +98,18 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let rec evaluate_tree_list treelist =
         match treelist with
         | [] -> None
-        | hd::tl ->
-	  let result = evaluate_tree hd in
-	  (if result = None then (evaluate_tree_list tl)
-                     else result)
+        | hd::tl -> (let result = evaluate_tree hd in
+	                     if result = None then (evaluate_tree_list tl)
+                       else result)
       in
         match tr with
         | Win(b, t, tlist) -> Some tlist
         | Leaf(b, t) -> None 
+        | Loss -> None 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
     let rec merge tree1 tree2 = tree1
+
 end
 
 module BThreats = TGenerator(Myboard)

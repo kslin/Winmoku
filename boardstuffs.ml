@@ -125,28 +125,36 @@ let rec print_threat_list tl = match tl with
     |hd::tl -> print_threats hd;
         print_threat_list tl
 
+(** Gets string form of index **)
+let get_string_i i = let (x,y) = i in
+    "(" ^
+    (List.nth letters x) ^
+    ", " ^
+    (string_of_int (y+1)) ^
+    ") "
+
 (** Prints gains **)
-let print_gain t = match t with
+let gain_string t = match t with
     |Threat(StraightFour,g,c,r) -> 
-        print_string "Threat: Straight Four gain = ";
-        print_index g;
-        print_string "\n"
+        "Threat: Straight Four gain = " ^
+        (get_string_i g) ^
+        "\n"
     |Threat(Four,g,c,r) ->
-        print_string "Threat: Four gain = ";
-        print_index g;
-        print_string "\n"
+        "Threat: Four gain = " ^
+        (get_string_i g) ^
+        "\n"
     |Threat(Three,g,c,r) ->
-        print_string "Threat: Three gain = ";
-        print_index g;
-        print_string "\n"
+        "Threat: Three gain = " ^
+        (get_string_i g) ^
+        "\n"
     |Threat(SplitThree,g,c,r) ->
-        print_string "Threat: Split Three gain = ";
-        print_index g;
-        print_string "\n"
+        "Threat: Split Three gain = " ^
+        (get_string_i g) ^
+        "\n"
     |Threat(WallThree,g,c,r) ->
-        print_string "Threat: Wall Three gain = ";
-        print_index g;
-        print_string "\n"
+        "Threat: Wall Three gain = " ^
+        (get_string_i g) ^
+        "\n"
     |Threat(Five,g,c,r) ->
         print_string "Threat: Five gain = ";
         print_index g ;
