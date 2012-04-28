@@ -83,7 +83,7 @@ let debug_button_threat () =
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  debug_button_eval ()
+  debug_button_eval ();
   debug_button_threat ()
 
 let rec print_threatlist tlist = 
