@@ -29,12 +29,13 @@ let draw_board () =
 
 (* Respond to a click, insert pieces if the click is near an index *)
 let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
-
+  let (rx, ry) = round_click (x,y) in
   if ( (x < floor - leeway) || (y < floor - leeway) ||
     (x > ceiling + leeway) || (y > ceiling + leeway) )
+    || (Myboard.get b (rx,ry) <> Unocc)
   then b
   else (
-    (Myboard.insertspecial b (round_click (x,y))) White)
+    (Myboard.insertspecial b (rx,ry)) White)
  (*)
 (* Evaluate board function *)
 let evaluate_board board =
@@ -122,7 +123,8 @@ let test_board () =
         if !won_board 
         then bor 
         else (
-          if (snd i) > ceiling 
+          if ((snd i) > ceiling || (snd i) < floor ||
+	    (fst i) > ceiling || (fst i) < floor)
           then (
             Graphics.clear_graph ();
             draw_board ();
