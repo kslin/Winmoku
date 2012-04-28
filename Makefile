@@ -12,28 +12,44 @@ FILES = \
 	event.ml \
 	ImportImage.ml\
 	boardstuffs.ml \
-	pieceobject.ml \
-	boardobject.ml \
-	miniboard.ml \
-	piece.ml \
-	horizontalboard.ml \
-	verticalboard.ml \
-	diagrightboard.ml \
-	diagleftboard.ml \
+	boardcomp.ml \
 	board.ml \
 	GUI.ml \
 	threats.ml \
-	main.ml \
+	mainhelpers.ml
+
 
 OBJECTS = $(FILES:.ml=.cmo)
 
-$(PROG)_basic: $(OBJECTS)
-	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) -o $(PROG)_basic
+all: clean run_basic
+
+$(PROG)_basic: $(OBJECTS) main.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main.cmo -o $(PROG)_basic
 
 build_basic: $(PROG)_basic
 
 run_basic: build_basic
 	@./$(PROG)_basic
+
+
+
+$(PROG)_game: $(OBJECTS) main_game.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main_game.cmo -o $(PROG)_game
+
+build_game: $(PROG)_game
+
+run_game: build_game
+	@./$(PROG)_game
+
+
+$(PROG)_compete: $(OBJECTS) main_compete.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main_compete.cmo -o $(PROG)_compete
+
+build_compete: $(PROG)_compete
+
+run_compete: build_compete
+	@./$(PROG)_compete
+
 
 #board: $(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS)
 	# ocamlc -c event.ml

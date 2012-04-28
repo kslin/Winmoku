@@ -2,6 +2,7 @@ open Boardstuffs
 open Pieceobject
 open Graphics
 
+(*)
 class piece (v: occupied): piece_object =
 object (self)
 
@@ -31,3 +32,5 @@ object (self)
                          (min width height / 2) 
 
 end
+*)
+module Piece 
