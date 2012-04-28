@@ -66,8 +66,8 @@ run_compete: build_compete
 	# ocamlc -g event.cmo boardstuffs.cmo pieceobject.cmo boardobject.cmo miniboard.cmo piece.cmo horizontalboard.cmo verticalboard.cmo diagrightboard.cmo diagleftboard.cmo boardobject.cmo
 
 gomooku: 
-	ocamlc -c main.ml
-	ocamlc -g -o gomoku_final main.cmo
+	ocamlc -c unix.cma main.ml
+	ocamlc -g -o unix.cma gomoku_final main.cmo
 	
 clean: 
 	rm -f *.cmi *.cmo gomoku_final gomooku_basic gomooku_game gomooku_compete
