@@ -96,8 +96,10 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let rec evaluate_tree_list treelist =
         match treelist with
         | [] -> None
-        | hd::tl -> (if evaluate_tree hd = None then (evaluate_tree_list tl)
-                     else evaluate_tree hd)
+        | hd::tl ->
+	  let result = evaluate_tree hd in
+	  (if result = None then (evaluate_tree_list tl)
+                     else result)
       in
         match tr with
         | Win(b, t, tlist) -> Some tlist
