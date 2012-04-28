@@ -41,6 +41,9 @@ sig
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
 
+  (* Finds hidden threats *)
+  val hidden_threats : board -> threats
+
 end
 
 module TGenerator(B: BOARD):THREATS with type board = B.board 
@@ -110,6 +113,32 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     let rec merge tree1 tree2 = tree1
 
+    (* Check if index is worth evaluating for hidden_threats *)
+    let check_index (b: board) (i: index) : bool = 
+      if (B.get b i) == Unocc then  
+        let coords = indices_within 3 i in
+        let rec count_color (ilist: index list) (color: occupied) =
+          match ilist with
+          | [] -> 0
+          | hd::tl -> (if B.get b i = color then 1 + (count_color tl color)
+                     else (count_color tl color))
+        in
+          if (count_color coords Black) + (count_color coords White) == 0 then 
+            false
+          else
+            if get_threats (B.insert b i) != [] then true
+            else false
+      else false 
+    
+    (* On a board with no threats, identify potential moves by searching for
+     * hidden threats. *)
+    let hidden_threats (b: board) =
+      let range = Boardstuffs.range 0 (Boardstuffs.world_size -1) in
+      let coords = Boardstuffs.cross range range in
+      let candidates = List.filter (check_index b) coords in 
+      match candidates with
+      | [] -> None
+      | hd::tl -> if 
 end
 
 module BThreats = TGenerator(Myboard)
