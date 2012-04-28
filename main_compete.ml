@@ -124,7 +124,7 @@ let test_board () =
         then bor 
         else (
           if ((snd i) > ceiling || (snd i) < floor ||
-	    (fst i) > ceiling || (fst i) < floor)
+	           (fst i) > ceiling || (fst i) < floor)
           then (
             Graphics.clear_graph ();
             draw_board ();
@@ -136,35 +136,35 @@ let test_board () =
           else (
             let newbor = respond_click bor i in
             match newbor with
-	      | None ->
-		Graphics.clear_graph ();
-		draw_board ();
-		debug_board ();
-		Myboard.indices bor;
-		bor
-	      | Some newbor1 ->
-		(match Myboard.isWin newbor1 with
-		  |Some s ->
+              |None ->
+            		Graphics.clear_graph ();
+            		draw_board ();
+            		debug_board ();
+            		Myboard.indices bor;
+            		bor
+              |Some newbor1 ->
+            		(match Myboard.isWin newbor1 with
+            		  |Some s ->
                     won_board := true;
                     (Graphics.set_color Graphics.red);
                     Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
                     Graphics.draw_string ("WHITE WON!!!");
                     Myboard.indices newbor1;
                     newbor1
-		  |None -> 
+		              |None -> 
                     let next = next_move newbor1 in
                     let newbor2 = Myboard.insertspecial newbor1 next Black in
                     (match Myboard.isWin newbor2 with
                       |Some s ->
-			won_board := true;
-			(Graphics.set_color Graphics.red);
-			Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-			Graphics.draw_string ("BLACK WON!!!")
+                  			won_board := true;
+                  			(Graphics.set_color Graphics.red);
+                  			Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+                  			Graphics.draw_string ("BLACK WON!!!")
                       |None -> ()
                     );
                     Myboard.indices newbor2;
                     newbor2
-		)
+		            )
           )
         )
     end 

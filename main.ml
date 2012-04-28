@@ -61,7 +61,7 @@ let evaluate_board board =
   in 
   let boardlist = List.map update_board threatlist in
   let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
-                          boardlist in 
+                           boardlist in 
   let rec win tlist =   
     match tlist with 
     | [] -> None
@@ -88,6 +88,25 @@ let debug_button_threat () =
 let debug_board () = 
   debug_button_eval ();
   debug_button_threat ()
+
+let rec play_sequence b tlist =
+  let rec insertwlist b ilist = 
+    match ilist with
+    | [] -> b
+    | hd::tl -> insertwlist (Myboard.insertspecial b hd White) tl
+  in
+    match tlist with
+    | [] -> ()
+    | Threat(_,tgain,tcost, _)::tl -> 
+      begin
+        bor1 = Myboard.insertspecial b tgain Black;
+        Myboard.indices bor1;
+        Unix.sleep 2;
+        bor2 = insertwlist bor1 tcost;
+        Myboard.indices bor2;
+        Unix.sleep 2;
+        play_sequence bor2 tl
+      end                                 
 
 let rec print_threatlist tlist = 
   match tlist with
