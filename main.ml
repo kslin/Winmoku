@@ -21,6 +21,9 @@ let piece_color = ref (Unocc)
 (* Stores if current board already won *)
 let won_board = ref false
 
+(* Stores if we're displaying threats *)
+let displaythreats = ref false
+
 (* Displays the player currently making a move *)
 let board_player () = 
   let player : string = 
@@ -110,8 +113,11 @@ let rec print_threatlist tlist =
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
-let print_tlist_screen tlist = 
-  
+let print_gainlist_screen glist = 
+  match glist with
+  | [] -> ()
+  | h::t -> (Graphics.rmoveto 0 (-obj_width));(Graphics.draw_string (gain_string h))
+
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -124,8 +130,11 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         | Some tlist -> print_threatlist tlist)
   else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then (Graphics.resize_window ((world_size+3)*obj_width*2) ((world_size+8)*obj_width));
-    (print_threatlist (Myboard.getThreats bor))
+  then (
+    (print_string "button working";flush_all());
+    (displaythreats := true);
+    (*(Graphics.moveto ((world_size+3) *obj_width) ((world_size+8)*obj_width));*)
+    (*(print_gainlist_screen (Myboard.getThreats b))*))
   else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
@@ -168,6 +177,13 @@ let test_board () =
             draw_board ();
             debug_board ();
             Myboard.indices bor;
+            (if (!displaythreats) then
+            (
+    (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width));
+    (Graphics.fill_rect (obj_width*10) ((world_size+5) * obj_width) (2 * obj_width) (obj_width));
+    (Graphics.set_color Graphics.black);
+    (Graphics.draw_string "testspfksdlfjsdkljfsdkljfs")));
+
             bor
           )
           (* If mouse clicks on board area, make a move *)          
