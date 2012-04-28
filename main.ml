@@ -15,7 +15,6 @@ open Boardstuffs
 open Threats
 open Mainhelpers
 
-(* Stores the color *)
 let piece_color = ref (Unocc)
 
 (* Stores if current board already won *)
@@ -104,17 +103,15 @@ let rec play_sequence b tlist =
     | hd::tl -> insertwlist (Myboard.insertspecial b hd White) tl
   in
     match tlist with
-    | [] -> ()
+    | [] -> []
     | Threat(_,tgain,tcost, _)::tl -> 
-      begin
-        bor1 = Myboard.insertspecial b tgain Black;
-        Myboard.indices bor1;
-        Unix.sleep 2;
-        bor2 = insertwlist bor1 tcost;
-        Myboard.indices bor2;
-        Unix.sleep 2;
-        play_sequence bor2 tl
-      end                                 
+      (let bor1 = Myboard.insertspecial b tgain Black in
+        (Myboard.indices bor1;
+         (let bor2 = insertwlist bor1 tcost in
+            (Myboard.indices bor2;
+             tl))))
+        
+                                     
 
 let rec print_threatlist tlist = 
   match tlist with
