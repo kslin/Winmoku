@@ -136,13 +136,13 @@ let test_board () =
           else (
             let newbor = respond_click bor i in
             match newbor with
-              | None ->
+              |None ->
             		Graphics.clear_graph ();
             		draw_board ();
             		debug_board ();
             		Myboard.indices bor;
             		bor
-              | Some newbor1 ->
+              |Some newbor1 ->
             		(match Myboard.isWin newbor1 with
             		  |Some s ->
                     won_board := true;
