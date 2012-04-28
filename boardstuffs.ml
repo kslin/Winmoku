@@ -113,14 +113,46 @@ let print_threats t = match t with
     |Threat(Five,g,c,r) ->
         print_string "Threat: Five gain = ";
         print_index g ;
-	print_string ", cost = ";
-	print_index_list c;
-	print_string ", rest = ";
-	print_index_list r;
-	print_string "\n"
+	    print_string ", cost = ";
+	    print_index_list c;
+	    print_string ", rest = ";
+	    print_index_list r;
+	    print_string "\n"
 
 (** Prints a list of threats **)
 let rec print_threat_list tl = match tl with
     |[] -> ()
     |hd::tl -> print_threats hd;
         print_threat_list tl
+
+(** Prints gains **)
+let print_gain t = match t with
+    |Threat(StraightFour,g,c,r) -> 
+        print_string "Threat: Straight Four gain = ";
+        print_index g;
+        print_string "\n"
+    |Threat(Four,g,c,r) ->
+        print_string "Threat: Four gain = ";
+        print_index g;
+        print_string "\n"
+    |Threat(Three,g,c,r) ->
+        print_string "Threat: Three gain = ";
+        print_index g;
+        print_string "\n"
+    |Threat(SplitThree,g,c,r) ->
+        print_string "Threat: Split Three gain = ";
+        print_index g;
+        print_string "\n"
+    |Threat(WallThree,g,c,r) ->
+        print_string "Threat: Wall Three gain = ";
+        print_index g;
+        print_string "\n"
+    |Threat(Five,g,c,r) ->
+        print_string "Threat: Five gain = ";
+        print_index g ;
+        print_string "\n"
+
+let rec print_gainlist tl = match tl with
+    |[] -> ()
+    |hd::tl -> print_gains hd;
+        print_gainlist tl

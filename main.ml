@@ -58,7 +58,7 @@ let evaluate_board board =
   in 
   let boardlist = List.map update_board threatlist in
   let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
-                          boardlist in 
+                           boardlist in 
   let rec win tlist =   
     match tlist with 
     | [] -> None
@@ -72,13 +72,13 @@ let evaluate_board board =
 let debug_button_eval () =
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug function eval";
+  Graphics.draw_string "Debug eval";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
 
 let debug_button_threat () =
   Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug function threat";
+  Graphics.draw_string "Show Threats";
   Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
 
 (* Shows buttons and other displays for function testing purposes *)
@@ -86,10 +86,32 @@ let debug_board () =
   debug_button_eval ();
   debug_button_threat ()
 
+let rec play_sequence b tlist =
+  let rec insertwlist b ilist = 
+    match ilist with
+    | [] -> b
+    | hd::tl -> insertwlist (Myboard.insertspecial b hd White) tl
+  in
+    match tlist with
+    | [] -> ()
+    | Threat(_,tgain,tcost, _)::tl -> 
+      begin
+        bor1 = Myboard.insertspecial b tgain Black;
+        Myboard.indices bor1;
+        Unix.sleep 2;
+        bor2 = insertwlist bor1 tcost;
+        Myboard.indices bor2;
+        Unix.sleep 2;
+        play_sequence bor2 tl
+      end                                 
+
 let rec print_threatlist tlist = 
   match tlist with
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
+
+let print_tlist_screen tlist = 
+  
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -100,6 +122,10 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         match result with
         | None -> (print_string "None"; flush_all();)
         | Some tlist -> print_threatlist tlist)
+  else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
+    && (y < ((world_size+6) * obj_width)))
+  then (Graphics.resize_window ((world_size+3)*obj_width*2) ((world_size+8)*obj_width));
+    (print_threatlist (Myboard.getThreats bor))
   else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
