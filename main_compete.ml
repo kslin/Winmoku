@@ -28,14 +28,14 @@ let draw_board () =
   draw_coord ()
 
 (* Respond to a click, insert pieces if the click is near an index *)
-let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board = 
+let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board option = 
   let (rx, ry) = round_click (x,y) in
   if ( (x < floor - leeway) || (y < floor - leeway) ||
     (x > ceiling + leeway) || (y > ceiling + leeway) )
     || (Myboard.get b (rx,ry) <> Unocc)
-  then b
+  then None
   else (
-    (Myboard.insertspecial b (rx,ry)) White)
+    Some (Myboard.insertspecial b (rx,ry) White))
  (*)
 (* Evaluate board function *)
 let evaluate_board board =
@@ -134,28 +134,37 @@ let test_board () =
           )
           (* If mouse clicks on board area, make a move *)          
           else (
-            let newbor1 = respond_click bor i in
-            match Myboard.isWin newbor1 with
-              |Some s ->
-                won_board := true;
-                (Graphics.set_color Graphics.red);
-                Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-                Graphics.draw_string ("WHITE WON!!!");
-                Myboard.indices newbor1;
-                newbor1
-              |None -> 
-                let next = next_move newbor1 in
-                let newbor2 = Myboard.insertspecial newbor1 next Black in
-                (match Myboard.isWin newbor2 with
-                  |Some s ->
+            let newbor = respond_click bor i in
+            match newbor with
+	      | None ->
+		Graphics.clear_graph ();
+		draw_board ();
+		debug_board ();
+		Myboard.indices bor;
+		bor
+	      | Some newbor1 ->
+		(match Myboard.isWin newbor1 with
+		  |Some s ->
                     won_board := true;
                     (Graphics.set_color Graphics.red);
                     Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-                    Graphics.draw_string ("BLACK WON!!!")
-                  |None -> ()
-                );
-                Myboard.indices newbor2;
-                newbor2
+                    Graphics.draw_string ("WHITE WON!!!");
+                    Myboard.indices newbor1;
+                    newbor1
+		  |None -> 
+                    let next = next_move newbor1 in
+                    let newbor2 = Myboard.insertspecial newbor1 next Black in
+                    (match Myboard.isWin newbor2 with
+                      |Some s ->
+			won_board := true;
+			(Graphics.set_color Graphics.red);
+			Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+			Graphics.draw_string ("BLACK WON!!!")
+                      |None -> ()
+                    );
+                    Myboard.indices newbor2;
+                    newbor2
+		)
           )
         )
     end 
