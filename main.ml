@@ -127,11 +127,8 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         | Some tlist -> print_threatlist tlist)
   else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then (
-    (print_string "button working";flush_all());
-    (displaythreats := true);
-    (*(Graphics.moveto ((world_size+3) *obj_width) ((world_size+8)*obj_width));*)
-    (*(print_gainlist_screen (Myboard.getThreats b))*))
+  then ((print_string "button working";flush_all());
+    (displaythreats := true);)
   else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
@@ -175,12 +172,8 @@ let test_board () =
             debug_board ();
             Myboard.indices bor;
             (if (!displaythreats) then
-            (
-    (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width));
-    (Graphics.fill_rect (obj_width*10) ((world_size+5) * obj_width) (2 * obj_width) (obj_width));
-    (Graphics.set_color Graphics.black);
-    (Graphics.draw_string "testspfksdlfjsdkljfsdkljfs")));
-
+              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width));
+              (print_gainlist_screen bor));
             bor
           )
           (* If mouse clicks on board area, make a move *)          
