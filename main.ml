@@ -116,9 +116,12 @@ let rec play_sequence b tlist =
 let play_move b = 
   let win_move = winning_move b in
   let next_move = 
-    match win_move with
-    | None -> (Random.int (world_size-1), Random.int (world_size-1))
-    | Some Threat(_,tgain,_,_) -> tgain
+    match Myboard.nextWin b with
+      | Some i -> i
+      | None ->
+	(match win_move with
+	  | None -> (Random.int (world_size-1), Random.int (world_size-1))
+	  | Some Threat(_,tgain,_,_) -> tgain)
   in
   let new_bor = Myboard.insertspecial b next_move Black in
   debug_board () ;
@@ -197,10 +200,11 @@ let test_board () =
         else (
           if (snd i) > ceiling 
           then (
-	    
+	    (* hacky plays the next move *)
 	    if ((fst i > obj_width * 9) && (fst i < 11 * obj_width) && (snd i > ((world_size+5) * obj_width)) && (snd i < ((world_size+6) * obj_width)))
 	    then 
 	      play_move bor
+
 	    else (
             respond_click_header bor i;
             Graphics.clear_graph ();
