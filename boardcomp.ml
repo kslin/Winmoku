@@ -591,9 +591,7 @@ struct
                     |None -> checkNeighbors tl c
                     |Some s -> Some s)
                 |_ -> checkNeighbors tl c
-        in match checkNeighbors bn Black with
-            |None -> checkNeighbors wn White
-            |Some s -> Some s
+        in checkNeighbors bn Black 
 
     
 
