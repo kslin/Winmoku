@@ -69,6 +69,7 @@ let test_board () =
       Myboard.indices bor;
       bor
     end
+    (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
       piece_color := Unocc;
