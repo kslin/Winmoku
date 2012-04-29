@@ -87,7 +87,7 @@ struct
   let run_game (init:Myboard.board -> Myboard.board) 
               (reset:Myboard.board -> Myboard.board)
              (handle_move: Myboard.board -> int*int -> Myboard.board) : unit =
-    run_ui ((world_size+8)*obj_width) (* GUI width *)
+    run_ui ((world_size+16)*obj_width) (* GUI width *)
            ((world_size+8)*obj_width) (* GUI height *)
            (* Event framework initializer *)
            begin fun () ->

@@ -163,6 +163,14 @@ let rec print_threatlist tlist =
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
+let rec string_of_winseq wlist = 
+  ()
+
+let threat_display () = 
+  Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width);
+  Graphics.set_color Graphics.red;
+  Graphics.draw_string "TESTTT"
+
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
@@ -179,7 +187,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (displaythreats := true)
-  (* plays the winning sequence after the board is set *)
+  (* gets the winning sequence after the board is set *)
   else if ((x > obj_width * 7) && (x < 9 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
@@ -188,7 +196,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
       | None -> ()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
-      (if l = [] then (print_string "there is no threat";flush_all()));
+      (displaythreats := true);
       (print_string "got threats in seq"; flush_all ())))
   (* plays the next move in the winning sequence determined when the board
   was set *)
@@ -245,7 +253,7 @@ let test_board () =
             debug_board ();
             Myboard.indices bor;              
             (if (!displaythreats) then
-              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width))
+              threat_display ()
               );            
             (if (!displaymove) then 
               (let newbor = (play_next bor) in Myboard.indices newbor; 
