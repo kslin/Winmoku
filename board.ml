@@ -28,6 +28,9 @@ sig
     (* Gets the threats of the board *)
 	val getThreats : board -> threat list
 
+    (* Gets the threats of white on the board *)
+	val getWhiteThreats : board -> threat list
+
     (* Determines if the board has a win next turn *)
 	val nextWin : board -> index option
 
@@ -58,7 +61,8 @@ struct
                 |_ -> (let rec build_row m r = match m with
                     |0 -> r
                     |_ -> build_row (m-1) (Unocc::r)
-                    in build_board (n-1) ((build_row world_size [])::b ) )
+                    in 
+		       build_board (n-1) ((build_row world_size [])::b ) )
             in(build_board world_size [])
         in let piecearray = buildEmptyBoard () in
   		let horboard = HorizontalBoard.empty in
@@ -106,6 +110,26 @@ struct
         let (_,_,h,v,dr,dl) = b in
         (HorizontalBoard.getThreats h)@(VerticalBoard.getThreats v)@    
         (DiagRightBoard.getThreats dr)@(DiagLeftBoard.getThreats dl)
+
+    let flipColor (b: board) : board = 
+      let (_, p, _, _, _, _) = b in      
+      let rec flip_row occ_row x y b = 
+	match occ_row with
+	  | [] -> b
+	  | White :: tl -> flip_row tl x (y+1) (insertspecial b (x,y) Black)
+	  | Black :: tl -> flip_row tl x (y+1) (insertspecial b (x,y) White)
+	  | Unocc ::tl -> flip_row tl x (y+1) b
+      in
+      let rec flip_board rows x y b = 
+	match rows with
+	  | [] -> b
+	  | hd :: tl -> flip_board tl (x+1) y (flip_row hd x y b)
+      in
+      flip_board p 0 0 empty
+
+    let getWhiteThreats (b:board) : threat list = 
+      let flipped_b = flipColor b in
+      getThreats flipped_b
 
     let nextWin (b:board) : index option =
         let (_,_,h,v,dr,dl) = b in

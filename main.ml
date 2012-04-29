@@ -59,13 +59,18 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
 let winning_move board = 
+  print_string "here";
   let threatlist = BThreats.get_threats board in
+  print_string "1";
   let update_board threat = 
     ((BThreats.gen_new_board board threat), threat)
   in 
+  print_string "2";
   let boardlist = List.map update_board threatlist in
+  print_string "3";
   let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
                           boardlist in 
+  print_string "4";
   let rec win tlist =   
     match tlist with 
     | [] -> None
@@ -143,6 +148,7 @@ let rec extract_win_seq tlist winlist =
             (Myboard.indices bor2;
              tl))))*)
 
+
 (* inserts a list of (index, occupied) into board and returns the board *)
 let rec insertlist b lst = 
   match lst with
@@ -166,12 +172,30 @@ let play_next bor =
 	  | None -> (Random.int (world_size-1), Random.int (world_size-1))
 	  | Some Threat(_,tgain,_,_) -> tgain)
   in
-  let new_bor = Myboard.insertspecial b next_move Black in
+  print_string "Move: " ;
+  print_string (string_of_int (fst next_move)) ;
+  print_string ",";
+  print_string (string_of_int (snd next_move)) ;
+  print_string "\n" ;
+  flush_all () ;
+  let newbor = Myboard.insertspecial b next_move Black in
+  (match Myboard.isWin newbor with
+    |None -> ()
+    |Some s -> 
+      let player : string = 
+        match s with
+          | Unocc -> "-"
+          | White -> "WHITE"
+          | Black -> "BLACK" in
+      won_board := true;
+      (Graphics.set_color Graphics.red);
+      Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+      Graphics.draw_string (player ^ " " ^ "WON!!!")
+  );
   debug_board () ;
   draw_board () ;
   Myboard.indices new_bor ;
   new_bor*)
-                                     
 
 let rec print_threatlist tlist = 
   match tlist with

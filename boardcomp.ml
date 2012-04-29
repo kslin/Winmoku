@@ -322,7 +322,7 @@ struct
                 let newpieces = insertPieces pieces ci c in 
                 (match (getNeighbors b ci c) with
                     |(None,None) -> 
-                        Some (newpieces,rows,([ci]::bn),wn)
+                        Some (newpieces,rows,bn,([ci]::wn))
                     |(Some s, None)|(None, Some s) ->
                         let newwn = addNeighbors wn s ci in
                         Some (newpieces,rows,bn,newwn)
