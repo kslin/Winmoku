@@ -39,6 +39,9 @@ sig
     (* Determines if there can be a win the next turn *)
     val nextWin : boardcomp -> index option
 
+    (* Returns a score regarding the number of groups of black pieces *)
+    val getNeighbors : boardcomp -> int
+
 end
 
 (* Arguments to construct a BOARDCOMP *)
@@ -592,6 +595,13 @@ struct
                     |Some s -> Some s)
                 |_ -> checkNeighbors tl c
         in checkNeighbors bn Black 
+
+    let getNeighbors (b:boardcomp) : int =
+        let (_,_,bn,_) = b in
+        let rec addNeighbors lst score = match lst with
+            |[] -> score
+            |hd::tl -> addNeighbors tl (score + (List.length hd) - 1)
+        in addNeighbors bn 0
 
     
 

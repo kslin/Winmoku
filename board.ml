@@ -38,7 +38,10 @@ sig
   val nextWhiteWin : board -> index option
 
   (* Draws the pieces *)
-	val indices : board -> unit
+  val indices : board -> unit
+
+  (* Returns a score regarding the number of groups of black pieces *)
+  val getNeighbors : board -> int
 
 end
 
@@ -183,5 +186,10 @@ struct
             |[] -> ()
             |hd::tl -> indices_row hd n 0; traverseRows tl (n+1)
     in traverseRows pa 0
+
+    let getNeighbors (b:board) : int =
+        let (_,_,h,v,dr,dl) = b in
+        (HorizontalBoard.getNeighbors h) + (VerticalBoard.getNeighbors v) +
+        (DiagRightBoard.getNeighbors dr) + (DiagLeftBoard.getNeighbors dl)
   
 end
