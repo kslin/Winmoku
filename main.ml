@@ -211,7 +211,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then
-    (play_next b)
+    displaymove := true
   (* changes player to white *)
   else if ((x > obj_width) && (x < 2 * obj_width) 
     && (y > ((world_size+3) * obj_width)) 
@@ -268,8 +268,9 @@ let test_board () =
             Myboard.indices bor;  
             (if (!displaythreats) then
               (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width)));
-            (if (!displaymove) then )
-            bor )
+            (if (!displaymove) then 
+              (let newbor = (play_next bor) in Myboard.indices newbor; newbor)
+              else bor)
           )
           (* If mouse clicks on board area, make a move *)          
           else (
