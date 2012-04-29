@@ -36,32 +36,17 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board option =
   then None
   else (
     Some (Myboard.insertspecial b (rx,ry) White))
- (*)
+
 (* Evaluate board function *)
-let evaluate_board board =
-  let threatlist = BThreats.get_threats board in
-  let update_board threat = 
-    let Threat(_, (x,y), a, _) = threat in
-      (print_string ((string_of_int x) ^ "," ^ (string_of_int y) ^ ":");
-       flush_all ();
-       List.map (fun z -> let (c,d) = z in
-       begin  
-         print_string ((string_of_int c) ^ "," ^ (string_of_int d) ^ "|");
-         flush_all ();
-       end) a;
-      ((Myboard.insertspecial board (x,y) Black), threat))
-  in 
-  let boardlist = List.map update_board threatlist in
-  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y)) 
-                          boardlist in 
-  let rec win tlist =   
-    match tlist with 
-    | [] -> false
-    | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
-  in
-    win treelist
-  *)
-      
+let evaluate_board board = 
+  match BThreats.evaluate_board board with
+  | Some tlist -> (let Threat(_,tgain, _, _) = 
+                     List.nth ((List.length tlist) - 1) tlist 
+                   in
+                     Some tgain)
+  | None -> (match BThreats.hidden_threats board with
+             | hd::tl -> Some hd
+             | [] -> None ) 
 
 (*  button for eval function *)
 let debug_button_eval () =
@@ -89,7 +74,9 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 let next_move (b:Myboard.board) : int*int =
   match Myboard.nextWin b with
     |Some s -> s
-    |None -> (Random.int (world_size-1), Random.int (world_size-1))
+    |None -> (match (evaluate_board b) with 
+              | Some s -> s
+              | None -> (Random.int (world_size-1), Random.int (world_size-1)))
 
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
