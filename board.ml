@@ -29,7 +29,7 @@ sig
 	val getThreats : board -> threat list
 
     (* Determines if the board has a win next turn *)
-    val nextWin : board -> index option
+  val nextWin : board -> index option
 
     (* Draws the pieces *)
 	val indices : board -> unit
