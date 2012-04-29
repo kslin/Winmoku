@@ -243,7 +243,7 @@ let test_board () =
           (* If mouse clicks on board area, make a move *)          
           else (
             let newbor = respond_click bor i in
-            let threats = Myboard.getWhiteThreats newbor in
+            let threats = Myboard.getThreats newbor in
             (match Myboard.isWin newbor with
               |None -> ()
               |Some s -> 
