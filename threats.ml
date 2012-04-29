@@ -35,11 +35,22 @@ sig
      made on the board returns the threat tree from that board *)
   val gen_threat_tree : board -> threat -> threats -> tree
   
+
   (* Evaluates the tree to see if it results in a winning threat sequence *)
   val evaluate_tree : tree -> threats option
 
+  (* Outputs the next threat if there is a winning threat sequence *)
+  val next_winning_move : tree -> threat option
+
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
+
+  (* Evaluates a board, and returns a winning sequence if there is one *)
+  val evaluate_board : board -> threats option
+
+  (* On a board with no threats, identify potential moves by searching for
+   * hidden threats. *)
+  val hidden_threats : board -> index list
 
 end
 
@@ -108,8 +119,65 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | Loss -> None 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
-    let rec merge tree1 tree2 = tree1
+    let next_winning_move (tr: tree) = 
+      match evaluate_tree tr with
+	| None -> None
+	| Some _ ->
+	  (match tr with
+	    | Win(b, t, tlist) -> Some t
+	    | Leaf(b, t) -> None
+	    | Node(b, t, tlist) -> Some t
+	    | Loss -> None
+	  )
+	    
 
+    let rec merge tree1 tree2 = tree1
+    
+    let evaluate_board board = 
+      let threatlist = get_threats board in
+      let update_board threat = ((gen_new_board board threat), threat) in 
+      let boardlist = List.map update_board threatlist in
+      let treelist = List.map (fun (x, y) -> (gen_threat_tree x y [])) 
+                              boardlist in 
+      let rec win tlist =   
+        match tlist with 
+        | [] -> None
+        | hd::tl -> (if evaluate_tree hd = None then (win tl)
+                     else evaluate_tree hd)
+      in
+        win treelist
+
+    (* Check if index is worth evaluating for hidden_threats *)
+    let check_index (b: board) (i: index) : bool = 
+      if (B.get b i) == Unocc then  
+        let coords = indices_within 3 i in
+        let rec count_color (ilist: index list) (color: occupied) =
+          match ilist with
+          | [] -> 0
+          | hd::tl -> (if B.get b i = color then 1 + (count_color tl color)
+                     else (count_color tl color))
+        in
+          if (count_color coords Black) + (count_color coords White) == 0 then 
+            false
+          else
+            if get_threats (B.insert b i) != [] then true
+            else false
+      else false 
+    
+    let hidden_threats (b: board) =
+      let range = Boardstuffs.range 0 (Boardstuffs.world_size -1) in
+      let coords = Boardstuffs.cross range range in
+      let candidates = List.filter (check_index b) coords in 
+      let candidateboards = List.map 
+                              (fun x -> ((B.insertspecial b x Black), x)) 
+                              candidates 
+      in 
+      let hiddenboards = List.filter (fun (x,y) -> if evaluate_board x == None
+                                                   then false
+                                                   else true)
+                                      candidateboards 
+      in
+        List.map snd hiddenboards
 end
 
 module BThreats = TGenerator(Myboard)

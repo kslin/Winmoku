@@ -62,7 +62,27 @@ let rec print_index_list il = match il with
 let tuple_sort (lst: index list) = 
         List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 
 
-(* Prints the color of a space *)
+(* Create list of all tuples of the form (x,y) where x is from xs and
+ * and y is from ys *)
+let rec cross (xs:int list) (ys:int list) : (int*int) list = 
+  match xs with
+  | [] -> []
+  | hd::tl -> List.map (fun y -> (hd,y)) ys @ cross tl ys
+
+(* Generate a list of ints between n1 and n2 *)
+let rec range (n1:int) (n2:int) : int list = 
+  if n1 > n2 then [] else n1::range (n1+1) n2
+
+let rec indices_within (d: int) (i: index) = 
+  let (x, y) = i in
+  let xlow = max 0 (x-d) in
+  let ylow = max 0 (y-d) in
+  let xhigh = min (world_size-1) (x+d) in
+  let yhigh = min (world_size-1) (y+d) in
+    cross (range xlow xhigh) 
+		      (range ylow yhigh)
+
+(** Prints the color of a space **)
 let print_occ c = match c with
         |Black -> print_string " Black "; flush_all ()
         |White -> print_string " White "; flush_all ()
@@ -156,11 +176,6 @@ let gain_string t = match t with
         (get_string_i g) ^
         "\n"
     |Threat(Five,g,c,r) ->
-        print_string "Threat: Five gain = ";
-        print_index g ;
-        print_string "\n"
-
-let rec print_gainlist tl = match tl with
-    |[] -> ()
-    |hd::tl -> print_gain hd;
-        print_gainlist tl
+        "Threat: Five gain = " ^
+        (get_string_i g) ^
+        "\n"

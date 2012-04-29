@@ -52,23 +52,30 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
-(* Evaluate board function *)
-let evaluate_board board =
+let winning_move board = 
+  print_string "here";
   let threatlist = BThreats.get_threats board in
+  print_string "1";
   let update_board threat = 
     ((BThreats.gen_new_board board threat), threat)
   in 
+  print_string "2";
   let boardlist = List.map update_board threatlist in
+  print_string "3";
   let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
-                           boardlist in 
+                          boardlist in 
+  print_string "4";
   let rec win tlist =   
     match tlist with 
     | [] -> None
-    | hd::tl -> (if BThreats.evaluate_tree hd = None then (win tl)
-                else BThreats.evaluate_tree hd)
+    | hd::tl -> (let result = BThreats.next_winning_move hd in
+		 if result = None then (win tl) else result)
   in
     win treelist
       
+(* Evaluate board function *)
+
+let evaluate_board board = BThreats.evaluate_board board
 
 (*  button for eval function *)
 let button_eval () =
@@ -83,11 +90,11 @@ let button_threat () =
   Graphics.draw_string "Show Threats";
   Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
 
-let button_playalgo () = () (*
+let button_playalgo () = 
   Graphics.set_color Graphics.green;
   Graphics.moveto  (obj_width *9) ((world_size+6) * obj_width);
-  Graphics.draw_string "Show Threats";
-  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width) *)
+  Graphics.draw_string "Play Algo";
+  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) (2 * obj_width) (obj_width) 
 
 
 (* Shows buttons and other displays for function testing purposes *)
@@ -110,7 +117,41 @@ let rec play_sequence b tlist =
          (let bor2 = insertwlist bor1 tcost in
             (Myboard.indices bor2;
              tl))))
-        
+
+let play_move (b:Myboard.board) : Myboard.board =
+  let win_move = winning_move b in
+  let next_move = 
+    match Myboard.nextWin b with
+      | Some i -> i
+      | None ->
+	(match win_move with
+	  | None -> (Random.int (world_size-1), Random.int (world_size-1))
+	  | Some Threat(_,tgain,_,_) -> tgain)
+  in
+  print_string "Move: " ;
+  print_string (string_of_int (fst next_move)) ;
+  print_string ",";
+  print_string (string_of_int (snd next_move)) ;
+  print_string "\n" ;
+  flush_all () ;
+  let newbor = Myboard.insertspecial b next_move Black in
+  (match Myboard.isWin newbor with
+    |None -> ()
+    |Some s -> 
+      let player : string = 
+        match s with
+          | Unocc -> "-"
+          | White -> "WHITE"
+          | Black -> "BLACK" in
+      won_board := true;
+      (Graphics.set_color Graphics.red);
+      Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+      Graphics.draw_string (player ^ " " ^ "WON!!!")
+  );
+  debug_board () ;
+  draw_board () ;
+  Myboard.indices newbor ;
+  newbor
                                      
 
 let rec print_threatlist tlist = 
@@ -132,13 +173,18 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
         match result with
-        | None -> (print_string "None"; flush_all();)
+        | None -> (print_string "None\n"; flush_all();)
         | Some tlist -> print_threatlist tlist)
   (* shows current threats on the game display *)
   else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then ((print_string "button working";flush_all());
     (displaythreats := true);)
+  (* shows next winning move if exists *)
+  else if ((x > obj_width * 9) && (x < 11 * obj_width) && (y > ((world_size+5) * obj_width)) 
+    && (y < ((world_size+6) * obj_width)))
+  then 
+    ignore(play_move b) 
   (* changes player to white *)
   else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
@@ -178,15 +224,21 @@ let test_board () =
         else (
           if (snd i) > ceiling 
           then (
+	    (* hacky plays the next move *)
+	    if ((fst i > obj_width * 9) && (fst i < 11 * obj_width) && (snd i > ((world_size+5) * obj_width)) && (snd i < ((world_size+6) * obj_width)))
+	    then 
+	      play_move bor
+
+	    else (
             respond_click_header bor i;
             Graphics.clear_graph ();
             draw_board ();
             debug_board ();
-            Myboard.indices bor;
+            Myboard.indices bor;  
             (if (!displaythreats) then
               (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width));
-              (print_gainlist_screen bor));
-            bor
+              (*(print_gainlist_screen bor)*));
+            bor )
           )
           (* If mouse clicks on board area, make a move *)          
           else (
