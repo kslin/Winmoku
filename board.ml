@@ -111,8 +111,17 @@ struct
 
     let getThreats (b:board) : threat list = 
         let (_,_,h,v,dr,dl) = b in
-        (HorizontalBoard.getThreats h)@(VerticalBoard.getThreats v)@    
-        (DiagRightBoard.getThreats dr)@(DiagLeftBoard.getThreats dl)
+        print_string "\n\nhorizontal\n\n";
+        let hthreats = HorizontalBoard.getThreats h in
+        print_string "\n\nvertical\n\n";
+        let vthreats = VerticalBoard.getThreats v in
+        print_string "\n\ndiagright\n\n";
+        let drthreats = DiagRightBoard.getThreats dr in
+        print_string "\n\ndiagleft\n\n";
+        let dlthreats = DiagLeftBoard.getThreats dl in
+        flush_all ();
+        (hthreats)@(vthreats)@    
+        (drthreats)@(dlthreats)
 
     let flipColor (b: board) : board = 
       let (_, p, _, _, _, _) = b in      
