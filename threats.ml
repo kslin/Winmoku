@@ -27,6 +27,10 @@ sig
      made on the board returns all threats dependent on the given threat*)
   val get_dependent_threats : board -> threat -> threats
 
+  (* Given a board and the threat whose gain square was the last move
+     made on the board, return all four threats dependent on given threat *)
+  val get_dependent_four_threats : board -> threat -> threats
+
   (* Given an old board and a threat generates the board that would result if
      black played the gain square and white played all the cost squares *)  
   val gen_new_board: board -> threat -> board
@@ -78,6 +82,13 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let get_dependent_threats (b: board) (t: threat) =
       dependent_threats (get_threats b) t
 
+    let get_dependent_four_threats (b: board) (t: threat) = 
+      List.filter
+	(fun x -> 
+	  let Threat(ttype, _, _, _) = x in
+	  ttype = StraightFour || ttype = Four)
+	(get_dependent_threats b t)
+
     let gen_new_board (b: board) (t:threat) =
       let Threat(_, tgain, tcost, _) = t in
       let rec insertwhitelist (b:board) (t: index list) =
@@ -90,10 +101,17 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let Threat(ttype, _, _, _) = t in
       if (B.isWin b == Some Black) || (ttype = StraightFour) then 
         Win(b, t, t::tlist)
-      else if (B.isWin b == Some White) then
-        Loss 
+      else if (B.isWin b = Some White) || (B.nextWhiteWin b) then
+	Loss
       else
-        let threatList = get_dependent_threats b t in 
+	let threatList = 
+	if List.exists 
+	  (fun wt -> let Threat(wttype, _, _, _) = wt in wttype = StraightFour)
+	  (B.getWhiteThreats b) then
+	  get_dependent_four_threats b t
+	else
+	  get_dependent_threats b t
+	in
           if threatList = [] then 
             Leaf(b, t)      
           else
