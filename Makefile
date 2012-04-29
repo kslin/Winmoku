@@ -21,6 +21,7 @@ FILES = \
 	board.ml \
 	GUI.ml \
 	threats.ml \
+  minimax.ml \
 	mainhelpers.ml \
 	sequenceBoards.ml
 

@@ -14,6 +14,7 @@ open GUI
 open Boardstuffs
 open Threats
 open Mainhelpers
+open Minimax
 
 (* Stores if current board already won *)
 let won_board = ref false
