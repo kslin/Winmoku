@@ -149,7 +149,8 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	      )
 
     let rec merge tree1 tree2 = 
-      let rec traverse2 (costs1: index list) : threat option = 
+      (* grabs top of tree2 if the threat is independent *)
+      let traverse2 (costs1: index list) : threat option = 
 	match tree2 with
 	  | Win(_, _, _) -> raise Boardstuffs.ERROR
 	  | Node(_, t, _) | Leaf(_, t) ->
@@ -160,6 +161,8 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	    else Some(t)
 	  | Loss -> None
       in
+      (* iterates through tree1, for each node and leaf it makes a tree from
+         the threat in tree2 (if independent) and adds it to treeList *)
       let rec traverse1 costs threatlist tree1 = 
 	match tree1 with
 	  | Win(_, _, _) -> raise Boardstuffs.ERROR
