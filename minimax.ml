@@ -17,6 +17,9 @@ sig
   (* game tree *)
   type tree
 
+  (* depth for minimax *)
+  val depth : int
+
   (* heuristic to rate board *)
   val heuristic : board -> float
 
@@ -42,7 +45,7 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
       | Node of board * index option * tree list * float option
       | Leaf of board * index option * float option
 
-  let depth = 5
+  let depth = 1
 
   let branchingfactor = 10
 
@@ -105,4 +108,4 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
 
 end
 
-module GomokuMiniMax = MGenerator(Myboard)
+module GMinimax = MGenerator(Myboard)
