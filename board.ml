@@ -35,7 +35,7 @@ sig
 	val nextWin : board -> index option
 
     (* Determines if the board has a win for white next turn *)
-        val nextWhiteWin : board -> bool
+        val nextWhiteWin : board -> index option
 
     (* Draws the pieces *)
 	val indices : board -> unit
@@ -143,10 +143,8 @@ struct
                     |Some s -> Some s
                     |None -> DiagLeftBoard.nextWin dl
 
-    let nextWhiteWin (b:board): bool = 
-      match nextWin (flipColor b) with
-	| None -> false
-	| Some _ -> true
+    let nextWhiteWin (b:board): index option = 
+      nextWin (flipColor b)
 
     (************************************)
     (*** Helper functions for indices ***)

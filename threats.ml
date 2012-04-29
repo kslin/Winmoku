@@ -101,8 +101,9 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let Threat(ttype, _, _, _) = t in
       if (B.isWin b == Some Black) || (ttype = StraightFour) then 
         Win(b, t, t::tlist)
-      else if (B.isWin b = Some White) || (B.nextWhiteWin b) then
-	Loss
+      else if (B.isWin b = Some White) || 
+	  (match B.nextWhiteWin b with | None -> false | Some _ -> true)
+      then Loss
       else
 	let threatList = 
 	if List.exists 
