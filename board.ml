@@ -92,6 +92,13 @@ struct
               (p,newPieceArray,h1,v1,dr1,dl1)) 
           |_ -> b
 
+
+    (* inserts a list of (index, color) into a board and returns the board *)
+    let rec insertlist (b:board) (list) : board = 
+      match list with
+      | [] -> ()
+      | h::t -> insertlist (insertspecial (fst h) (snd h)) t
+
     let isWin (b:board) : occupied option =
     	let (_,_,h,v,dr,dl) = b in
         match (HorizontalBoard.isWin h, VerticalBoard.isWin v, 
