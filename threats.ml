@@ -151,6 +151,10 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       if (B.get b i) == Unocc then 
         let coords = Boardstuffs.indices_within 3 i in
         let rec count_color (ilist: index list) (color: occupied) =
+          Boardstuffs.print_index i;
+          print_string ": ";
+          Boardstuffs.print_index_list coords;
+          print_string "|";
           match ilist with
           | [] -> 0
           | hd::tl -> (if (B.get b i) != Unocc then 1 + (count_color tl color)
@@ -158,10 +162,9 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         in
           if (count_color coords Black) + (count_color coords White) == 0 then 
             false
-          else
-            true 
-              if get_threats (B.insertspecial b i Black) != [] then true
-              else false  
+          else 
+            if get_threats (B.insertspecial b i Black) != [] then true
+            else false  
       else false 
     
     let hidden_threats (b: board) =
