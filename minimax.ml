@@ -45,23 +45,30 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
       | Node of board * index option * tree list * float option
       | Leaf of board * index option * float option
 
-  let depth = 2
+  let depth = 1
 
-  let branchingfactor = 10
+  let branchingfactor = 5
 
-  let heuristic board = 
+  let heuristic board =
+    let b1 = List.length (B.getThreats board) in
+    let b2 = float_of_int b1 in
+    let w1 = List.length (B.getWhiteThreats board) in
+    let w2 = float_of_int w1 in 
     let x1, y1 = B.getNeighbors board in
     let x2 = float_of_int x1 in
     let y2 = float_of_int y1 in
-      (x2 -. y2)/(x2 +. y2)
+      ((x2 -. y2)/.(x2 +. y2 +. 1.0))*. 0.5 
+      +. ((b2 -. w2)/.(b2 +. w2 +. 1.0)) *. 0.5
 
   let rec gen_tree depth index board = 
     if depth > 0 then
+      let h = if ((depth mod 2) = 1) then (fun x -> -. heuristic x)
+              else heuristic in
       let range = Boardstuffs.range 0 (Boardstuffs.world_size - 1) in
       let coords = Boardstuffs.cross range range in
       let sorter index = 
         if (B.get board index != Unocc) then -1.0
-        else heuristic (B.insert board index)
+        else h (B.insert board index)
       in
       let candidates = List.filter (fun x -> (sorter x) > -1.0) coords in
       let sorted_cand = List.sort (fun x y -> compare (sorter x) (sorter y))
@@ -101,7 +108,7 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
     | hd::tl -> (match hd with
                  | Leaf(_, _, Some v) -> (print_float v; print_treelist tl)
                  | Node(_, _, _, Some v) -> (print_float v; print_treelist tl))
-    | [] -> print_string "noooo"
+    | [] -> print_string "||||"
 
   let next_move tree =
     match tree with
@@ -113,10 +120,10 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
                               tlist) 
        in
          match lst with
-         | [] -> (print_treelist tlist; print_string "|"; print_float value; None)
-         | hd::tl -> (match hd with
-                      | Leaf(_,index,_) -> index  
-                      | Node(_,index, _, _) -> index))
+         | [] -> (print_treelist tlist; print_string "|"; print_float value; flush_all (); None)
+         | hd::tl -> (print_treelist tlist; print_string "|"; print_float value; flush_all (); match hd with 
+               | Leaf(_,index,_) -> index  
+               | Node(_,index, _, _) -> index))
 
 end
 
