@@ -151,13 +151,9 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       if (B.get b i) == Unocc then 
         let coords = Boardstuffs.indices_within 3 i in
         let rec count_color (ilist: index list) (color: occupied) =
-          Boardstuffs.print_index i;
-          print_string ": ";
-          Boardstuffs.print_index_list coords;
-          print_string "|";
           match ilist with
           | [] -> 0
-          | hd::tl -> (if (B.get b i) != Unocc then 1 + (count_color tl color)
+          | hd::tl -> (if (B.get b hd) == color then 1 + (count_color tl color)
                        else (count_color tl color))
         in
           if (count_color coords Black) + (count_color coords White) == 0 then 
@@ -180,7 +176,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
                                                    else true)
                                       candidateboards 
       in
-          List.map snd hiddenboards
+        List.map snd hiddenboards
 end
 
 module BThreats = TGenerator(Myboard)

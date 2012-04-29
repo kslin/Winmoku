@@ -81,13 +81,7 @@ let winning_move board =
       
 (* Evaluate board function *)
 
-let evaluate_board board = 
-  if BThreats.evaluate_board board = None then
-    match BThreats.hidden_threats board with
-    | [] -> None
-    | hd::tl -> Some [(Threat(Four, hd, [(0,0)], [(0,0)]))]
-  else
-    BThreats.evaluate_board board
+let evaluate_board board = BThreats.evaluate_board board
 
 (*  button for eval function *)
 let button_eval () =
