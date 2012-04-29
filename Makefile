@@ -47,7 +47,13 @@ build_basic: $(PROG)_basic
 run_basic: build_basic
 	@./$(PROG)_basic
 
+$(PROG)_move: $(OBJECTS) main_move.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main_move.cmo -o $(PROG)_move
 
+build_move: $(PROG)_move
+
+run_move: build_move
+	@./$(PROG)_move
 
 $(PROG)_game: $(OBJECTS) main_game.cmo
 	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main_game.cmo -o $(PROG)_game
@@ -84,7 +90,7 @@ run_compete: build_compete
 gomooku: 
 	ocamlc -c unix.cma main.ml
 	ocamlc -g -o unix.cma gomoku_final main.cmo
-	
+
 clean: 
 	rm -f *.cmi *.cmo gomoku_final gomooku_basic gomooku_game gomooku_compete
 
