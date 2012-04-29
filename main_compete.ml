@@ -63,19 +63,6 @@ let debug_button_eval () =
 let debug_board () = 
   debug_button_eval ()
 
-(*)
-(* A handles clicks to to run functions in the area above the board: 
-  debugging function, change piece color *)
-let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
-  if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
-    && (y < ((world_size+6) * obj_width)))
-  then (let result = evaluate_board b in
-        print_string (string_of_bool result); flush_all ())
-  else ()
-*)
-
-(* Gives an empty space next to a black neighbor *)
-
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
   (Random.self_init ;
@@ -83,7 +70,7 @@ let next_move (b:Myboard.board) : int*int =
      |Some s -> s
      |None -> (match (evaluate_board b) with 
                | Some s -> (flush_all (); s)
-               | None -> (print_string "no fucker" ; flush_all (); (Random.int (world_size-1), Random.int (world_size-1))))))
+               | None -> (Random.int (world_size-1), Random.int (world_size-1)))))
 
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
@@ -91,7 +78,7 @@ let firstmove = ((world_size/2), (world_size/2))
 (* Run the board *)
 let test_board () =
   GUI.run_game
-    (* Initialize the board to be empty *)
+    (* Initialize the board to be empty except for the first piece *)
     begin fun (bor:Myboard.board) -> 
       draw_board ();
       debug_board ();
@@ -99,6 +86,7 @@ let test_board () =
       Myboard.indices newbor;
       newbor
     end
+    (* A resetted board should be empty except for the first piece *)
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
       won_board := false;

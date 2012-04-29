@@ -95,20 +95,15 @@ let button_eval () =
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width)
 
-let button_threat () =
-  Graphics.set_color Graphics.blue;
-  Graphics.moveto  (obj_width *4) ((world_size+6) * obj_width);
-  Graphics.draw_string "Win Threats";
-  Graphics.fill_rect (obj_width*4) ((world_size+5) * obj_width) 
-    (2 * obj_width) (obj_width)
-
-let button_playalgo () = 
+(* button to run the threat-space search algorithm on the current board *)
+let button_getwin () = 
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
   Graphics.draw_string "Get Win";
   Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
+(* button to make the next move of the winning threat sequence*)
 let button_nextmove () = 
   Graphics.set_color Graphics.green;
   Graphics.moveto  (obj_width *10) ((world_size+6) * obj_width);
@@ -119,7 +114,7 @@ let button_nextmove () =
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   button_eval ();
-  button_playalgo ();
+  button_getwin ();
   button_nextmove ()
 
 (* Converts a threat list (like the winning sequence) into a list of 
@@ -230,9 +225,9 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 (* Run the board *)
 let test_board () =
   GUI.run_game
-    (* Initialize the board to be empty *)
+    (* Initialize the board to be empty or a predetermined board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq4 bor in
+      let newbor = threatseq2b bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
@@ -245,6 +240,7 @@ let test_board () =
       Myboard.indices bor;
       bor*)
     end
+    (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
       piece_color := Unocc;
