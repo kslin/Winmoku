@@ -206,7 +206,16 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | hd::tl -> (if evaluate_tree hd = None then (win tl)
                      else evaluate_tree hd)
       in
-        win treelist
+      match win treelist with
+	| None ->
+	  let mergefunctionlist = List.map merge treelist in
+	  let mergetreelist = 
+	  List.flatten (
+	    List.map (fun f -> List.map f treelist) mergefunctionlist)
+	  in
+	  win mergetreelist
+	| x -> x
+      
 
     (* Check if index is worth evaluating for hidden_threats *)
     let check_index (b: board) (i: index) : bool = 
