@@ -51,6 +51,14 @@ let print_index i = let (x,y) = i in
     print_string ") ";
     flush_all () 
 
+(** String of an index **)
+let string_of_index i = let (x,y) = i in
+    "(" ^
+    (List.nth letters x) ^
+    ", " ^
+    (string_of_int (y+1)) ^
+    ") " 
+
 (** Prints a list of indices **)
 let rec print_index_list il = match il with
     |[] -> ()
@@ -87,6 +95,12 @@ let print_occ c = match c with
         |Black -> print_string " Black "; flush_all ()
         |White -> print_string " White "; flush_all ()
         |Unocc -> print_string " Unocc "; flush_all ()
+
+(** Returns string of the color of a space **)
+let string_of_occ c = match c with
+        |Black -> " Black "
+        |White -> " White "
+        |Unocc -> " Unocc "
 
 (** Prints threats **)
 let print_threats t = match t with

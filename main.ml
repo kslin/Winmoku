@@ -164,12 +164,27 @@ let rec print_threatlist tlist =
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
 let rec string_of_winseq wlist = 
-  ()
+  let rec print_pairs l = 
+    match l with
+    | [] -> "\n"
+    | (i, c)::t -> (string_of_occ c) ^ (string_of_index i) ^ "\n" ^ 
+                   (print_pairs t) in
+  match wlist with
+  | [] -> "No more moves"
+  | (b, l)::t -> (print_pairs l) ^ "\n" ^ (string_of_winseq t)
 
 let threat_display () = 
-  Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width);
-  Graphics.set_color Graphics.red;
-  Graphics.draw_string "TESTTT"
+  let x = (world_size+7) in
+  let l = !winseq in
+  match l with
+  | [] -> ()
+  | (i, c)::t -> 
+  Graphics.moveto ((world_size+4)*obj_width) (x*obj_width);
+  Graphics.set_color Graphics.blue;
+  Graphics.draw_string "line 1";
+  Graphics.moveto ((world_size+4)*obj_width) ((x-1)*obj_width);
+  Graphics.draw_string "line2"
+  (*Graphics.draw_string (string_of_winseq !win_seq)*)
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -193,7 +208,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y < ((world_size+6) * obj_width)))
   then 
     (match (evaluate_board b) with
-      | None -> ()
+      | None -> (win_seq := []);()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
       (displaythreats := true);
