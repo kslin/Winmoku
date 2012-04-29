@@ -29,7 +29,11 @@ TESTOBJECTS = $(TESTFILES:.ml=.cmo)
 
 OBJECTS = $(FILES:.ml=.cmo)
 
-all: clean run_basic
+game: clean run_game
+
+AI: clean run_basic
+
+AIplus: clean run_compete
 
 tests: clean run_tests
 
