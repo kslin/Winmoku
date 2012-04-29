@@ -44,13 +44,13 @@ let evaluate_board board =
   | Some tlist -> (let Threat(_,tgain, _, _) = 
                      List.nth tlist ((List.length tlist) - 1) 
                    in
-                     Some tgain)
+                     (print_string "threat"; Some tgain))
   | None -> (match BThreats.hidden_threats board with
-             | hd::tl -> Some hd
+             | hd::tl -> (print_string "hidden"; Some hd)
              | [] -> 
                (let tree1 = GMinimax.gen_tree (GMinimax.depth) None board in
                 let tree2 = GMinimax.minimax tree1 in
-                (print_string "minimax"; GMinimax.next_move tree2))) 
+                (print_string "minimax"; flush_all ();  GMinimax.next_move tree2))) 
 
 (*  button for eval function *)
 let debug_button_eval () =
@@ -82,8 +82,8 @@ let next_move (b:Myboard.board) : int*int =
   (match Myboard.nextWin b with
      |Some s -> s
      |None -> (match (evaluate_board b) with 
-               | Some s -> s
-               | None -> (Random.int (world_size-1), Random.int (world_size-1)))))
+               | Some s -> (flush_all (); s)
+               | None -> (print_string "no fucker" ; flush_all (); (Random.int (world_size-1), Random.int (world_size-1))))))
 
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
