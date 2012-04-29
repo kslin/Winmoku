@@ -223,15 +223,15 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
-      (*let newbor = threatseq1 bor in
+      let newbor = threatseq3b bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
-      newbor*)
+      newbor(*
       draw_board ();
       debug_board ();
       Myboard.indices bor;
-      bor
+      bor*)
     end
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
