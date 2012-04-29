@@ -71,16 +71,16 @@ let rec cross (xs:int list) (ys:int list) : (int*int) list =
 
 (* Generate a list of ints between n1 and n2 *)
 let rec range (n1:int) (n2:int) : int list = 
-  if n1 > n2 then [] else n1::range (n1+1) n2
+  if n1 > n2 then [] else n1::(range (n1+1) n2)
 
+(* Generate a list of indices within d distance of i *)
 let rec indices_within (d: int) (i: index) = 
   let (x, y) = i in
   let xlow = max 0 (x-d) in
   let ylow = max 0 (y-d) in
   let xhigh = min (world_size-1) (x+d) in
   let yhigh = min (world_size-1) (y+d) in
-    cross (range xlow xhigh) 
-		      (range ylow yhigh)
+    cross (range xlow xhigh) (range ylow yhigh)
 
 (** Prints the color of a space **)
 let print_occ c = match c with
