@@ -102,16 +102,17 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       if (B.isWin b == Some Black) || (ttype = StraightFour) then 
         Win(b, t, t::tlist)
       else if (B.isWin b = Some White) || (B.nextWhiteWin b) then
-	Loss
+	      Loss
       else
-	let threatList = 
-	if List.exists 
-	  (fun wt -> let Threat(wttype, _, _, _) = wt in wttype = StraightFour)
-	  (B.getWhiteThreats b) then
-	  get_dependent_four_threats b t
-	else
-	  get_dependent_threats b t
-	in
+	      let threatList = 
+	        if List.exists 
+	          (fun wt -> let Threat(wttype,_,_,_) = wt in wttype = StraightFour)
+	          (B.getWhiteThreats b) 
+          then
+	          get_dependent_four_threats b t
+	        else
+	          get_dependent_threats b t
+	      in
           if threatList = [] then 
             Leaf(b, t)      
           else
