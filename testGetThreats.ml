@@ -3,7 +3,9 @@ open Boardstuffs
 open Threats
 
 (* There are 20 different kinds of scenarios that would lead to a threat 
-	These can occur in all 4 directions *)
+	These can occur in all 4 directions 
+	80 scenarios were tested total *)
+let successful : int ref = ref 0
 
 let run_tests_horizontal () =
 	let bor = Myboard.empty in
@@ -72,27 +74,46 @@ let run_tests_horizontal () =
 		let bor20 = Myboard.insertspecial bor20 (10,12) Black in
 
 
-
 	assert (List.length (Myboard.getThreats bor1) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor2) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor3) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor4) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor5) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor6) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor7) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor8) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor9) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor10) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor11) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor12) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor13) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor14) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor15) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor16) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor17) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor18) = 3);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor19) = 3);
-	assert (List.length (Myboard.getThreats bor20) = 4)
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1
 
 let run_tests_vertical () =
 	let bor = Myboard.empty in
@@ -163,25 +184,45 @@ let run_tests_vertical () =
 
 
 	assert (List.length (Myboard.getThreats bor1) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor2) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor3) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor4) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor5) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor6) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor7) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor8) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor9) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor10) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor11) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor12) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor13) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor14) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor15) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor16) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor17) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor18) = 3);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor19) = 3);
-	assert (List.length (Myboard.getThreats bor20) = 4)
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1
 
 
 let run_tests_diagright () =
@@ -253,25 +294,45 @@ let run_tests_diagright () =
 
 
 	assert (List.length (Myboard.getThreats bor1) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor2) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor3) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor4) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor5) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor6) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor7) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor8) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor9) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor10) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor11) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor12) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor13) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor14) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor15) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor16) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor17) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor18) = 3);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor19) = 3);
-	assert (List.length (Myboard.getThreats bor20) = 4)
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1
 
 let run_tests_diagleft () =
 	let bor = Myboard.empty in
@@ -342,27 +403,50 @@ let run_tests_diagleft () =
 
 
 	assert (List.length (Myboard.getThreats bor1) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor2) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor3) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor4) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor5) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor6) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor7) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor8) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor9) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor10) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor11) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor12) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor13) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor14) = 1);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor15) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor16) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor17) = 2);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor18) = 3);
+	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor19) = 3);
-	assert (List.length (Myboard.getThreats bor20) = 4)
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1
 
 let _ = run_tests_horizontal ();
 		run_tests_vertical ();
 		run_tests_diagright ();
 		run_tests_diagleft ();
+		print_string "\nSuccessful passed: ";
+		print_int !successful;
+		print_string " tests.\n\n";
