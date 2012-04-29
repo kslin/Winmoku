@@ -50,6 +50,10 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
   let branchingfactor = 10
 
   let heuristic board = 
+    let x1, y1 = B.getNeighbors board in
+    let x2 = float_of_int x1 in
+    let y2 = float_of_int y1 in
+      (x2 -. y2)/(x2 +. y2)
 
   let rec gen_tree depth index board = 
     if depth > 0 then
