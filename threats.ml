@@ -121,15 +121,14 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     let next_winning_move (tr: tree) = 
       match evaluate_tree tr with
-	| None -> None
-	| Some _ ->
-	  (match tr with
-	    | Win(b, t, tlist) -> Some t
-	    | Leaf(b, t) -> None
-	    | Node(b, t, tlist) -> Some t
-	    | Loss -> None
-	  )
-	    
+	    | None -> None
+	    | Some _ ->
+	      (match tr with
+	       | Win(b, t, tlist) -> Some t
+	       | Leaf(b, t) -> None
+	       | Node(b, t, tlist) -> Some t
+	       | Loss -> None
+	      )
 
     let rec merge tree1 tree2 = tree1
     
@@ -149,19 +148,19 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     (* Check if index is worth evaluating for hidden_threats *)
     let check_index (b: board) (i: index) : bool = 
-      if (B.get b i) == Unocc then  
-        let coords = indices_within 3 i in
+      if (B.get b i) == Unocc then 
+        let coords = Boardstuffs.indices_within 3 i in
         let rec count_color (ilist: index list) (color: occupied) =
           match ilist with
           | [] -> 0
-          | hd::tl -> (if B.get b i = color then 1 + (count_color tl color)
-                     else (count_color tl color))
+          | hd::tl -> (if (B.get b hd) == color then 1 + (count_color tl color)
+                       else (count_color tl color))
         in
           if (count_color coords Black) + (count_color coords White) == 0 then 
             false
-          else
-            if get_threats (B.insert b i) != [] then true
-            else false
+          else 
+            if get_threats (B.insertspecial b i Black) != [] then true
+            else false  
       else false 
     
     let hidden_threats (b: board) =
