@@ -63,7 +63,7 @@ let threatseq2b0 (b:Myboard.board) =
 
 let threatseq2a0 (b:Myboard.board) =
 	let b1 = Myboard.insertspecial b (7,11) Black in
-	(*let b1 = Myboard.insertspecial b1 (5,11) Black in*)
+	let b1 = Myboard.insertspecial b1 (5,11) Black in
 	let b1 = Myboard.insertspecial b1 (6,12) Black in
 	let b1 = Myboard.insertspecial b1 (7,13) Black in
 	let b1 = Myboard.insertspecial b1 (9,13) Black in
