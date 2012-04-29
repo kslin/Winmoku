@@ -201,7 +201,9 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y < ((world_size+6) * obj_width)))
   then 
     (match (evaluate_board b) with
-      | None -> (win_seq := []); ()
+      | None -> 
+      	print_string "None\n"; flush_all ();
+      	win_seq := []; ()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
       (displaythreats := true);
@@ -230,10 +232,11 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq2a bor in
+      let newbor = threatseq4 bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
+      print_tuple (Myboard.getNeighbors newbor);
       newbor
       (*draw_board ();
       newbor

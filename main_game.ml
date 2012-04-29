@@ -1,18 +1,10 @@
-(* Main.ml Description:                 *
- * Call draw: Draw will take user input, and return a board                 *
- * Call board: Find all threats on board from draw; create a list of board, *
- * threat pairs.                  *
- * Call on each pair in the list:             *
- * (1) gen_threat_tree                  *
- * (2) evaluate_tree                    *
- * from tree. If (2) evaluates to a winning sequence, create new board with *
- * first move from that sequence, and send board to draw.                   *)
+(* This version of the game allows people to play each other.
+   It does not evaluate threats *)
 
 open Board
 open ImportImage
 open GUI
 open Boardstuffs
-open Threats
 open Mainhelpers
 
 (* Stores the color *)
@@ -55,31 +47,6 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   then b
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
-(*)
-(* Evaluate board function *)
-let evaluate_board board =
-  let threatlist = BThreats.get_threats board in
-  let update_board threat = 
-    let Threat(_, (x,y), a, _) = threat in
-      (print_string ((string_of_int x) ^ "," ^ (string_of_int y) ^ ":");
-       flush_all ();
-       List.map (fun z -> let (c,d) = z in
-       begin  
-         print_string ((string_of_int c) ^ "," ^ (string_of_int d) ^ "|");
-         flush_all ();
-       end) a;
-      ((Myboard.insertspecial board (x,y) Black), threat))
-  in 
-  let boardlist = List.map update_board threatlist in
-  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y)) 
-                          boardlist in 
-  let rec win tlist =   
-    match tlist with 
-    | [] -> false
-    | hd::tl -> (BThreats.evaluate_tree hd) || (win tl)
-  in
-    win treelist
-  *)    
 
 (*  button for eval function *)
 let debug_button_eval () =
@@ -91,16 +58,7 @@ let debug_button_eval () =
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   debug_button_eval ()
-(*)
-(* A handles clicks to to run functions in the area above the board: 
-  debugging function, change piece color *)
-let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
-  if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
-    && (y < ((world_size+6) * obj_width)))
-  then (let result = evaluate_board b in
-        print_string (string_of_bool result); flush_all ())
-  else ()
-*)
+
 (* Run the board *)
 let test_board () =
   GUI.run_game
@@ -142,6 +100,8 @@ let test_board () =
             let threats = Myboard.getThreats newbor in
             switch_color ();
             Graphics.clear_graph ();
+            (* Checks if the board has a winning sequence 
+              Stops the game and prints the winner if there is a win *)
             (match Myboard.isWin newbor with
               |None -> ()
               |Some s -> 
@@ -158,13 +118,6 @@ let test_board () =
             debug_board ();
             draw_board ();
             Myboard.indices newbor;
-            List.iter (print_threats) threats;
-            print_string "threats: "; print_int (List.length threats);
-            print_string "\n";
-            (match Myboard.nextWin newbor with
-              |None -> print_string "None \n"
-              |Some s -> print_index s);
-            flush_all ();
             newbor
           )
         )

@@ -1,3 +1,5 @@
+(* This file contains files with known threat sequences for testing *)
+
 open Board
 open Boardstuffs
 

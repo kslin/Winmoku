@@ -66,6 +66,14 @@ let rec print_index_list il = match il with
         print_string "; ";
         print_index_list tl
 
+let print_tuple t = let (x,y) = t in
+    print_string "(";
+    print_int x;
+    print_string ", ";
+    print_int y;
+    print_string ") ";
+    flush_all () 
+
 (** Sorts a list of tuples **)
 let tuple_sort (lst: index list) = 
         List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 

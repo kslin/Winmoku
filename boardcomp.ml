@@ -39,6 +39,10 @@ sig
     (* Determines if there can be a win the next turn *)
     val nextWin : boardcomp -> index option
 
+    (* Returns a score regarding the number of groups of black 
+        and white pieces *)
+    val getNeighbors : boardcomp -> int*int
+
 end
 
 (* Arguments to construct a BOARDCOMP *)
@@ -238,6 +242,8 @@ struct
     (***********************************)
     (*** Helper functions for insert ***)
     (***********************************)
+
+    (* Inserts a specified piece color into an occupied list list *)
     let insertPieces (lst: occupied list list) (ci:index) (c:occupied) =
         let (x,y) = ci in 
         let rec insertRows rows row =
@@ -247,6 +253,8 @@ struct
                     else hd::(insertRows tl (row+1))
         in insertRows lst 0
 
+    (* Determine if pieces next to a space are the same color
+       Returns neighbors of the same color *)
     let getNeighbors (b:boardcomp) (ci:index) (c:occupied): 
         (index option)*(index option) = 
         let (x,y) = ci in
@@ -265,7 +273,9 @@ struct
                 |(true, false) -> (Some (x,y-1), None)
                 |_ -> (Some (x,y-1), Some (x,y+1))  ))
 
-    let addNeighbors (neighlist: index list list) (ci1: index) (ci2:index) =
+    (* If ci1 is already part of a neighbor list, add ci2 to that list
+       Otherwise, make both into a new neighbor list *)
+    let addNeighbors (neighlist: index list list) (ci1: index) (ci2:index) =   
         let rec findneighlist lst =
             match lst with 
                 |[] -> (tuple_sort(ci1::ci2::[]))::neighlist
@@ -274,6 +284,9 @@ struct
                     else hd::(findneighlist tl)
         in findneighlist neighlist
 
+    (* If ci1 or ci3 are part of neighbor lists, add the other to that list
+       If both are in a neighbor list, merge the two lists
+       If neither are, make a new neighbor list *)
     let addMultNeighbors (neighlist: index list list) 
                     (ci1: index) (ci2: index) (ci3: index) =
         let rec findneighlist lst isfirst isthird rest =
@@ -344,7 +357,8 @@ struct
             |(false, true) -> Some White
             |(true, true) -> raise ERROR
 
-    (* Helper function for getThreats, handles the three-in-a-row *)
+    (* Helper function for getThreats, determins if a three-in-a-row 
+        contains threats, returns the threats *)
     let handle_threes (bor:boardcomp) (threes: index list) : threat list =
         match threes with
             |(x1,y1)::(x2,y2)::(x3,y3)::[] -> let (a,b,c,d) = 
@@ -376,7 +390,8 @@ struct
                     |_ -> [])
             |_ -> raise ERROR
 
-    (* Helper function for getThreats, handles the two-in-a-row *)
+    (* Helper function for getThreats, determins if a twho-in-a-row 
+        contains threats, returns the threats *)
     let handle_twos (bor:boardcomp) (twos: index list) : threat list = 
         match twos with
             |(x1,y1)::(x2,y2)::[] -> let (a,b,c,d,e,f) = 
@@ -455,7 +470,8 @@ struct
                     |_ -> [])
             |_ -> raise ERROR
 
-    (* Helper function for getThreats, handles the singleton *)
+    (* Helper function for getThreats, determins if a singleton 
+        contains threats, returns the threats *)
     let handle_ones (bor:boardcomp) (lst: index list) : threat list = 
         match lst with
             |(x,y)::[] -> let (a,b,c,d,e,f) = 
@@ -591,9 +607,14 @@ struct
                     |None -> checkNeighbors tl c
                     |Some s -> Some s)
                 |_ -> checkNeighbors tl c
-        in match checkNeighbors bn Black with
-            |None -> checkNeighbors wn White
-            |Some s -> Some s
+        in checkNeighbors bn Black 
+
+    let getNeighbors (b:boardcomp) : int*int =
+        let (_,_,bn,wn) = b in
+        let rec addNeighbors lst score = match lst with
+            |[] -> score
+            |hd::tl -> addNeighbors tl (score + (List.length hd) - 1)
+        in (addNeighbors bn 0, addNeighbors wn 0)
 
     
 

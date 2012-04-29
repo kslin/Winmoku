@@ -47,17 +47,28 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
 
   let depth = 1
 
-  let branchingfactor = 10
+  let branchingfactor = 5
 
-  let heuristic board = 1.0
+  let heuristic board =
+    let b1 = List.length (B.getThreats board) in
+    let b2 = float_of_int b1 in
+    let w1 = List.length (B.getWhiteThreats board) in
+    let w2 = float_of_int w1 in 
+    let x1, y1 = B.getNeighbors board in
+    let x2 = float_of_int x1 in
+    let y2 = float_of_int y1 in
+      ((x2 -. y2)/.(x2 +. y2 +. 1.0))*. 0.5 
+      +. ((b2 -. w2)/.(b2 +. w2 +. 1.0)) *. 0.5
 
   let rec gen_tree depth index board = 
     if depth > 0 then
+      let h = if ((depth mod 2) = 1) then (fun x -> -. heuristic x)
+              else heuristic in
       let range = Boardstuffs.range 0 (Boardstuffs.world_size - 1) in
       let coords = Boardstuffs.cross range range in
       let sorter index = 
         if (B.get board index != Unocc) then -1.0
-        else heuristic (B.insert board index)
+        else h (B.insert board index)
       in
       let candidates = List.filter (fun x -> (sorter x) > -1.0) coords in
       let sorted_cand = List.sort (fun x y -> compare (sorter x) (sorter y))
@@ -72,39 +83,47 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
       let moves = take sorted_cand branchingfactor in
       let boards = List.map (fun x -> ((B.insert board x), Some x)) moves in
       let trees = List.map (fun (x, y) -> gen_tree (depth - 1) y x) boards in
-        if trees == [] then Leaf(board, index, None)
+        if trees = [] then Leaf(board, index, None)
         else Node(board, index, trees, None)
     else
       Leaf(board, index, None)
 
   let rec minimax tree =
-    let h = if (depth mod 2 == 1) then (fun x -> -.(heuristic x)) else heuristic
+    let h = if ((depth mod 2) = 1) then (fun x -> -.(heuristic x)) else heuristic
     in
     match tree with
     | Leaf(board, index, _) -> Leaf(board, index, Some (h board)) 
     | Node(board, index, tlist, value) -> 
-      (let value = List.fold_left max (-1.0) 
-                    (List.map (fun x -> match (minimax x) with
+      (let ntlist = List.map minimax tlist in
+       let value = List.fold_left max (-1.0) 
+                    (List.map (fun x -> match x with
                                         | Leaf(_, _, Some v) -> -.v
                                         | Node(_, _, _, Some v) -> -.v)
-                              tlist) 
+                               ntlist) 
        in
-         Node(board, index, tlist, Some value))
+         Node(board, index, ntlist, Some value))
   
+  let rec print_treelist tlist = 
+    match tlist with
+    | hd::tl -> (match hd with
+                 | Leaf(_, _, Some v) -> (print_float v; print_treelist tl)
+                 | Node(_, _, _, Some v) -> (print_float v; print_treelist tl))
+    | [] -> print_string "||||"
+
   let next_move tree =
     match tree with
     | Leaf(_, _, _) -> None
     | Node(_, _, tlist, Some value) ->
       (let lst = (List.filter (fun x -> match x with
-                                        | Leaf(_, _, Some v) ->(v == -.value)
-                                        | Node(_, _, _, Some v) ->(v == -.value)                                        | _ -> false)
+                                        | Leaf(_,_,Some v) -> (v = (-.value))
+                                        | Node(_,_,_,Some v) -> (v = (-.value)))
                               tlist) 
        in
          match lst with
-         | [] -> (print_string "broken"; None)
-         | hd::tl -> (match hd with
-                      | Leaf(_,index,_) -> index  
-                      | Node(_,index, _, _) -> index))
+         | [] -> (print_treelist tlist; print_string "|"; print_float value; flush_all (); None)
+         | hd::tl -> (print_treelist tlist; print_string "|"; print_float value; flush_all (); match hd with 
+               | Leaf(_,index,_) -> index  
+               | Node(_,index, _, _) -> index))
 
 end
 
