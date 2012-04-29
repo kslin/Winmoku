@@ -8,9 +8,14 @@ CAMLDOC = ocamldoc
 %.cmo: %.ml
 	$(CAMLC) $(CAMLFLAGS) -c $<
 
+TESTFILES = \
+	boardstuffs.ml \
+	boardcomp.ml \
+	board.ml 
+
 FILES = \
 	event.ml \
-	ImportImage.ml\
+	ImportImage.ml \
 	boardstuffs.ml \
 	boardcomp.ml \
 	board.ml \
@@ -18,10 +23,21 @@ FILES = \
 	threats.ml \
 	mainhelpers.ml
 
+TESTOBJECTS = $(TESTFILES:.ml=.cmo)
 
 OBJECTS = $(FILES:.ml=.cmo)
 
 all: clean run_basic
+
+tests: clean run_tests
+
+$(PROG)_tests: $(OBJECTS) testGetThreats.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(TESTOBJECTS) testGetThreats.cmo -o $(PROG)_tests
+
+build_tests: $(PROG)_tests
+
+run_tests: build_tests
+	@./$(PROG)_tests
 
 $(PROG)_basic: $(OBJECTS) main.cmo
 	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(OBJECTS) main.cmo -o $(PROG)_basic

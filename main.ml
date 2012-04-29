@@ -26,6 +26,9 @@ let displaythreats = ref false
 (* Stores if we're playing next move *)
 let displaymove = ref false
 
+(* Stores if there is a straight four *)
+let board_four = ref false
+
 (* Stores the winning threat after board has been set *)
 let win_seq = ref []
 
@@ -93,23 +96,23 @@ let button_eval () =
 
 let button_threat () =
   Graphics.set_color Graphics.blue;
-  Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
-  Graphics.draw_string "Show Threats";
-  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) 
+  Graphics.moveto  (obj_width *4) ((world_size+6) * obj_width);
+  Graphics.draw_string "Win Threats";
+  Graphics.fill_rect (obj_width*4) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width)
 
 let button_playalgo () = 
   Graphics.set_color Graphics.green;
-  Graphics.moveto  (obj_width *9) ((world_size+6) * obj_width);
+  Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
   Graphics.draw_string "Play Algo";
-  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 let button_nextmove () = 
   Graphics.set_color Graphics.magenta;
-  Graphics.moveto  (obj_width *13) ((world_size+6) * obj_width);
+  Graphics.moveto  (obj_width *10) ((world_size+6) * obj_width);
   Graphics.draw_string "Next Move";
-  Graphics.fill_rect (obj_width*13) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*10) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 
@@ -150,7 +153,8 @@ let play_next bor =
   match (!win_seq) with
   | [] -> (print_string "no more winning moves"; flush_all()); bor
   | h::t -> 
-    if fst h then ((print_string "straight four!"; flush_all()); bor)
+    if fst h then (board_four := true;
+      (print_string "straight four!"; flush_all()); bor)
     else ((win_seq := t); insertlist bor (snd h))
 
 (* displays threats when given a list of threats *)
@@ -171,12 +175,12 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         | None -> (print_string "None\n"; flush_all();)
         | Some tlist -> print_threatlist tlist)
   (* shows current threats on the game display *)
-  else if ((x > obj_width * 5) && (x < 7 * obj_width) 
+  else if ((x > obj_width * 4) && (x < 6 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (displaythreats := true)
   (* plays the winning sequence after the board is set *)
-  else if ((x > obj_width * 9) && (x < 11 * obj_width) 
+  else if ((x > obj_width * 7) && (x < 9 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
@@ -188,7 +192,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
       (print_string "got threats in seq"; flush_all ())))
   (* plays the next move in the winning sequence determined when the board
   was set *)
-  else if ((x > obj_width * 13) && (x < 15 * obj_width) 
+  else if ((x > obj_width * 10) && (x < 12 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then
@@ -219,6 +223,7 @@ let test_board () =
       Graphics.clear_graph ();
       piece_color := Unocc;
       won_board := false;
+      board_four := false;
       Graphics.clear_graph ();
       draw_board ();
       debug_board ();
@@ -238,12 +243,17 @@ let test_board () =
             Graphics.clear_graph ();
             draw_board ();
             debug_board ();
-            Myboard.indices bor;  
+            Myboard.indices bor;              
             (if (!displaythreats) then
-              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width)));
+              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width))
+              );            
             (if (!displaymove) then 
               (let newbor = (play_next bor) in Myboard.indices newbor; 
-                displaymove := false; newbor)
+                displaymove := false; 
+                (if (!board_four) then ((Graphics.set_color Graphics.red);
+                (Graphics.moveto (obj_width * 15) ((world_size+4) * obj_width));
+                (Graphics.draw_string "STRAIGHT FOUR!!!")));
+                newbor)
               else bor)
           )
           (* If mouse clicks on board area, make a move *)          
