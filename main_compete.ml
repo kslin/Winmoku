@@ -14,6 +14,7 @@ open GUI
 open Boardstuffs
 open Threats
 open Mainhelpers
+open Minimax
 
 (* Stores if current board already won *)
 let won_board = ref false
@@ -46,7 +47,10 @@ let evaluate_board board =
                      Some tgain)
   | None -> (match BThreats.hidden_threats board with
              | hd::tl -> Some hd
-             | [] -> None ) 
+             | [] -> 
+               (let tree1 = GMinimax.gen_tree (GMinimax.depth) None board in
+                let tree2 = GMinimax.minimax tree1 in
+                (print_string "minimax"; GMinimax.next_move tree2))) 
 
 (*  button for eval function *)
 let debug_button_eval () =

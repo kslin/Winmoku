@@ -89,7 +89,7 @@ let evaluate_board board = BThreats.evaluate_board board
 
 (*  button for eval function *)
 let button_eval () =
-  Graphics.set_color Graphics.red;
+  Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
   Graphics.draw_string "Debug eval";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) 
@@ -103,24 +103,22 @@ let button_threat () =
     (2 * obj_width) (obj_width)
 
 let button_playalgo () = 
-  Graphics.set_color Graphics.green;
+  Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
-  Graphics.draw_string "Play Algo";
+  Graphics.draw_string "Get Win";
   Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 let button_nextmove () = 
-  Graphics.set_color Graphics.magenta;
+  Graphics.set_color Graphics.green;
   Graphics.moveto  (obj_width *10) ((world_size+6) * obj_width);
-  Graphics.draw_string "Next Move";
+  Graphics.draw_string "Play Win";
   Graphics.fill_rect (obj_width*10) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
-
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   button_eval ();
-  button_threat ();
   button_playalgo ();
   button_nextmove ()
 
@@ -164,13 +162,27 @@ let rec print_threatlist tlist =
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
-let rec string_of_winseq wlist = 
-  ()
+let rec print_pairs l = 
+  match l with
+  | [] -> ""
+  | (i, c)::[] -> (string_of_occ c) ^ (string_of_index i)
+  | (i, c)::t -> (string_of_occ c) ^ (string_of_index i) ^ "," ^ 
+                 (print_pairs t)
 
 let threat_display () = 
-  Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width);
+  let rec show_threat l num =
+    match l with
+    | [] -> ()
+    | (b, lst)::t -> 
+      (Graphics.moveto ((world_size+4)*obj_width) (num*obj_width));
+      (Graphics.draw_string (print_pairs lst));
+      (Graphics.set_color Graphics.black);
+      (show_threat t (num-1)) in
   Graphics.set_color Graphics.red;
-  Graphics.draw_string "TESTTT"
+  if !win_seq = [] then
+    ((Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
+    (Graphics.draw_string "No winning sequence")) else
+    (show_threat (!win_seq) (world_size+7))
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -183,18 +195,13 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
         match result with
         | None -> (print_string "None\n"; flush_all();)
         | Some tlist -> print_threatlist tlist)
-  (* shows current threats on the game display *)
-  else if ((x > obj_width * 4) && (x < 6 * obj_width) 
-    && (y > ((world_size+5) * obj_width)) 
-    && (y < ((world_size+6) * obj_width)))
-  then (displaythreats := true)
   (* gets the winning sequence after the board is set *)
   else if ((x > obj_width * 7) && (x < 9 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
     (match (evaluate_board b) with
-      | None -> ()
+      | None -> (win_seq := []);()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
       (displaythreats := true);
