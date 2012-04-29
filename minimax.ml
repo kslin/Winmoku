@@ -96,8 +96,8 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
     | Leaf(_, _, _) -> None
     | Node(_, _, tlist, Some value) ->
       (let lst = (List.filter (fun x -> match x with
-                                        | Leaf(_, _,Some v) ->(v == -.value)
-                                        | Node(_, _, _,Some v) ->(v == -.value))
+                                        | Leaf(_, _, Some v) ->(v == -.value)
+                                        | Node(_, _, _, Some v) ->(v == -.value)                                        | _ -> false)
                               tlist) 
        in
          match lst with
