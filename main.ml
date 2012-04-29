@@ -15,11 +15,13 @@ open Boardstuffs
 open Threats
 open Mainhelpers
 
-(* Stores the color *)
 let piece_color = ref (Unocc)
 
 (* Stores if current board already won *)
 let won_board = ref false
+
+(* Stores if we're displaying threats *)
+let displaythreats = ref false
 
 (* Displays the player currently making a move *)
 let board_player () = 
@@ -50,23 +52,6 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
-(* Evaluate board function *)
-let evaluate_board board =
-  let threatlist = BThreats.get_threats board in
-  let update_board threat = 
-    ((BThreats.gen_new_board board threat), threat)
-  in 
-  let boardlist = List.map update_board threatlist in
-  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
-                          boardlist in 
-  let rec win tlist =   
-    match tlist with 
-    | [] -> None
-    | hd::tl -> (let result = BThreats.evaluate_tree hd in 
-		 if result = None then (win tl) else result)
-  in
-    win treelist
-
 let winning_move board = 
   let threatlist = BThreats.get_threats board in
   let update_board threat = 
@@ -83,42 +68,84 @@ let winning_move board =
   in
     win treelist
       
+(* Evaluate board function *)
+
+let evaluate_board board = BThreats.evaluate_board board
 
 (*  button for eval function *)
-let debug_button_eval () =
+let button_eval () =
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug function eval";
+  Graphics.draw_string "Debug eval";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
 
-let debug_button_threat () =
+let button_threat () =
   Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug function threat";
+  Graphics.draw_string "Show Threats";
   Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+
+let button_playalgo () = () (*
+  Graphics.set_color Graphics.green;
+  Graphics.moveto  (obj_width *9) ((world_size+6) * obj_width);
+  Graphics.draw_string "Play Algo";
+  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width) *)
+
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  debug_button_eval ();
-  debug_button_threat ()
+  button_eval ();
+  button_threat ();
+  button_playalgo ()
+
+let rec play_sequence b tlist =
+  let rec insertwlist b ilist = 
+    match ilist with
+    | [] -> b
+    | hd::tl -> insertwlist (Myboard.insertspecial b hd White) tl
+  in
+    match tlist with
+    | [] -> []
+    | Threat(_,tgain,tcost, _)::tl -> 
+      (let bor1 = Myboard.insertspecial b tgain Black in
+        (Myboard.indices bor1;
+         (let bor2 = insertwlist bor1 tcost in
+            (Myboard.indices bor2;
+             tl))))
+        
+                                     
 
 let rec print_threatlist tlist = 
   match tlist with
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
+let print_gainlist_screen glist = 
+  match glist with
+  | [] -> ()
+  | h::t -> (Graphics.rmoveto 0 (-obj_width));(Graphics.draw_string (gain_string h))
+
+
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
+  (* runs eval board function *)
   if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
         match result with
         | None -> (print_string "None"; flush_all();)
         | Some tlist -> print_threatlist tlist)
+  (* shows current threats on the game display *)
+  else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
+    && (y < ((world_size+6) * obj_width)))
+  then ((print_string "button working";flush_all());
+    (displaythreats := true);)
+  (* changes player to white *)
   else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
+  (* changes player to black *)
   else if ((x > (2 *obj_width)) && (x < 3 * obj_width) && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width))) 
   then ((piece_color := Black))
@@ -158,6 +185,9 @@ let test_board () =
             draw_board ();
             debug_board ();
             Myboard.indices bor;
+            (if (!displaythreats) then
+              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width));
+              (print_gainlist_screen bor));
             bor
           )
           (* If mouse clicks on board area, make a move *)          

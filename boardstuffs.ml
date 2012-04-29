@@ -62,7 +62,27 @@ let rec print_index_list il = match il with
 let tuple_sort (lst: index list) = 
         List.sort (fun (x1,y1) (x2,y2) -> y1 - y2) lst 
 
-(* Prints the color of a space *)
+(* Create list of all tuples of the form (x,y) where x is from xs and
+ * and y is from ys *)
+let rec cross (xs:int list) (ys:int list) : (int*int) list = 
+  match xs with
+  | [] -> []
+  | hd::tl -> List.map (fun y -> (hd,y)) ys @ cross tl ys
+
+(* Generate a list of ints between n1 and n2 *)
+let rec range (n1:int) (n2:int) : int list = 
+  if n1 > n2 then [] else n1::range (n1+1) n2
+
+let rec indices_within (d: int) (i: index) = 
+  let (x, y) = i in
+  let xlow = max 0 (x-d) in
+  let ylow = max 0 (y-d) in
+  let xhigh = min (world_size-1) (x+d) in
+  let yhigh = min (world_size-1) (y+d) in
+    cross (range xlow xhigh) 
+		      (range ylow yhigh)
+
+(** Prints the color of a space **)
 let print_occ c = match c with
         |Black -> print_string " Black "; flush_all ()
         |White -> print_string " White "; flush_all ()
@@ -113,14 +133,49 @@ let print_threats t = match t with
     |Threat(Five,g,c,r) ->
         print_string "Threat: Five gain = ";
         print_index g ;
-	print_string ", cost = ";
-	print_index_list c;
-	print_string ", rest = ";
-	print_index_list r;
-	print_string "\n"
+	    print_string ", cost = ";
+	    print_index_list c;
+	    print_string ", rest = ";
+	    print_index_list r;
+	    print_string "\n"
 
 (** Prints a list of threats **)
 let rec print_threat_list tl = match tl with
     |[] -> ()
     |hd::tl -> print_threats hd;
         print_threat_list tl
+
+(** Gets string form of index **)
+let get_string_i i = let (x,y) = i in
+    "(" ^
+    (List.nth letters x) ^
+    ", " ^
+    (string_of_int (y+1)) ^
+    ") "
+
+(** Prints gains **)
+let gain_string t = match t with
+    |Threat(StraightFour,g,c,r) -> 
+        "Threat: Straight Four gain = " ^
+        (get_string_i g) ^
+        "\n"
+    |Threat(Four,g,c,r) ->
+        "Threat: Four gain = " ^
+        (get_string_i g) ^
+        "\n"
+    |Threat(Three,g,c,r) ->
+        "Threat: Three gain = " ^
+        (get_string_i g) ^
+        "\n"
+    |Threat(SplitThree,g,c,r) ->
+        "Threat: Split Three gain = " ^
+        (get_string_i g) ^
+        "\n"
+    |Threat(WallThree,g,c,r) ->
+        "Threat: Wall Three gain = " ^
+        (get_string_i g) ^
+        "\n"
+    |Threat(Five,g,c,r) ->
+        "Threat: Five gain = " ^
+        (get_string_i g) ^
+        "\n"
