@@ -38,6 +38,9 @@ sig
   (* Evaluates the tree to see if it results in a winning threat sequence *)
   val evaluate_tree : tree -> threats option
 
+  (* Outputs the next threat if there is a winning threat sequence *)
+  val next_winning_move : tree -> threat option
+
   (* Merges two independent trees into one tree *)  
   val merge : tree -> tree -> tree
 
@@ -105,6 +108,15 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | Win(b, t, tlist) -> Some tlist
         | Leaf(b, t) -> None 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
+
+    let next_winning_move (tr: tree) = 
+      match evaluate_tree tr with
+	| None -> None
+	| Some _ ->
+	  (match tr with
+	    | Win(b, t, tlist) -> Some t
+	    | Leaf(b, t) -> None
+	    | Node(b, t, tlist) -> Some t)
 
     let rec merge tree1 tree2 = tree1
 end

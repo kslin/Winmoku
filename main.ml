@@ -62,8 +62,24 @@ let evaluate_board board =
   let rec win tlist =   
     match tlist with 
     | [] -> None
-    | hd::tl -> (if BThreats.evaluate_tree hd = None then (win tl)
-                else BThreats.evaluate_tree hd)
+    | hd::tl -> (let result = BThreats.evaluate_tree hd in 
+		 if result = None then (win tl) else result)
+  in
+    win treelist
+
+let winning_move board = 
+  let threatlist = BThreats.get_threats board in
+  let update_board threat = 
+    ((BThreats.gen_new_board board threat), threat)
+  in 
+  let boardlist = List.map update_board threatlist in
+  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
+                          boardlist in 
+  let rec win tlist =   
+    match tlist with 
+    | [] -> None
+    | hd::tl -> (let result = BThreats.next_winning_move hd in
+		 if result = None then (win tl) else result)
   in
     win treelist
       
