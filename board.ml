@@ -34,6 +34,9 @@ sig
     (* Determines if the board has a win next turn *)
 	val nextWin : board -> index option
 
+    (* Determines if the board has a win for white next turn *)
+        val nextWhiteWin : board -> bool
+
     (* Draws the pieces *)
 	val indices : board -> unit
 
@@ -128,8 +131,7 @@ struct
       flip_board p 0 0 empty
 
     let getWhiteThreats (b:board) : threat list = 
-      let flipped_b = flipColor b in
-      getThreats flipped_b
+      getThreats (flipColor b)
 
     let nextWin (b:board) : index option =
         let (_,_,h,v,dr,dl) = b in
@@ -140,6 +142,11 @@ struct
                 |None -> match DiagRightBoard.nextWin dr with
                     |Some s -> Some s
                     |None -> DiagLeftBoard.nextWin dl
+
+    let nextWhiteWin (b:board): bool = 
+      match nextWin (flipColor b) with
+	| None -> false
+	| Some _ -> true
 
     (************************************)
     (*** Helper functions for indices ***)
