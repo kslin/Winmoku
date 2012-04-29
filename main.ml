@@ -223,11 +223,15 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq1 bor in
+      (*let newbor = threatseq1 bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
-      newbor
+      newbor*)
+      draw_board ();
+      debug_board ();
+      Myboard.indices bor;
+      bor
     end
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
@@ -270,6 +274,7 @@ let test_board () =
           else (
             let newbor = respond_click bor i in
             let threats = Myboard.getThreats newbor in
+            print_threat_list threats;
             (match Myboard.isWin newbor with
               |None -> ()
               |Some s -> 

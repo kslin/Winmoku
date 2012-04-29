@@ -25,3 +25,37 @@ let threatseq1 (b:Myboard.board) =
 	let b1 = Myboard.insertspecial b1 (12,8) White in
 	let b1 = Myboard.insertspecial b1 (11,9) White in
 	b1
+
+let threatseq2 (b:Myboard.board) =
+	let b1 = Myboard.insertspecial b (10,10) Black in
+	let b1 = Myboard.insertspecial b1 (11,9) Black in
+	let b1 = Myboard.insertspecial b1 (12,9) Black in
+	let b1 = Myboard.insertspecial b1 (12,11) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,11) White in
+	let b1 = Myboard.insertspecial b1 (9,10) White in
+	let b1 = Myboard.insertspecial b1 (9,9) White in
+	let b1 = Myboard.insertspecial b1 (11,11) White in
+	let b1 = Myboard.insertspecial b1 (13,10) White in
+	b1
+
+let threatseq3 (b:Myboard.board) =
+	let b1 = Myboard.insertspecial b (10,10) Black in
+	let b1 = Myboard.insertspecial b1 (11,9) Black in
+	let b1 = Myboard.insertspecial b1 (12,9) Black in
+	let b1 = Myboard.insertspecial b1 (12,11) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
+	let b1 = Myboard.insertspecial b1 (9,12) Black in
