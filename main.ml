@@ -104,7 +104,7 @@ let button_nextmove () =
   Graphics.set_color Graphics.magenta;
   Graphics.moveto  (obj_width *13) ((world_size+6) * obj_width);
   Graphics.draw_string "Next Move";
-  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*13) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 
@@ -117,15 +117,15 @@ let debug_board () =
 
 (* Converts a threat list (like the winning sequence) into a list of moves 
 that can be inserted into the board *)
-let rec extract_win_seq tlist winlist= 
-  let rec extract_tcost clist costlist=
+let rec extract_win_seq tlist winlist = 
+  let rec extract_tcost clist costlist =
     match clist with
-    | [] -> []
+    | [] -> costlist
     | h::t -> extract_tcost t ((h, White)::costlist) in
   match tlist with 
-  | [] -> []
+  | [] -> winlist
   | Threat(_,tgain,tcost,_)::t -> extract_win_seq t 
-    (List.append ((tgain, Black) ::(extract_tcost tcost [])) winlist)
+    (((tgain, Black) :: (extract_tcost tcost [])) :: winlist)
     
 
 (*let rec play_sequence b tlist =
@@ -142,6 +142,12 @@ let rec extract_win_seq tlist winlist=
          (let bor2 = insertwlist bor1 tcost in
             (Myboard.indices bor2;
              tl))))*)
+
+(* inserts a list of (index, occupied) into board and returns the board *)
+let rec insertlist b lst = 
+  match lst with
+  | [] -> b
+  | h::t -> insertlist (Myboard.insertspecial b (fst h) (snd h)) t
 
 (* plays the next move in the winning sequences, updates the winning sequence
 with the remaining moves. Returns the original board if no more moves *)
@@ -200,10 +206,11 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
-    ( match (evaluate_board b) with
+    (match (evaluate_board b) with
       | None -> ()
-      | Some t -> 
+      | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
+      (if l = [] then (print_string "there is no threat";flush_all()));
       (print_string "got threats in seq"; flush_all ())))
   (* plays the next move in the winning sequence determined when the board
   was set *)
@@ -253,14 +260,6 @@ let test_board () =
         else (
           if (snd i) > ceiling 
           then (
-	    (* hacky plays the next move *)
-	    if ((fst i > obj_width * 9) && (fst i < 11 * obj_width) 
-        && (snd i > ((world_size+5) * obj_width)) 
-        && (snd i < ((world_size+6) * obj_width)))
-	    then 
-	      play_move bor
-
-	    else (
             respond_click_header bor i;
             Graphics.clear_graph ();
             draw_board ();
@@ -269,7 +268,8 @@ let test_board () =
             (if (!displaythreats) then
               (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width)));
             (if (!displaymove) then 
-              (let newbor = (play_next bor) in Myboard.indices newbor; newbor)
+              (let newbor = (play_next bor) in Myboard.indices newbor; 
+                displaymove := false; newbor)
               else bor)
           )
           (* If mouse clicks on board area, make a move *)          
