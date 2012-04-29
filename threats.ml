@@ -126,7 +126,9 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	      (match tr with
 	       | Win(b, t, tlist) -> Some t
 	       | Leaf(b, t) -> None
-	       | Node(b, t, tlist) -> Some t)
+	       | Node(b, t, tlist) -> Some t
+	       | Loss -> None
+	      )
 
     let rec merge tree1 tree2 = tree1
     
