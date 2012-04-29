@@ -52,7 +52,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
-let winning_move board : (int*int) = 
+let winning_move board = 
   let threatlist = BThreats.get_threats board in
   let update_board threat = 
     ((BThreats.gen_new_board board threat), threat)
@@ -67,11 +67,11 @@ let winning_move board : (int*int) =
 		 if result = None then (win tl) else result)
   in
   match win treelist with
-    | Some Threat(_,tgain,_,_) -> tgain
+    | Some Threat(ttype,tgain,_,_) -> (ttype,tgain)
     | None -> 
       (match threatlist with
-	| [] -> (Random.int (world_size-1), Random.int (world_size-1))
-	| Threat(_,tgain,_,_)::_ -> tgain)
+	| [] -> (Three,(Random.int (world_size-1), Random.int (world_size-1)))
+	| Threat(ttype,tgain,_,_)::_ -> (ttype,tgain))
 
 (* draws buttons *)
 let button_playalgo () =
@@ -95,7 +95,7 @@ let debug_board () =
   button_playalgo ()
 
 let play_move (b:Myboard.board) : Myboard.board =
-  let win_move = winning_move b in
+  let (ttype, win_move) = winning_move b in
   let next_move = 
     match Myboard.nextWin b with
       | Some i -> i
@@ -105,9 +105,11 @@ let play_move (b:Myboard.board) : Myboard.board =
 	    let Threat(wttype,wtgain,_,_) = wt in 
 	    if wttype = StraightFour then wtgain::gains else gains)
 	  [] (Myboard.getWhiteThreats b) in
-	(match block_white with
-	  | hd :: tl -> hd
-	  | [] -> win_move)
+	(match ttype, block_white with
+	  | _,[] -> win_move
+	  | StraightFour, _ -> win_move
+	  | Four, _ -> win_move
+	  | _, hd :: tl -> hd)
   in
   print_string "Move: " ;
   print_string (string_of_int (fst next_move)) ;

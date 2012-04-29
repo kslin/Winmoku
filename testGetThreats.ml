@@ -72,6 +72,24 @@ let run_tests_horizontal () =
 		let bor19 = Myboard.insertspecial bor19 (13,12) White in
 	let bor20 = Myboard.insertspecial bor (9,12) Black in 
 		let bor20 = Myboard.insertspecial bor20 (10,12) Black in
+	let bor21 = Myboard.insertspecial bor (4,12) Black in
+		let bor21 = Myboard.insertspecial bor21 (5,12) Black in 
+		let bor21 = Myboard.insertspecial bor21 (8,12) Black in
+	let bor22 = Myboard.insertspecial bor (4,12) Black in
+		let bor22 = Myboard.insertspecial bor22 (7,12) Black in 
+		let bor22 = Myboard.insertspecial bor22 (8,12) Black in
+	let bor23 = Myboard.insertspecial bor (4,12) White in
+		let bor23 = Myboard.insertspecial bor23 (6,12) Black in 
+		let bor23 = Myboard.insertspecial bor23 (8,12) Black in
+	let bor24 = Myboard.insertspecial bor (4,12) Black in
+		let bor24 = Myboard.insertspecial bor24 (6,12) Black in 
+		let bor24 = Myboard.insertspecial bor24 (8,12) White in
+	let bor25 = Myboard.insertspecial bor (4,12) Black in
+		let bor25 = Myboard.insertspecial bor25 (6,12) Black in 
+	let bor26 = Myboard.insertspecial bor (4,12) Black in
+		let bor26 = Myboard.insertspecial bor26 (6,12) Black in 
+		let bor26 = Myboard.insertspecial bor26 (8,12) Black in
+
 
 
 	assert (List.length (Myboard.getThreats bor1) = 2);
@@ -113,6 +131,18 @@ let run_tests_horizontal () =
 	assert (List.length (Myboard.getThreats bor19) = 3);
 	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor21) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor22) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor23) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor24) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor25) = 3);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor26) = 2);
 	successful := !successful + 1
 
 let run_tests_vertical () =
@@ -180,6 +210,23 @@ let run_tests_vertical () =
 		let bor19 = Myboard.insertspecial bor19 (5,13) White in
 	let bor20 = Myboard.insertspecial bor (5,9) Black in 
 		let bor20 = Myboard.insertspecial bor20 (5,10) Black in
+	let bor21 = Myboard.insertspecial bor (12,4) Black in
+		let bor21 = Myboard.insertspecial bor21 (12,5) Black in 
+		let bor21 = Myboard.insertspecial bor21 (12,8) Black in
+	let bor22 = Myboard.insertspecial bor (12,4) Black in
+		let bor22 = Myboard.insertspecial bor22 (12,7) Black in 
+		let bor22 = Myboard.insertspecial bor22 (12,8) Black in
+	let bor23 = Myboard.insertspecial bor (12,4) White in
+		let bor23 = Myboard.insertspecial bor23 (12,6) Black in 
+		let bor23 = Myboard.insertspecial bor23 (12,8) Black in
+	let bor24 = Myboard.insertspecial bor (12,4) Black in
+		let bor24 = Myboard.insertspecial bor24 (12,6) Black in 
+		let bor24 = Myboard.insertspecial bor24 (12,8) White in
+	let bor25 = Myboard.insertspecial bor (12,4) Black in
+		let bor25 = Myboard.insertspecial bor25 (12,6) Black in 
+	let bor26 = Myboard.insertspecial bor (12,4) Black in
+		let bor26 = Myboard.insertspecial bor26 (12,6) Black in 
+		let bor26 = Myboard.insertspecial bor26 (12,8) Black in
 
 
 
@@ -222,6 +269,18 @@ let run_tests_vertical () =
 	assert (List.length (Myboard.getThreats bor19) = 3);
 	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor21) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor22) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor23) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor24) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor25) = 3);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor26) = 2);
 	successful := !successful + 1
 
 
@@ -290,6 +349,23 @@ let run_tests_diagright () =
 		let bor19 = Myboard.insertspecial bor19 (12,3) White in
 	let bor20 = Myboard.insertspecial bor (8,7) Black in 
 		let bor20 = Myboard.insertspecial bor20 (9,6) Black in
+	let bor21 = Myboard.insertspecial bor (7,12) Black in
+		let bor21 = Myboard.insertspecial bor21 (8,11) Black in 
+		let bor21 = Myboard.insertspecial bor21 (11,8) Black in
+	let bor22 = Myboard.insertspecial bor (7,12) Black in
+		let bor22 = Myboard.insertspecial bor22 (10,9) Black in 
+		let bor22 = Myboard.insertspecial bor22 (11,8) Black in
+	let bor23 = Myboard.insertspecial bor (7,12) White in
+		let bor23 = Myboard.insertspecial bor23 (9,10) Black in 
+		let bor23 = Myboard.insertspecial bor23 (11,8) Black in
+	let bor24 = Myboard.insertspecial bor (7,12) Black in
+		let bor24 = Myboard.insertspecial bor24 (9,10) Black in 
+		let bor24 = Myboard.insertspecial bor24 (11,8) White in
+	let bor25 = Myboard.insertspecial bor (7,12) Black in
+		let bor25 = Myboard.insertspecial bor25 (9,10) Black in 
+	let bor26 = Myboard.insertspecial bor (7,10) Black in
+		let bor26 = Myboard.insertspecial bor26 (9,8) Black in 
+		let bor26 = Myboard.insertspecial bor26 (11,6) Black in
 
 
 
@@ -332,6 +408,18 @@ let run_tests_diagright () =
 	assert (List.length (Myboard.getThreats bor19) = 3);
 	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor21) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor22) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor23) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor24) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor25) = 3);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor26) = 2);
 	successful := !successful + 1
 
 let run_tests_diagleft () =
@@ -399,6 +487,23 @@ let run_tests_diagleft () =
 		let bor19 = Myboard.insertspecial bor19 (13,17) White in
 	let bor20 = Myboard.insertspecial bor (9,12) Black in 
 		let bor20 = Myboard.insertspecial bor20 (10,13) Black in
+	let bor21 = Myboard.insertspecial bor (4,8) Black in
+		let bor21 = Myboard.insertspecial bor21 (5,9) Black in 
+		let bor21 = Myboard.insertspecial bor21 (8,12) Black in
+	let bor22 = Myboard.insertspecial bor (4,8) Black in
+		let bor22 = Myboard.insertspecial bor22 (7,11) Black in 
+		let bor22 = Myboard.insertspecial bor22 (8,12) Black in
+	let bor23 = Myboard.insertspecial bor (4,8) White in
+		let bor23 = Myboard.insertspecial bor23 (6,10) Black in 
+		let bor23 = Myboard.insertspecial bor23 (8,12) Black in
+	let bor24 = Myboard.insertspecial bor (4,8) Black in
+		let bor24 = Myboard.insertspecial bor24 (6,10) Black in 
+		let bor24 = Myboard.insertspecial bor24 (8,12) White in
+	let bor25 = Myboard.insertspecial bor (4,10) Black in
+		let bor25 = Myboard.insertspecial bor25 (6,12) Black in 
+	let bor26 = Myboard.insertspecial bor (4,8) Black in
+		let bor26 = Myboard.insertspecial bor26 (6,10) Black in 
+		let bor26 = Myboard.insertspecial bor26 (8,12) Black in
 
 
 
@@ -441,12 +546,24 @@ let run_tests_diagleft () =
 	assert (List.length (Myboard.getThreats bor19) = 3);
 	successful := !successful + 1;
 	assert (List.length (Myboard.getThreats bor20) = 4);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor21) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor22) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor23) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor24) = 2);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor25) = 3);
+	successful := !successful + 1;
+	assert (List.length (Myboard.getThreats bor26) = 2);
 	successful := !successful + 1
 
 let _ = run_tests_horizontal ();
 		run_tests_vertical ();
 		run_tests_diagright ();
 		run_tests_diagleft ();
-		print_string "\nSuccessful passed: ";
+		print_string "\nSuccessfully passed: ";
 		print_int !successful;
 		print_string " tests.\n\n";

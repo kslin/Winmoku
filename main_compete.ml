@@ -70,6 +70,8 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   else ()
 *)
 
+(* Gives an empty space next to a black neighbor *)
+
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
   (Random.self_init ;
@@ -78,6 +80,7 @@ let next_move (b:Myboard.board) : int*int =
      |None -> (match (evaluate_board b) with 
                | Some s -> s
                | None -> (Random.int (world_size-1), Random.int (world_size-1)))))
+
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
 
@@ -130,13 +133,13 @@ let test_board () =
             		Myboard.indices bor;
             		bor
               |Some newbor1 ->
+                Myboard.indices newbor1;
             		(match Myboard.isWin newbor1 with
             		  |Some s ->
                     won_board := true;
                     (Graphics.set_color Graphics.red);
                     Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
                     Graphics.draw_string ("WHITE WON!!!");
-                    Myboard.indices newbor1;
                     newbor1
 		              |None -> 
                     let next = next_move newbor1 in
