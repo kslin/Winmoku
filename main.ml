@@ -53,22 +53,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
 (* Evaluate board function *)
-let evaluate_board board =
-  let threatlist = BThreats.get_threats board in
-  let update_board threat = 
-    ((BThreats.gen_new_board board threat), threat)
-  in 
-  let boardlist = List.map update_board threatlist in
-  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
-                           boardlist in 
-  let rec win tlist =   
-    match tlist with 
-    | [] -> None
-    | hd::tl -> (if BThreats.evaluate_tree hd = None then (win tl)
-                else BThreats.evaluate_tree hd)
-  in
-    win treelist
-      
+let evaluate_board board = BThreats.evaluate_board board
 
 (*  button for eval function *)
 let button_eval () =
