@@ -41,7 +41,7 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board option =
 let evaluate_board board = 
   match BThreats.evaluate_board board with
   | Some tlist -> (let Threat(_,tgain, _, _) = 
-                     List.nth ((List.length tlist) - 1) tlist 
+                     List.nth tlist ((List.length tlist) - 1) 
                    in
                      Some tgain)
   | None -> (match BThreats.hidden_threats board with
@@ -72,12 +72,12 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
-  match Myboard.nextWin b with
-    |Some s -> s
-    |None -> (match (evaluate_board b) with 
-              | Some s -> s
-              | None -> (Random.int (world_size-1), Random.int (world_size-1)))
-
+  (Random.self_init ;
+  (match Myboard.nextWin b with
+     |Some s -> s
+     |None -> (match (evaluate_board b) with 
+               | Some s -> s
+               | None -> (Random.int (world_size-1), Random.int (world_size-1)))))
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
 

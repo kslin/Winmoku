@@ -23,6 +23,12 @@ let won_board = ref false
 (* Stores if we're displaying threats *)
 let displaythreats = ref false
 
+(* Stores if we're playing next move *)
+let displaymove = ref false
+
+(* Stores the winning threat after board has been set *)
+let win_seq = ref []
+
 (* Displays the player currently making a move *)
 let board_player () = 
   let player : string = 
@@ -82,115 +88,119 @@ let button_eval () =
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
   Graphics.draw_string "Debug eval";
-  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+  Graphics.fill_rect obj_width ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width)
 
 let button_threat () =
   Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
   Graphics.draw_string "Show Threats";
-  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width)
 
 let button_playalgo () = 
   Graphics.set_color Graphics.green;
   Graphics.moveto  (obj_width *9) ((world_size+6) * obj_width);
   Graphics.draw_string "Play Algo";
-  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) (2 * obj_width) (obj_width) 
+  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width) 
+
+let button_nextmove () = 
+  Graphics.set_color Graphics.magenta;
+  Graphics.moveto  (obj_width *13) ((world_size+6) * obj_width);
+  Graphics.draw_string "Next Move";
+  Graphics.fill_rect (obj_width*13) ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width) 
 
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   button_eval ();
   button_threat ();
-  button_playalgo ()
+  button_playalgo ();
+  button_nextmove ()
 
-let rec play_sequence b tlist =
-  let rec insertwlist b ilist = 
-    match ilist with
-    | [] -> b
-    | hd::tl -> insertwlist (Myboard.insertspecial b hd White) tl
-  in
-    match tlist with
-    | [] -> []
-    | Threat(_,tgain,tcost, _)::tl -> 
-      (let bor1 = Myboard.insertspecial b tgain Black in
-        (Myboard.indices bor1;
-         (let bor2 = insertwlist bor1 tcost in
-            (Myboard.indices bor2;
-             tl))))
+(* Converts a threat list (like the winning sequence) into a list of 
+(bool, list of moves) where the bool indicates if we've reached a straight four
+and have won and the list is a list of moves that can be inserted into the 
+board*)
+let rec extract_win_seq tlist winlist = 
+  let rec extract_tcost clist costlist =
+    match clist with
+    | [] -> costlist
+    | h::t -> extract_tcost t ((h, White)::costlist) in
+  match tlist with 
+  | [] -> winlist
+  | Threat(StraightFour,tgain,tcost,_)::t -> extract_win_seq t 
+    ((false, [(tgain, Black)]) :: ((true,(extract_tcost tcost [])) :: 
+    winlist))
+  | Threat(_,tgain,tcost,_)::t -> extract_win_seq t 
+    ((false, [(tgain, Black)]) :: ((false,(extract_tcost tcost [])) :: 
+    winlist))
 
-let play_move (b:Myboard.board) : Myboard.board =
-  let win_move = winning_move b in
-  let next_move = 
-    match Myboard.nextWin b with
-      | Some i -> i
-      | None ->
-	(match win_move with
-	  | None -> (Random.int (world_size-1), Random.int (world_size-1))
-	  | Some Threat(_,tgain,_,_) -> tgain)
-  in
-  print_string "Move: " ;
-  print_string (string_of_int (fst next_move)) ;
-  print_string ",";
-  print_string (string_of_int (snd next_move)) ;
-  print_string "\n" ;
-  flush_all () ;
-  let newbor = Myboard.insertspecial b next_move Black in
-  (match Myboard.isWin newbor with
-    |None -> ()
-    |Some s -> 
-      let player : string = 
-        match s with
-          | Unocc -> "-"
-          | White -> "WHITE"
-          | Black -> "BLACK" in
-      won_board := true;
-      (Graphics.set_color Graphics.red);
-      Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
-      Graphics.draw_string (player ^ " " ^ "WON!!!")
-  );
-  debug_board () ;
-  draw_board () ;
-  Myboard.indices newbor ;
-  newbor
-                                     
+(* inserts a list of (index, occupied) into board and returns the board *)
+let rec insertlist b lst = 
+  match lst with
+  | [] -> b
+  | h::t -> insertlist (Myboard.insertspecial b (fst h) (snd h)) t
 
+(* plays the next move in the winning sequences, updates the winning sequence
+with the remaining moves. Returns the original board if no more moves *)
+let play_next bor =
+  match (!win_seq) with
+  | [] -> (print_string "no more winning moves"; flush_all()); bor
+  | h::t -> 
+    if fst h then ((print_string "straight four!"; flush_all()); bor)
+    else ((win_seq := t); insertlist bor (snd h))
+
+(* displays threats when given a list of threats *)
 let rec print_threatlist tlist = 
   match tlist with
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
-let print_gainlist_screen glist = 
-  match glist with
-  | [] -> ()
-  | h::t -> (Graphics.rmoveto 0 (-obj_width));(Graphics.draw_string (gain_string h))
-
-
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
   (* runs eval board function *)
-  if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  if ((x > obj_width) && (x < 3 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
         match result with
         | None -> (print_string "None\n"; flush_all();)
         | Some tlist -> print_threatlist tlist)
   (* shows current threats on the game display *)
-  else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  else if ((x > obj_width * 5) && (x < 7 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then ((print_string "button working";flush_all());
-    (displaythreats := true);)
-  (* shows next winning move if exists *)
-  else if ((x > obj_width * 9) && (x < 11 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  then (displaythreats := true)
+  (* plays the winning sequence after the board is set *)
+  else if ((x > obj_width * 9) && (x < 11 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
-    ignore(play_move b) 
+    (match (evaluate_board b) with
+      | None -> ()
+      | Some t ->
+      (let l = (extract_win_seq t []) in win_seq := l;
+      (if l = [] then (print_string "there is no threat";flush_all()));
+      (print_string "got threats in seq"; flush_all ())))
+  (* plays the next move in the winning sequence determined when the board
+  was set *)
+  else if ((x > obj_width * 13) && (x < 15 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
+    && (y < ((world_size+6) * obj_width)))
+  then
+    displaymove := true
   (* changes player to white *)
-  else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
+  else if ((x > obj_width) && (x < 2 * obj_width) 
+    && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
   (* changes player to black *)
-  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) && (y > ((world_size+3) * obj_width)) 
+  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) 
+    && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width))) 
   then ((piece_color := Black))
   else ()
@@ -224,21 +234,17 @@ let test_board () =
         else (
           if (snd i) > ceiling 
           then (
-	    (* hacky plays the next move *)
-	    if ((fst i > obj_width * 9) && (fst i < 11 * obj_width) && (snd i > ((world_size+5) * obj_width)) && (snd i < ((world_size+6) * obj_width)))
-	    then 
-	      play_move bor
-
-	    else (
             respond_click_header bor i;
             Graphics.clear_graph ();
             draw_board ();
             debug_board ();
             Myboard.indices bor;  
             (if (!displaythreats) then
-              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width));
-              (*(print_gainlist_screen bor)*));
-            bor )
+              (Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width)));
+            (if (!displaymove) then 
+              (let newbor = (play_next bor) in Myboard.indices newbor; 
+                displaymove := false; newbor)
+              else bor)
           )
           (* If mouse clicks on board area, make a move *)          
           else (

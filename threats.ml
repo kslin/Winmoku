@@ -27,6 +27,10 @@ sig
      made on the board returns all threats dependent on the given threat*)
   val get_dependent_threats : board -> threat -> threats
 
+  (* Given a board and the threat whose gain square was the last move
+     made on the board, return all four threats dependent on given threat *)
+  val get_dependent_four_threats : board -> threat -> threats
+
   (* Given an old board and a threat generates the board that would result if
      black played the gain square and white played all the cost squares *)  
   val gen_new_board: board -> threat -> board
@@ -78,6 +82,13 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let get_dependent_threats (b: board) (t: threat) =
       dependent_threats (get_threats b) t
 
+    let get_dependent_four_threats (b: board) (t: threat) = 
+      List.filter
+	(fun x -> 
+	  let Threat(ttype, _, _, _) = x in
+	  ttype = StraightFour || ttype = Four)
+	(get_dependent_threats b t)
+
     let gen_new_board (b: board) (t:threat) =
       let Threat(_, tgain, tcost, _) = t in
       let rec insertwhitelist (b:board) (t: index list) =
@@ -90,10 +101,17 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let Threat(ttype, _, _, _) = t in
       if (B.isWin b == Some Black) || (ttype = StraightFour) then 
         Win(b, t, t::tlist)
-      else if (B.isWin b == Some White) then
-        Loss 
+      else if (B.isWin b = Some White) || (B.nextWhiteWin b) then
+	Loss
       else
-        let threatList = get_dependent_threats b t in 
+	let threatList = 
+	if List.exists 
+	  (fun wt -> let Threat(wttype, _, _, _) = wt in wttype = StraightFour)
+	  (B.getWhiteThreats b) then
+	  get_dependent_four_threats b t
+	else
+	  get_dependent_threats b t
+	in
           if threatList = [] then 
             Leaf(b, t)      
           else
@@ -121,15 +139,14 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     let next_winning_move (tr: tree) = 
       match evaluate_tree tr with
-	| None -> None
-	| Some _ ->
-	  (match tr with
-	    | Win(b, t, tlist) -> Some t
-	    | Leaf(b, t) -> None
-	    | Node(b, t, tlist) -> Some t
-	    | Loss -> None
-	  )
-	    
+	    | None -> None
+	    | Some _ ->
+	      (match tr with
+	       | Win(b, t, tlist) -> Some t
+	       | Leaf(b, t) -> None
+	       | Node(b, t, tlist) -> Some t
+	       | Loss -> None
+	      )
 
     let rec merge tree1 tree2 = tree1
     
@@ -149,19 +166,19 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 
     (* Check if index is worth evaluating for hidden_threats *)
     let check_index (b: board) (i: index) : bool = 
-      if (B.get b i) == Unocc then  
-        let coords = indices_within 3 i in
+      if (B.get b i) == Unocc then 
+        let coords = Boardstuffs.indices_within 3 i in
         let rec count_color (ilist: index list) (color: occupied) =
           match ilist with
           | [] -> 0
-          | hd::tl -> (if B.get b i = color then 1 + (count_color tl color)
-                     else (count_color tl color))
+          | hd::tl -> (if (B.get b hd) == color then 1 + (count_color tl color)
+                       else (count_color tl color))
         in
           if (count_color coords Black) + (count_color coords White) == 0 then 
             false
-          else
-            if get_threats (B.insert b i) != [] then true
-            else false
+          else 
+            if get_threats (B.insertspecial b i Black) != [] then true
+            else false  
       else false 
     
     let hidden_threats (b: board) =
