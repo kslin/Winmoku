@@ -23,6 +23,9 @@ let won_board = ref false
 (* Stores if we're displaying threats *)
 let displaythreats = ref false
 
+(* Stores the winning threat after board has been set *)
+let win_seq = ref []
+
 (* Displays the player currently making a move *)
 let board_player () = 
   let player : string = 
@@ -77,30 +80,52 @@ let button_eval () =
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
   Graphics.draw_string "Debug eval";
-  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+  Graphics.fill_rect obj_width ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width)
 
 let button_threat () =
   Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width *5) ((world_size+6) * obj_width);
   Graphics.draw_string "Show Threats";
-  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+  Graphics.fill_rect (obj_width*5) ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width)
 
 let button_playalgo () = 
   Graphics.set_color Graphics.green;
   Graphics.moveto  (obj_width *9) ((world_size+6) * obj_width);
   Graphics.draw_string "Play Algo";
-  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) (2 * obj_width) (obj_width) 
+  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width) 
+
+let button_nextmove () = 
+  Graphics.set_color Graphics.magenta;
+  Graphics.moveto  (obj_width *13) ((world_size+6) * obj_width);
+  Graphics.draw_string "Next Move";
+  Graphics.fill_rect (obj_width*9) ((world_size+5) * obj_width) 
+    (2 * obj_width) (obj_width) 
 
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   button_eval ();
   button_threat ();
-  button_playalgo ()
+  button_playalgo ();
+  button_nextmove ()
+
+let rec extract_win_seq tlist winlist= 
+  let rec extract_tcost clist costlist=
+    match clist with
+    | [] -> []
+    | h::t -> extract_tcost t ((h, white)::costlist) in
+  match tlist with 
+  | [] -> []
+  | Treat(_,tgain,tcost,_)::t -> extract_win_seq t 
+    (append (extract_tcost tcost []) ((tgain, black)::winlist))
+    
 
 let rec play_sequence b tlist =
-  let rec insertwlist b ilist = 
-    match ilist with
+  let rec insertwlist b wlist = 
+    match wlist with
     | [] -> b
     | hd::tl -> insertwlist (Myboard.insertspecial b hd White) tl
   in
@@ -145,28 +170,33 @@ let print_gainlist_screen glist =
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
   (* runs eval board function *)
-  if ((x > obj_width) && (x < 3 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  if ((x > obj_width) && (x < 3 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then (let result = evaluate_board b in
         match result with
         | None -> (print_string "None\n"; flush_all();)
         | Some tlist -> print_threatlist tlist)
   (* shows current threats on the game display *)
-  else if ((x > obj_width * 5) && (x < 7 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  else if ((x > obj_width * 5) && (x < 7 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then ((print_string "button working";flush_all());
-    (displaythreats := true);)
-  (* shows next winning move if exists *)
-  else if ((x > obj_width * 9) && (x < 11 * obj_width) && (y > ((world_size+5) * obj_width)) 
+  then ((displaythreats := true);
+        (let bor = (extract_win_seq (evaluate_board b) []) in win_seq := bor))
+  (* plays the winning sequence after the board is set *)
+  else if ((x > obj_width * 9) && (x < 11 * obj_width) 
+    && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
-    ignore(play_move b) 
+    play_sequence(evaluate_board b) 
   (* changes player to white *)
-  else if ((x > obj_width) && (x < 2 * obj_width) && (y > ((world_size+3) * obj_width)) 
+  else if ((x > obj_width) && (x < 2 * obj_width) 
+    && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width)))
   then ((piece_color := White))
   (* changes player to black *)
-  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) && (y > ((world_size+3) * obj_width)) 
+  else if ((x > (2 *obj_width)) && (x < 3 * obj_width) 
+    && (y > ((world_size+3) * obj_width)) 
     && (y < ((world_size+4) * obj_width))) 
   then ((piece_color := Black))
   else ()
