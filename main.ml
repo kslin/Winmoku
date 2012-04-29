@@ -223,7 +223,7 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq4 bor in
+      let newbor = threatseq2a bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;

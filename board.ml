@@ -111,15 +111,10 @@ struct
 
     let getThreats (b:board) : threat list = 
         let (_,_,h,v,dr,dl) = b in
-        print_string "\n\nhorizontal\n\n";
         let hthreats = HorizontalBoard.getThreats h in
-        print_string "\n\nvertical\n\n";
         let vthreats = VerticalBoard.getThreats v in
-        print_string "\n\ndiagright\n\n";
         let drthreats = DiagRightBoard.getThreats dr in
-        print_string "\n\ndiagleft\n\n";
         let dlthreats = DiagLeftBoard.getThreats dl in
-        flush_all ();
         (hthreats)@(vthreats)@    
         (drthreats)@(dlthreats)
 
