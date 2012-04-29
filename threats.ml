@@ -101,17 +101,19 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let Threat(ttype, _, _, _) = t in
       if (B.isWin b == Some Black) || (ttype = StraightFour) then 
         Win(b, t, t::tlist)
-      else if (B.isWin b = Some White) || (B.nextWhiteWin b) then
-	Loss
+      else if (B.isWin b = Some White) || 
+	  (match B.nextWhiteWin b with | None -> false | Some _ -> true)
+      then Loss
       else
-	let threatList = 
-	if List.exists 
-	  (fun wt -> let Threat(wttype, _, _, _) = wt in wttype = StraightFour)
-	  (B.getWhiteThreats b) then
-	  get_dependent_four_threats b t
-	else
-	  get_dependent_threats b t
-	in
+	      let threatList = 
+	        if List.exists 
+	          (fun wt -> let Threat(wttype,_,_,_) = wt in wttype = StraightFour)
+	          (B.getWhiteThreats b) 
+          then
+	          get_dependent_four_threats b t
+	        else
+	          get_dependent_threats b t
+	      in
           if threatList = [] then 
             Leaf(b, t)      
           else
@@ -148,7 +150,49 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	       | Loss -> None
 	      )
 
-    let rec merge tree1 tree2 = tree1
+    let rec merge tree1 tree2 = 
+      (* grabs top of tree2 if the threat is independent *)
+      let traverse2 (costs1: index list) : threat option = 
+	match tree2 with
+	  | Win(_, _, _) -> raise Boardstuffs.ERROR
+	  | Node(_, t, _) | Leaf(_, t) ->
+	    let Threat(_, tgain2, tcost2, _) = t in
+	    if List.fold_left 
+	      (fun result index -> (List.mem index costs1) || result)
+	      false (tgain2::tcost2) then None
+	    else Some(t)
+	  | Loss -> None
+      in
+      (* iterates through tree1, for each node and leaf it makes a tree from
+         the threat in tree2 (if independent) and adds it to treeList *)
+      let rec traverse1 costs threatlist tree1 = 
+	match tree1 with
+	  | Win(_, _, _) -> raise Boardstuffs.ERROR
+	  | Leaf(b, t) -> 
+	    let Threat(_, _, tcost, _) = t in
+	    let new_costs = costs @ tcost in
+	    (match traverse2 new_costs with
+	      | None -> Leaf(b, t)
+	      | Some new_t -> 
+		let new_tree = 
+		  gen_threat_tree (gen_new_board b new_t) new_t (t::threatlist)
+		in
+		Node(b, t, [new_tree]))
+	  | Node(b, t, tlist) ->
+	    let Threat(_, _, tcost, _) = t in
+	    let new_costs = costs @ tcost in
+	    (match traverse2 new_costs with
+	      | None -> Node(b, t, tlist)
+	      | Some new_t ->
+		let new_tree = 
+		  gen_threat_tree (gen_new_board b new_t) new_t (t::threatlist)
+		in
+		let new_tlist = 
+		  List.map (traverse1 new_costs (t::threatlist)) tlist in
+		Node(b, t, new_tree::new_tlist))
+	  | Loss -> Loss
+      in
+      traverse1 [] [] tree1 
     
     let evaluate_board board = 
       let threatlist = get_threats board in
