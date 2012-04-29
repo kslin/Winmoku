@@ -409,6 +409,14 @@ struct
                     |(Some Unocc, Some Black, Some Unocc,
                      Some Unocc, _, _) ->
                         [Threat(StraightFour, c, [a;d], b::lst)]
+                    |(_,_,_,
+                     Some Unocc, Some Unocc, Some Black) ->
+                        [Threat(Four, d, [e], lst@[f]);
+                         Threat(Four, e, [d], lst@[f])]
+                    |(Some Black, Some Unocc, Some Unocc,
+                     _,_,_) ->
+                        [Threat(Four, b, [c], a::lst);
+                         Threat(Four, c, [b], a::lst)]
 
                     |(_, (None|Some White), Some Unocc,
                      Some Unocc, Some Unocc, (None|Some White)) ->
@@ -471,6 +479,10 @@ struct
                     [Threat(Three, c, [b;e], lst);
                      Threat(SplitThree, b, [a;c;e], lst@[d]);
                      Threat(SplitThree, e, [b;c;f], lst@[d])]
+                |(_,_,Some Unocc,
+                 Some Black, Some Unocc, Some Black) ->
+                    [Threat(Four, c, [e], lst@[d;f]);
+                     Threat(Four, e, [c], lst@[d;f])]
                 |_ -> [] )
             |_ -> raise ERROR
 

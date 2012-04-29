@@ -21,7 +21,8 @@ FILES = \
 	board.ml \
 	GUI.ml \
 	threats.ml \
-	mainhelpers.ml
+	mainhelpers.ml \
+	sequenceBoards.ml
 
 TESTOBJECTS = $(TESTFILES:.ml=.cmo)
 
@@ -75,5 +76,5 @@ run_compete: build_compete
 
 
 clean: 
-	rm -f *.cmi *.cmo gomoku_final gomooku_basic gomooku_game gomooku_compete
+	rm -f *.cmi *.cmo gomooku_basic gomooku_game gomooku_compete
 

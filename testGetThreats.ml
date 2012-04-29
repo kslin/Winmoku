@@ -72,6 +72,12 @@ let run_tests_horizontal () =
 		let bor19 = Myboard.insertspecial bor19 (13,12) White in
 	let bor20 = Myboard.insertspecial bor (9,12) Black in 
 		let bor20 = Myboard.insertspecial bor20 (10,12) Black in
+	let bor11 = Myboard.insertspecial bor (4,12) Black in
+		let bor11 = Myboard.insertspecial bor11 (5,12) Black in 
+		let bor11 = Myboard.insertspecial bor11 (8,12) Black in
+	let bor11 = Myboard.insertspecial bor (4,12) Black in
+		let bor11 = Myboard.insertspecial bor11 (7,12) Black in 
+		let bor11 = Myboard.insertspecial bor11 (8,12) Black in
 
 
 	assert (List.length (Myboard.getThreats bor1) = 2);
@@ -447,6 +453,6 @@ let _ = run_tests_horizontal ();
 		run_tests_vertical ();
 		run_tests_diagright ();
 		run_tests_diagleft ();
-		print_string "\nSuccessful passed: ";
+		print_string "\nSuccessfully passed: ";
 		print_int !successful;
 		print_string " tests.\n\n";

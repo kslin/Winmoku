@@ -14,6 +14,7 @@ open GUI
 open Boardstuffs
 open Threats
 open Mainhelpers
+open SequenceBoards
 
 let piece_color = ref (Unocc)
 
@@ -214,10 +215,11 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
+      let newbor = threatseq1 bor in
       draw_board ();
       debug_board ();
-      Myboard.indices bor;
-      bor
+      Myboard.indices newbor;
+      newbor
     end
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
