@@ -229,6 +229,8 @@ let test_board () =
       Myboard.indices newbor;
       newbor
       (*draw_board ();
+      newbor
+      draw_board ();
       debug_board ();
       Myboard.indices bor;
       bor*)
