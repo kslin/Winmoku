@@ -236,6 +236,7 @@ let test_board () =
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
+      print_tuple (Myboard.getNeighbors newbor);
       newbor
       (*draw_board ();
       newbor

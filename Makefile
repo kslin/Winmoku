@@ -11,7 +11,7 @@ CAMLDOC = ocamldoc
 TESTFILES = \
 	boardstuffs.ml \
 	boardcomp.ml \
-	board.ml 
+	board.ml  
 
 FILES = \
 	event.ml \
@@ -33,8 +33,8 @@ all: clean run_basic
 
 tests: clean run_tests
 
-$(PROG)_tests: $(OBJECTS) testGetThreats.cmo
-	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(TESTOBJECTS) testGetThreats.cmo -o $(PROG)_tests
+$(PROG)_tests: $(OBJECTS) testGetThreats.cmo testInsert.cmo testBoardFuncs.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(TESTOBJECTS) testGetThreats.cmo testInsert.cmo testBoardFuncs.cmo -o $(PROG)_tests
 
 build_tests: $(PROG)_tests
 

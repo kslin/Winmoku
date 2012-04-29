@@ -564,6 +564,6 @@ let _ = run_tests_horizontal ();
 		run_tests_vertical ();
 		run_tests_diagright ();
 		run_tests_diagleft ();
-		print_string "\nSuccessfully passed: ";
+		print_string "\ngetThreats successfully passed: ";
 		print_int !successful;
-		print_string " tests.\n\n";
+		print_string "/104 tests.\n\n";
