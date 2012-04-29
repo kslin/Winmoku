@@ -14,6 +14,7 @@ open GUI
 open Boardstuffs
 open Threats
 open Mainhelpers
+open Minimax
 
 (* Stores if current board already won *)
 let won_board = ref false
@@ -46,7 +47,10 @@ let evaluate_board board =
                      Some tgain)
   | None -> (match BThreats.hidden_threats board with
              | hd::tl -> Some hd
-             | [] -> None ) 
+             | [] -> 
+               (let tree1 = GMinimax.gen_tree (GMinimax.depth) None board in
+                let tree2 = GMinimax.minimax tree1 in
+                (print_string "minimax"; GMinimax.next_move tree2))) 
 
 (*  button for eval function *)
 let debug_button_eval () =
@@ -70,6 +74,8 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   else ()
 *)
 
+(* Gives an empty space next to a black neighbor *)
+
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
   (Random.self_init ;
@@ -78,6 +84,7 @@ let next_move (b:Myboard.board) : int*int =
      |None -> (match (evaluate_board b) with 
                | Some s -> s
                | None -> (Random.int (world_size-1), Random.int (world_size-1)))))
+
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
 
@@ -130,13 +137,13 @@ let test_board () =
             		Myboard.indices bor;
             		bor
               |Some newbor1 ->
+                Myboard.indices newbor1;
             		(match Myboard.isWin newbor1 with
             		  |Some s ->
                     won_board := true;
                     (Graphics.set_color Graphics.red);
                     Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
                     Graphics.draw_string ("WHITE WON!!!");
-                    Myboard.indices newbor1;
                     newbor1
 		              |None -> 
                     let next = next_move newbor1 in

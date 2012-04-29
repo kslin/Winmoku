@@ -14,6 +14,7 @@ open GUI
 open Boardstuffs
 open Threats
 open Mainhelpers
+open SequenceBoards
 
 let piece_color = ref (Unocc)
 
@@ -229,10 +230,17 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
+      let newbor = threatseq4 bor in
+      draw_board ();
+      debug_board ();
+      Myboard.indices newbor;
+      newbor
+      (*draw_board ();
+      newbor
       draw_board ();
       debug_board ();
       Myboard.indices bor;
-      bor
+      bor*)
     end
     begin fun (bor:Myboard.board) -> 
       Graphics.clear_graph ();
@@ -275,6 +283,7 @@ let test_board () =
           else (
             let newbor = respond_click bor i in
             let threats = Myboard.getThreats newbor in
+            print_threat_list threats;
             (match Myboard.isWin newbor with
               |None -> ()
               |Some s -> 

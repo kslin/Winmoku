@@ -7,37 +7,37 @@ open Graphics
 
 module type BOARD =
 sig 
-    (* Defines the type of the board *)
+  (* Defines the type of the board *)
 	type board
 
-    (* Returns an empty board *)
+  (* Returns an empty board *)
 	val empty : board
 
-    (* Returns the color of a particular index *)
+  (* Returns the color of a particular index *)
 	val get : board -> index -> occupied
 
-    (** Inserts a piece on the board of the color specified by the board *)
+  (** Inserts a piece on the board of the color specified by the board *)
 	val insert : board -> index -> board
 
-    (** Inserts a piece on the board of the color specified by the user *)
+  (** Inserts a piece on the board of the color specified by the user *)
 	val insertspecial : board -> index -> occupied -> board
 
-    (* Determines if the board has a winning configuration *)
+  (* Determines if the board has a winning configuration *)
 	val isWin : board -> occupied option
 
-    (* Gets the threats of the board *)
+  (* Gets the threats of the board *)
 	val getThreats : board -> threat list
 
-    (* Gets the threats of white on the board *)
+  (* Gets the threats of white on the board *)
 	val getWhiteThreats : board -> threat list
 
-    (* Determines if the board has a win next turn *)
+  (* Determines if the board has a win next turn *)
 	val nextWin : board -> index option
 
-    (* Determines if the board has a win for white next turn *)
-        val nextWhiteWin : board -> index option
+  (* Determines if the board has a win for white next turn *)
+  val nextWhiteWin : board -> index option
 
-    (* Draws the pieces *)
+  (* Draws the pieces *)
 	val indices : board -> unit
 
 end
@@ -111,8 +111,17 @@ struct
 
     let getThreats (b:board) : threat list = 
         let (_,_,h,v,dr,dl) = b in
-        (HorizontalBoard.getThreats h)@(VerticalBoard.getThreats v)@    
-        (DiagRightBoard.getThreats dr)@(DiagLeftBoard.getThreats dl)
+        print_string "\n\nhorizontal\n\n";
+        let hthreats = HorizontalBoard.getThreats h in
+        print_string "\n\nvertical\n\n";
+        let vthreats = VerticalBoard.getThreats v in
+        print_string "\n\ndiagright\n\n";
+        let drthreats = DiagRightBoard.getThreats dr in
+        print_string "\n\ndiagleft\n\n";
+        let dlthreats = DiagLeftBoard.getThreats dl in
+        flush_all ();
+        (hthreats)@(vthreats)@    
+        (drthreats)@(dlthreats)
 
     let flipColor (b: board) : board = 
       let (_, p, _, _, _, _) = b in      
