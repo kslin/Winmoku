@@ -32,6 +32,11 @@ let board_four = ref false
 (* Stores the winning threat after board has been set *)
 let win_seq = ref []
 
+(* Stores the current preset board number *)
+let board_num = ref 0
+
+let pboard = ref false
+
 (* Displays the player currently making a move *)
 let board_player () = 
   let player : string = 
@@ -51,6 +56,7 @@ let draw_board () =
   board_player ();
   board_set_white ();
   board_set_black ();
+  board_instruct ();
   draw_coord ()
 
 (* Respond to a click, insert pieces if the click is near an index *)
@@ -86,33 +92,33 @@ let winning_move board =
 
 let evaluate_board board = BThreats.evaluate_board board
 
-(*  button for eval function *)
-let button_eval () =
+(*  button for getting the next pre-setboard *)
+let button_bor () =
   Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug eval";
+  Graphics.draw_string "Next Board";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width)
 
 (* button to run the threat-space search algorithm on the current board *)
 let button_getwin () = 
   Graphics.set_color Graphics.red;
-  Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
+  Graphics.moveto  (obj_width *4) ((world_size+6) * obj_width);
   Graphics.draw_string "Get Win";
-  Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*4) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 (* button to make the next move of the winning threat sequence*)
 let button_nextmove () = 
   Graphics.set_color Graphics.green;
-  Graphics.moveto  (obj_width *10) ((world_size+6) * obj_width);
+  Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
   Graphics.draw_string "Play Win";
-  Graphics.fill_rect (obj_width*10) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  button_eval ();
+  button_bor ();
   button_getwin ();
   button_nextmove ()
 
@@ -156,6 +162,7 @@ let rec print_threatlist tlist =
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
+(* converts a pair of (occ, index) to string *)
 let rec print_pairs l = 
   match l with
   | [] -> ""
@@ -163,6 +170,7 @@ let rec print_pairs l =
   | (i, c)::t -> (string_of_occ c) ^ (string_of_index i) ^ "," ^ 
                  (print_pairs t)
 
+(* Displays a sequence of threats on the side *)
 let threat_display () = 
   let rec show_threat l num =
     match l with
@@ -172,25 +180,33 @@ let threat_display () =
       (Graphics.draw_string (print_pairs lst));
       (Graphics.set_color Graphics.black);
       (show_threat t (num-1)) in
-  Graphics.set_color Graphics.red;
   if !win_seq = [] then
-    ((Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
+    (Graphics.set_color Graphics.red;
+    (Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
     (Graphics.draw_string "No winning sequence")) else
-    (show_threat (!win_seq) (world_size+7))
+    ((Graphics.set_color Graphics.black);
+    (Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
+    (Graphics.draw_string "Winning sequence: "); 
+    Graphics.set_color Graphics.red;
+    (show_threat (!win_seq) (world_size+6)))
+
+(* Gets the next preset board and returns it *)
+let display_numboard () =
+  let x = !board_num in
+  if x = (List.length (threatseq)) then board_num := 0 
+    else board_num := (x + 1)
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
-  (* runs eval board function *)
+  (* gives the next pre-set board *)
   if ((x > obj_width) && (x < 3 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then (let result = evaluate_board b in
-        match result with
-        | None -> (print_string "None\n"; flush_all();)
-        | Some tlist -> print_threatlist tlist)
+  then (pboard := true; 
+    display_numboard ())
   (* gets the winning sequence after the board is set *)
-  else if ((x > obj_width * 7) && (x < 9 * obj_width) 
+  else if ((x > obj_width * 4) && (x < 6 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
@@ -204,7 +220,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
       (print_string "got threats in seq"; flush_all ())))
   (* plays the next move in the winning sequence determined when the board
   was set *)
-  else if ((x > obj_width * 10) && (x < 12 * obj_width) 
+  else if ((x > obj_width * 7) && (x < 9 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then
@@ -226,18 +242,12 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty or a predetermined board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq2b bor in
+      let newbor = threatseq4 bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
       print_tuple (Myboard.getNeighbors newbor);
       newbor
-      (*draw_board ();
-      newbor
-      draw_board ();
-      debug_board ();
-      Myboard.indices bor;
-      bor*)
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
@@ -245,6 +255,7 @@ let test_board () =
       piece_color := Unocc;
       won_board := false;
       board_four := false;
+      pboard := false;
       Graphics.clear_graph ();
       draw_board ();
       debug_board ();
@@ -275,7 +286,11 @@ let test_board () =
                 (Graphics.moveto (obj_width * 15) ((world_size+4) * obj_width));
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
-              else bor)
+            else if (!pboard) then 
+              (let l = threatseq in 
+              let newbor = List.nth l !board_num in Myboard.indices newbor;
+              newbor)
+            else bor)
           )
           (* If mouse clicks on board area, make a move *)          
           else (
