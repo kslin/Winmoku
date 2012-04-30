@@ -37,7 +37,9 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board option =
   else (
     Some (Myboard.insertspecial b (rx,ry) White))
 
-(* Evaluate board function *)
+(* Evaluate board function; first check for winning threat sequences.
+   If there aren't any, then look for hidden threats and play those. 
+   If that isn't available, use the minimax algorithm. *)
 let evaluate_board board = 
   match BThreats.evaluate_board board with
   | Some tlist -> (let Threat(_,tgain, _, _) = 
@@ -62,9 +64,12 @@ let debug_button_eval () =
 let debug_board () = 
   debug_button_eval ()
 
-(* Determines the next move based on threats *)
+(* Determines the next move based on evaluate board defined above. First,
+   make sure white doesn't have an impending threat, and also play any
+   move that will win the game for you. Otherwise, play what evaluate board
+   tells you to. *)
 let next_move (b:Myboard.board) : int*int =
-  (Random.self_init ;
+  (Random.self_init ();
     (match Myboard.nextWin b with
     | Some i -> i
     | None -> 

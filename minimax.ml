@@ -103,14 +103,6 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
                                ntlist) 
        in
          Node(board, index, ntlist, Some value))
-  
-  let rec print_treelist tlist = 
-    match tlist with
-    | hd::tl -> (match hd with
-                 | Leaf(_, _, Some v) -> (print_float v; print_treelist tl)
-                 | Node(_, _, _, Some v) -> (print_float v; print_treelist tl))
-                 | _ -> print_string "Uh oh, something is wrong."
-    | [] -> print_string "||||"
 
   let next_move tree =
     match tree with
@@ -118,7 +110,8 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
     | Node(_, _, tlist, Some value) ->
       (let lst = (List.filter (fun x -> match x with
                                         | Leaf(_,_,Some v) -> (v = (-.value))
-                                        | Node(_,_,_,Some v) -> (v = (-.value)))
+                                        | Node(_,_,_,Some v) -> (v = (-.value))
+                                        | _ -> false)
                               tlist)
        in
          match lst with
