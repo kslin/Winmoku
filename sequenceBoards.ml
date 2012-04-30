@@ -146,5 +146,8 @@ let threatseq4 (b:Myboard.board) =
 	let b1 = Myboard.insertspecial b1 (6,7) White in
 	let b1 = Myboard.insertspecial b1 (7,8) White in
 	let b1 = Myboard.insertspecial b1 (12,6) White in
-
 	b1
+
+let threatseq : Myboard.board list =
+	let bor = Myboard.empty in
+	[threatseq2a bor; threatseq2b bor; threatseq3b bor; threatseq4 bor]
