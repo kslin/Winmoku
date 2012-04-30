@@ -33,6 +33,9 @@ let board_four = ref false
 (* Stores the winning threat after board has been set *)
 let win_seq = ref []
 
+(* Stores the current preset board number *)
+let board_num = ref 1
+
 (* Displays the player currently making a move *)
 let board_player () = 
   let player : string = 
@@ -52,6 +55,7 @@ let draw_board () =
   board_player ();
   board_set_white ();
   board_set_black ();
+  board_instruct ();
   draw_coord ()
 
 (* Respond to a click, insert pieces if the click is near an index *)
@@ -87,33 +91,33 @@ let winning_move board =
 
 let evaluate_board board = BThreats.evaluate_board board
 
-(*  button for eval function *)
-let button_eval () =
+(*  button for getting the next pre-setboard *)
+let button_bor () =
   Graphics.set_color Graphics.blue;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug eval";
+  Graphics.draw_string "Next Board";
   Graphics.fill_rect obj_width ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width)
 
 (* button to run the threat-space search algorithm on the current board *)
 let button_getwin () = 
   Graphics.set_color Graphics.red;
-  Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
+  Graphics.moveto  (obj_width *4) ((world_size+6) * obj_width);
   Graphics.draw_string "Get Win";
-  Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*4) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 (* button to make the next move of the winning threat sequence*)
 let button_nextmove () = 
   Graphics.set_color Graphics.green;
-  Graphics.moveto  (obj_width *10) ((world_size+6) * obj_width);
+  Graphics.moveto  (obj_width *7) ((world_size+6) * obj_width);
   Graphics.draw_string "Play Win";
-  Graphics.fill_rect (obj_width*10) ((world_size+5) * obj_width) 
+  Graphics.fill_rect (obj_width*7) ((world_size+5) * obj_width) 
     (2 * obj_width) (obj_width) 
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  button_eval ();
+  button_bor ();
   button_getwin ();
   button_nextmove ()
 
@@ -182,16 +186,15 @@ let threat_display () =
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
 let respond_click_header (b:Myboard.board) ((x,y):int*int) = 
-  (* runs eval board function *)
+  (* gives the next pre-set board *)
   if ((x > obj_width) && (x < 3 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then (let result = evaluate_board b in
-        match result with
-        | None -> (print_string "None\n"; flush_all();)
-        | Some tlist -> print_threatlist tlist)
+  then ((let x = !board_num in 
+    if x = 4 then board_num := 1 else board_num := (x + 1));
+    display_pboard ()
   (* gets the winning sequence after the board is set *)
-  else if ((x > obj_width * 7) && (x < 9 * obj_width) 
+  else if ((x > obj_width * 4) && (x < 6 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
@@ -205,7 +208,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
       (print_string "got threats in seq"; flush_all ())))
   (* plays the next move in the winning sequence determined when the board
   was set *)
-  else if ((x > obj_width * 10) && (x < 12 * obj_width) 
+  else if ((x > obj_width * 7) && (x < 9 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then
