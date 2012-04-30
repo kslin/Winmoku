@@ -2,7 +2,6 @@
    It does not evaluate threats *)
 
 open Board
-open ImportImage
 open GUI
 open Boardstuffs
 open Mainhelpers
@@ -48,16 +47,6 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
 
-(*  button for eval function *)
-let debug_button_eval () =
-  Graphics.set_color Graphics.red;
-  Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
-  Graphics.draw_string "Debug function eval";
-  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
-
-(* Shows buttons and other displays for function testing purposes *)
-let debug_board () = 
-  debug_button_eval ()
 
 (* Run the board *)
 let test_board () =
@@ -65,7 +54,6 @@ let test_board () =
     (* Initialize the board to be empty *)
     begin fun (bor:Myboard.board) -> 
       draw_board ();
-      debug_board ();
       Myboard.indices bor;
       bor
     end
@@ -76,7 +64,6 @@ let test_board () =
       won_board := false;
       Graphics.clear_graph ();
       draw_board ();
-      debug_board ();
       let newbor = Myboard.empty in
       Myboard.indices newbor;
       newbor
@@ -91,7 +78,6 @@ let test_board () =
           then (
             Graphics.clear_graph ();
             draw_board ();
-            debug_board ();
             Myboard.indices bor;
             bor
           )
@@ -116,7 +102,6 @@ let test_board () =
                 Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
                 Graphics.draw_string (player ^ " " ^ "WON!!!")
             );
-            debug_board ();
             draw_board ();
             Myboard.indices newbor;
             newbor

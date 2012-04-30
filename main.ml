@@ -9,7 +9,6 @@
  * first move from that sequence, and send board to draw.                   *)
 
 open Board
-open ImportImage
 open GUI
 open Boardstuffs
 open Threats
