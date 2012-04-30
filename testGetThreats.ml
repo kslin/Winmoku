@@ -560,10 +560,40 @@ let run_tests_diagleft () =
 	assert (List.length (Myboard.getThreats bor26) = 2);
 	successful := !successful + 1
 
+let test_evaluate_board () = 
+  (* board in figure 3b of paper that has a winning sequence *)
+  let b1 = Myboard.empty in
+  let b1 = Myboard.insertspecial b (0,0) Black in
+  let b1 = Myboard.insertspecial b1 (0,1) Black in
+  let b1 = Myboard.insertspecial b1 (0,2) Black in
+  let b1 = Myboard.insertspecial b1 (1,0) Black in
+  let b1 = Myboard.insertspecial b1 (2,0) Black in
+  let b1 = Myboard.insertspecial b1 (18,18) Black in
+  let b1 = Myboard.insertspecial b1 (18,17) Black in
+  let b1 = Myboard.insertspecial b1 (18,16) Black in
+  let b1 = Myboard.insertspecial b1 (16,18) Black in
+  let b1 = Myboard.insertspecial b1 (17,18) Black in
+  let b1 = Myboard.insertspecial b1 (18,0) Black in
+  let b1 = Myboard.insertspecial b1 (18,1) Black in
+  let b1 = Myboard.insertspecial b1 (18,2) Black in
+  let b1 = Myboard.insertspecial b1 (16,18) Black in
+  let b1 = Myboard.insertspecial b1 (17,18) Black in
+  let b1 = Myboard.insertspecial b1 (0,18) Black in
+  let b1 = Myboard.insertspecial b1 (0,17) Black in
+  let b1 = Myboard.insertspecial b1 (0,16) Black in
+  let b1 = Myboard.insertspecial b1 (1,18) Black in
+  let b1 = Myboard.insertspecial b1 (2,18) Black in
+  assert(BThreats.evauate_board <> None) ;
+  successful := succesful + 1
+
+
+
+
 let _ = run_tests_horizontal ();
 		run_tests_vertical ();
 		run_tests_diagright ();
 		run_tests_diagleft ();
+		test_evaluate_board ();
 		print_string "\ngetThreats successfully passed: ";
 		print_int !successful;
 		print_string "/104 tests.\n\n";
