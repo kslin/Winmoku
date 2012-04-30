@@ -34,7 +34,7 @@ let board_four = ref false
 let win_seq = ref []
 
 (* Stores the current preset board number *)
-let board_num = ref 1
+let board_num = ref 0
 
 (* Displays the player currently making a move *)
 let board_player () = 
@@ -189,7 +189,10 @@ let threat_display () =
     Graphics.set_color Graphics.red;
     (show_threat (!win_seq) (world_size+6))
 
-(*  *)
+(* Gets the next preset board and returns it *)
+let display_numboard () =
+  let x = !board_num in
+  if x = 4 then board_num := 1 else board_num := (x + 1)
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -250,6 +253,7 @@ let test_board () =
       piece_color := Unocc;
       won_board := false;
       board_four := false;
+      pboard := false;
       Graphics.clear_graph ();
       draw_board ();
       debug_board ();
@@ -280,7 +284,8 @@ let test_board () =
                 (Graphics.moveto (obj_width * 15) ((world_size+4) * obj_width));
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
-              else bor)
+            else if (!pboard) then (let l = threatseq () in 
+            else bor)
           )
           (* If mouse clicks on board area, make a move *)          
           else (
