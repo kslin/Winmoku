@@ -111,19 +111,10 @@ let threatseq5 (b:Myboard.board) =
 	let b1 = Myboard.insertspecial b1 (10,10) White in
 	b1 
 
-let threathidden (b:Myboard.board) =
-	let b1 = Myboard.insertspecial b (9,9) Black in
-	let b1 = Myboard.insertspecial b1 (9,10) Black in
-	let b1 = Myboard.insertspecial b1 (10,9) Black in
-	let b1 = Myboard.insertspecial b1 (8,9) White in
-	let b1 = Myboard.insertspecial b1 (7,9) White in
-	let b1 = Myboard.insertspecial b1 (10,10) White in
-	b1 
-
 let threatseq : Myboard.board list =
 	let bor = Myboard.empty in
-	let bor1 = threatseq2a bor in
-	let bor2 = threatseq2b bor in
-	let bor3 = threatseq3b bor in
-	let bor4 = threatseq4 bor in
+	let bor1 = threatseq2 bor in
+	let bor2 = threatseq3b bor in
+	let bor3 = threatseq4 bor in
+	let bor4 = threatseq5 bor in
 	[bor1;bor2;bor3;bor4]

@@ -210,14 +210,14 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
   then 
+    ((displaythreats := true);
     (match (evaluate_board b) with
       | None -> 
       	print_string "None\n"; flush_all ();
       	win_seq := []; ()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
-      (displaythreats := true);
-      (print_string "got threats in seq"; flush_all ())))
+      (print_string "got threats in seq"; flush_all ()))))
   (* plays the next move in the winning sequence determined when the board
   was set *)
   else if ((x > obj_width * 7) && (x < 9 * obj_width) 
@@ -273,15 +273,15 @@ let test_board () =
             Graphics.clear_graph ();
             draw_board ();
             debug_board ();
-            Myboard.indices bor;              
             (if (!displaythreats) then
               threat_display ()
-              );            
+              );  
+            Myboard.indices bor;          
             (if (!displaymove) then 
               (let newbor = (play_next bor) in Myboard.indices newbor; 
                 displaymove := false; 
                 (if (!board_four) then ((Graphics.set_color Graphics.red);
-                (Graphics.moveto (obj_width * 10) ((world_size+1) * obj_width));
+                (Graphics.moveto (obj_width * 8) ((world_size+3) * obj_width));
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
             else if (!pboard) then 
@@ -291,6 +291,8 @@ let test_board () =
               debug_board ();
               Myboard.indices newbor;
               print_int !board_num;
+              won_board := false;
+              board_four := false;
               newbor)
             else bor)
           )
@@ -309,11 +311,14 @@ let test_board () =
                   | Black -> "BLACK" in
                 won_board := true;
                 (Graphics.set_color Graphics.red);
-                Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+                Graphics.moveto (obj_width * 8) ((world_size+3) * obj_width);
                 Graphics.draw_string (player ^ " " ^ "WON!!!")
             );
             debug_board ();
             draw_board ();
+            (if (!displaythreats) then
+              threat_display ()
+              );  
             Myboard.indices newbor;
             newbor
           )
