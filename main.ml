@@ -9,7 +9,6 @@
  * first move from that sequence, and send board to draw.                   *)
 
 open Board
-open ImportImage
 open GUI
 open Boardstuffs
 open Threats
@@ -227,7 +226,7 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to be empty or a predetermined board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq2b bor in
+      let newbor = threatseq4 bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;

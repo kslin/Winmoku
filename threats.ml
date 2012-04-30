@@ -158,11 +158,6 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	let x1, y1 = point in
 	let dx = abs (x1-x0) in
 	let dy = abs (y1-y0) in
-	(*let _ = if dx = dy then 
-	  let _ = print_string "dx=dy" in
-	  flush_all ()
-	in*)
-
 	(x0 = x1 && dy < 5) ||
 	(y0 = y1 && dx < 5) ||
 	(dx = dy && dx < 5)  
@@ -223,21 +218,15 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | hd::tl -> (if evaluate_tree hd = None then (win tl)
                      else evaluate_tree hd)
       in
-      let rec merge_tree (n: int) treelist = 
-	print_string "merging" ;
-	flush_all () ;
-	if n <= 0 then None else
-	  match win treelist with
-	    | None ->
-	      let mergefunctionlist = List.map merge treelist in
-	      let mergetreelist = 
-		List.flatten (
-		  List.map (fun f -> List.map f treelist) mergefunctionlist)
-	      in
-	      merge_tree (n-1) mergetreelist
-	    | x -> x
-      in
-      merge_tree 3 treelist
+      match win treelist with
+	| None ->
+	  let mergefunctionlist = List.map merge treelist in
+	  let mergetreelist = 
+	    List.flatten (
+	      List.map (fun f -> List.map f treelist) mergefunctionlist)
+	  in
+	  win mergetreelist
+	| x -> x
 
 
     (* Check if index is worth evaluating for hidden_threats *)
