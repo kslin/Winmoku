@@ -35,6 +35,8 @@ To run this program:
 	    - To cycle through pre-made boards with winning threat sequences hit the blue button
 
 	5. To play against the AI, run "make AIplus"
-
+		- The minimax algorithm takes some time to run, so please be patient
+		- You should definitely play the AI and see if you can beat it!
+		
 	6. To view testing of our code, run "make tests" to see how many tests the 		code passes and open any of the files beginning with the word "test" to
 		view the tests explicitly.
