@@ -45,9 +45,9 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
       | Node of board * index option * tree list * float option
       | Leaf of board * index option * float option
 
-  let depth = 1
+  let depth = 2
 
-  let branchingfactor = 5
+  let branchingfactor = 10
 
   let heuristic board =
     let b1 = List.length (B.getThreats board) in
@@ -57,12 +57,12 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
     let x1, y1 = B.getNeighbors board in
     let x2 = float_of_int x1 in
     let y2 = float_of_int y1 in
-      ((x2 -. y2)/.(x2 +. y2 +. 1.0))*. 0.5 
-      +. ((b2 -. w2)/.(b2 +. w2 +. 1.0)) *. 0.5
+      ((x2 -. y2)/.(x2 +. y2 +. 1.0))*. 0.2 
+      +. ((b2 -. w2)/.(b2 +. w2 +. 1.0)) *. 0.8
 
   let rec gen_tree depth index board = 
     if depth > 0 then
-      let h = if ((depth mod 2) = 1) then (fun x -> -. heuristic x)
+      let h = if ((depth mod 2) = 0) then (fun x -> -. heuristic x)
               else heuristic in
       let range = Boardstuffs.range 0 (Boardstuffs.world_size - 1) in
       let coords = Boardstuffs.cross range range in
@@ -98,7 +98,8 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
        let value = List.fold_left max (-1.0) 
                     (List.map (fun x -> match x with
                                         | Leaf(_, _, Some v) -> -.v
-                                        | Node(_, _, _, Some v) -> -.v)
+                                        | Node(_, _, _, Some v) -> -.v
+                                        | _ -> -1.0 )
                                ntlist) 
        in
          Node(board, index, ntlist, Some value))
@@ -108,6 +109,7 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
     | hd::tl -> (match hd with
                  | Leaf(_, _, Some v) -> (print_float v; print_treelist tl)
                  | Node(_, _, _, Some v) -> (print_float v; print_treelist tl))
+                 | _ -> print_string "Uh oh, something is wrong."
     | [] -> print_string "||||"
 
   let next_move tree =
@@ -117,13 +119,14 @@ module MGenerator(B: BOARD):MINIMAX with type board = B.board
       (let lst = (List.filter (fun x -> match x with
                                         | Leaf(_,_,Some v) -> (v = (-.value))
                                         | Node(_,_,_,Some v) -> (v = (-.value)))
-                              tlist) 
+                              tlist)
        in
          match lst with
-         | [] -> (print_treelist tlist; print_string "|"; print_float value; flush_all (); None)
-         | hd::tl -> (print_treelist tlist; print_string "|"; print_float value; flush_all (); match hd with 
-               | Leaf(_,index,_) -> index  
-               | Node(_,index, _, _) -> index))
+         | [] -> None
+         | hd::tl -> (match hd with 
+                      | Leaf(_,index,_) -> index  
+                      | Node(_,index, _, _) -> index))
+    | _ -> None
 
 end
 

@@ -153,13 +153,13 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let rec merge tree1 tree2 = 
       (* grabs top of tree2 if the threat is independent *)
       let within_five origin point : bool = 
-	let x0, y0 = origin in
-	let x1, y1 = point in
-	let dx = abs (x1-x0) in
-	let dy = abs (y1-y0) in
-	(x0 = x1 && dy < 5) ||
-	(y0 = y1 && dx < 5) ||
-	(dx = dy && dx < 5)  
+	      let x0, y0 = origin in
+	      let x1, y1 = point in
+	      let dx = abs (x1-x0) in
+	      let dy = abs (y1-y0) in
+	      (x0 = x1 && dy < 5) ||
+	      (y0 = y1 && dx < 5) ||
+	      (dx = dy && dx < 5)  
       in
       let traverse2 (costs1: index list) (tgain: index) : threat option = 
 	match tree2 with

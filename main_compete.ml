@@ -43,13 +43,13 @@ let evaluate_board board =
   | Some tlist -> (let Threat(_,tgain, _, _) = 
                      List.nth tlist ((List.length tlist) - 1) 
                    in
-                     (print_string "threat"; Some tgain))
+                     Some tgain)
   | None -> (match BThreats.hidden_threats board with
-             | hd::tl -> (print_string "hidden"; Some hd)
+             | hd::tl -> Some hd
              | [] -> 
                (let tree1 = GMinimax.gen_tree (GMinimax.depth) None board in
                 let tree2 = GMinimax.minimax tree1 in
-                (print_string "minimax"; flush_all ();  GMinimax.next_move tree2))) 
+                GMinimax.next_move tree2)) 
 
 (*  button for eval function *)
 let debug_button_eval () =
@@ -65,11 +65,23 @@ let debug_board () =
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =
   (Random.self_init ;
-  (match Myboard.nextWin b with
-     |Some s -> s
-     |None -> (match (evaluate_board b) with 
-               | Some s -> (flush_all (); s)
-               | None -> (Random.int (world_size-1), Random.int (world_size-1)))))
+    (match Myboard.nextWin b with
+    | Some i -> i
+    | None -> 
+      (match Myboard.nextWhiteWin b with
+ 		   | Some i -> i
+ 		   | None -> 
+         (let block_white = List.fold_left 
+           (fun gains wt -> let Threat(wttype,wtgain,_,_) = wt in 
+   				                    if wttype = StraightFour then wtgain::gains 
+                              else gains)
+ 			    [] (Myboard.getWhiteThreats b) in
+         (match block_white with
+          | hd :: tl -> hd
+          | [] -> 
+            (match (evaluate_board b) with 
+             | Some s -> (flush_all (); s)
+             | None -> (Random.int (world_size-1), Random.int (world_size-1))))))))
 
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
