@@ -15,13 +15,12 @@ TESTFILES = \
 
 FILES = \
 	event.ml \
-	ImportImage.ml \
 	boardstuffs.ml \
 	boardcomp.ml \
 	board.ml \
 	GUI.ml \
 	threats.ml \
-  minimax.ml \
+ 	minimax.ml \
 	mainhelpers.ml \
 	sequenceBoards.ml
 

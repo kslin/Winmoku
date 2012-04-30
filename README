@@ -1,0 +1,39 @@
+Gomooku 
+
+2012 CS 51 project
+
+@authors 
+	Ina Chen
+	Kathy Lin
+	Yixiao Wang
+	Peter Zhang
+
+To run this program:
+	1. Ensure that all of the following files are present
+		- event.ml
+		- boardstuffs.ml
+		- boardcomp.ml
+		- board.ml
+		- GUI.ml
+		- threats.ml
+		- minimax.ml
+		- mainhelpers.ml
+		- sequenceBoards.ml
+		- testGetThreats.ml
+		- testInsert.ml
+		- testBoardFuncs.ml
+		- main.ml
+		- main_game.ml
+		- main_compete.ml
+		- Makefile
+
+	2. Install ocaml on your machine.
+
+	3. To play Gomoku with your friends on a board without AI, run "make game" 		at your terminal.
+
+	4. To watch the AI find winning threat sequences on boards that contain 		threat sequences, run "make AI"
+
+	5. To play against the AI, run "make AIplus"
+	
+	6. To view testing of the code, run "make tests" to see how many tests the 		code passes and open any of the files beginning with the word "test" to
+		view the tests explicitly.
