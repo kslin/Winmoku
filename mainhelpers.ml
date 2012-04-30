@@ -24,7 +24,7 @@ let board_border () =
 
 (* Displays game title *)
 let board_title () = 
-  Graphics.moveto  ((world_size + 3) * obj_width / 2) ((world_size+7) * obj_width);
+  Graphics.moveto  ((world_size+3)*obj_width/2) ((world_size+7)*obj_width);
   Graphics.draw_string "GOMOOKU"
 
 (* Sets white color for next piece *)
@@ -33,12 +33,14 @@ let board_set_white () =
   Graphics.moveto  (obj_width) ((world_size+4) * obj_width);
   Graphics.draw_string "Change piece color";
   Graphics.set_color Graphics.black;
-  Graphics.draw_rect (obj_width ) ((world_size+3) * obj_width) (obj_width) (obj_width)
+  Graphics.draw_rect (obj_width ) ((world_size+3)*obj_width) 
+                      (obj_width) (obj_width)
 
 (* Sets black color for next piece *)
 let board_set_black () =
   Graphics.set_color Graphics.black;
-  Graphics.fill_rect (obj_width * 2) ((world_size+3) * obj_width) (obj_width) (obj_width)
+  Graphics.fill_rect (obj_width * 2) ((world_size+3) * obj_width) 
+                    (obj_width) (obj_width)
 
 (* Draws the playing grid of the board *)
 let draw_grid () = 
@@ -124,6 +126,8 @@ let roundfloat (f:float) : int =
 
 (** Finds the closest index that is next to the click **)
 let round_click ((x,y):int*int) = 
-  (abs (roundfloat ((float_of_int (x - (2*obj_width)))/.(float_of_int obj_width))), 
-  abs (roundfloat ((float_of_int (y - (2*obj_width)))/.(float_of_int obj_width))))
+  (abs (roundfloat ((float_of_int (x - (2*obj_width)))/.
+                    (float_of_int obj_width))), 
+  abs (roundfloat ((float_of_int (y - (2*obj_width)))/.
+                    (float_of_int obj_width))))
 
