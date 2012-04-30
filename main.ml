@@ -35,6 +35,8 @@ let win_seq = ref []
 (* Stores the current preset board number *)
 let board_num = ref 0
 
+let pboard = ref false
+
 (* Displays the player currently making a move *)
 let board_player () = 
   let player : string = 
@@ -179,19 +181,20 @@ let threat_display () =
       (Graphics.set_color Graphics.black);
       (show_threat t (num-1)) in
   if !win_seq = [] then
-    Graphics.set_color Graphics.red;
-    ((Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
+    (Graphics.set_color Graphics.red;
+    (Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
     (Graphics.draw_string "No winning sequence")) else
-    Graphics.set_color Graphics.black;
-    ((Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
-    (Graphics.draw_string "Winning sequence: ")) 
+    ((Graphics.set_color Graphics.black);
+    (Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
+    (Graphics.draw_string "Winning sequence: "); 
     Graphics.set_color Graphics.red;
-    (show_threat (!win_seq) (world_size+6))
+    (show_threat (!win_seq) (world_size+6)))
 
 (* Gets the next preset board and returns it *)
 let display_numboard () =
   let x = !board_num in
-  if x = 4 then board_num := 1 else board_num := (x + 1)
+  if x = (List.length (threatseq)) then board_num := 0 
+    else board_num := (x + 1)
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -200,8 +203,8 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   if ((x > obj_width) && (x < 3 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then
-    display_numboard ()
+  then (pboard := true; 
+    display_numboard ())
   (* gets the winning sequence after the board is set *)
   else if ((x > obj_width * 4) && (x < 6 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
@@ -283,7 +286,10 @@ let test_board () =
                 (Graphics.moveto (obj_width * 15) ((world_size+4) * obj_width));
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
-            else if (!pboard) then (let l = threatseq () in 
+            else if (!pboard) then 
+              (let l = threatseq in 
+              let newbor = List.nth l !board_num in Myboard.indices newbor;
+              newbor)
             else bor)
           )
           (* If mouse clicks on board area, make a move *)          
