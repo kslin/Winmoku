@@ -11,7 +11,8 @@ CAMLDOC = ocamldoc
 TESTFILES = \
 	boardstuffs.ml \
 	boardcomp.ml \
-	board.ml  
+	board.ml \
+	threats.ml
 
 FILES = \
 	event.ml \
@@ -36,8 +37,8 @@ AIplus: clean run_compete
 
 tests: clean run_tests
 
-$(PROG)_tests: $(OBJECTS) testGetThreats.cmo testInsert.cmo testBoardFuncs.cmo
-	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(TESTOBJECTS) testGetThreats.cmo testInsert.cmo testBoardFuncs.cmo -o $(PROG)_tests
+$(PROG)_tests: $(OBJECTS) testEvaluateBoard.cmo testGetThreats.cmo testInsert.cmo testBoardFuncs.cmo
+	$(CAMLC) $(CAMLFLAGS) $(LIBS) $(TESTOBJECTS) testEvaluateBoard.cmo testGetThreats.cmo testInsert.cmo testBoardFuncs.cmo -o $(PROG)_tests
 
 build_tests: $(PROG)_tests
 
