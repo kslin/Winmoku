@@ -281,7 +281,7 @@ let test_board () =
               (let newbor = (play_next bor) in Myboard.indices newbor; 
                 displaymove := false; 
                 (if (!board_four) then ((Graphics.set_color Graphics.red);
-                (Graphics.moveto (obj_width * 15) ((world_size+4) * obj_width));
+                (Graphics.moveto (obj_width * 10) ((world_size+1) * obj_width));
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
             else if (!pboard) then 

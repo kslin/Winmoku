@@ -113,12 +113,8 @@ let threatseq5 (b:Myboard.board) =
 
 let threatseq : Myboard.board list =
 	let bor = Myboard.empty in
-<<<<<<< HEAD
 	let bor1 = threatseq2a bor in
 	let bor2 = threatseq2b bor in
 	let bor3 = threatseq3b bor in
 	let bor4 = threatseq4 bor in
 	[bor1;bor2;bor3;bor4]
-=======
-	[threatseq2 bor; threatseq3b bor; threatseq4 bor; threatseq5 bor]
->>>>>>> 1875203c3e65d2723d202d16c748d1bfe85bc09d
