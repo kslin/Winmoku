@@ -240,7 +240,7 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 (* Run the board *)
 let test_board () =
   GUI.run_game
-    (* Initialize the board to be empty or a predetermined board *)
+    (* Initialize the board to a predetermined board *)
     begin fun (bor:Myboard.board) -> 
       draw_board ();
       debug_board ();
