@@ -53,6 +53,34 @@ let draw_grid () =
       gridarrayver;
     Graphics.draw_segments gridarrayver
 
+(* Writes out the instructions *)
+let board_instruct () = 
+  let h = (world_size+6) * obj_width -10 in
+  let x = 11 in
+  Graphics.set_color (Graphics.rgb 102 51 0);
+  Graphics.moveto  (obj_width * 10) (h);
+  Graphics.draw_string "Press 'r' or 'R' to reset the board";
+  Graphics.moveto  (obj_width * 10) (h - x);
+  Graphics.draw_string "Click ";
+  Graphics.set_color Graphics.blue;
+  Graphics.draw_string "Next Board ";
+  Graphics.set_color (Graphics.rgb 102 51 0);
+  Graphics.draw_string "to get the next preset board";
+  Graphics.moveto  (obj_width * 10) (h - 2 *x);
+  Graphics.draw_string "Click ";
+  Graphics.set_color Graphics.red;
+  Graphics.draw_string "Get Win ";
+  Graphics.set_color (Graphics.rgb 102 51 0);
+  Graphics.draw_string "to get the winning sequence";
+  Graphics.moveto  (obj_width * 10) (h - 3 * x);
+  Graphics.draw_string "Click ";
+  Graphics.set_color Graphics.green;
+  Graphics.draw_string "Play Win ";
+  Graphics.set_color (Graphics.rgb 102 51 0);
+  Graphics.draw_string "to play next move of the ";
+  Graphics.moveto (obj_width * 11) (h - 4*x);
+  Graphics.draw_string "winning sequence"
+
 (* Draws the coordinates for the board *)
 let draw_coord () =
   let leeway1 = 2 in

@@ -38,7 +38,6 @@ sig
   (* Given a board and the threat whose gain square was the last move
      made on the board returns the threat tree from that board *)
   val gen_threat_tree : board -> threat -> threats -> tree
-  
 
   (* Evaluates the tree to see if it results in a winning threat sequence *)
   val evaluate_tree : tree -> threats option
