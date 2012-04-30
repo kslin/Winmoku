@@ -2,7 +2,6 @@
    It does not evaluate threats *)
 
 open Board
-open ImportImage
 open GUI
 open Boardstuffs
 open Mainhelpers
