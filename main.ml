@@ -193,7 +193,7 @@ let threat_display () =
 (* Gets the next preset board and returns it *)
 let display_numboard () =
   let x = !board_num in
-  if x = (List.length (threatseq)) then board_num := 0 
+  if x = ((List.length (threatseq)) -1) then board_num := 0 
     else board_num := (x + 1)
 
 (* A handles clicks to to run functions in the area above the board: 
@@ -242,12 +242,10 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to a predetermined board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq2 bor in
       draw_board ();
       debug_board ();
-      Myboard.indices newbor;
-      print_tuple (Myboard.getNeighbors newbor);
-      newbor
+      Myboard.indices bor;
+      bor
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
@@ -287,8 +285,12 @@ let test_board () =
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
             else if (!pboard) then 
-              (let l = threatseq in 
-              let newbor = List.nth l !board_num in Myboard.indices newbor;
+              (let newbor = List.nth threatseq !board_num in
+              Graphics.clear_graph (); 
+              draw_board ();
+              debug_board ();
+              Myboard.indices newbor;
+              print_int !board_num;
               newbor)
             else bor)
           )
@@ -313,10 +315,6 @@ let test_board () =
             debug_board ();
             draw_board ();
             Myboard.indices newbor;
-            List.iter (print_threats) threats;
-            print_string "threats: "; print_int (List.length threats);
-            print_string "\n";
-            flush_all ();
             newbor
           )
         )
