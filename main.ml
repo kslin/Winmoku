@@ -161,6 +161,7 @@ let rec print_threatlist tlist =
   | [] -> ()
   | hd::tl -> (print_threats hd; print_threatlist tl)
 
+(* converts a pair of (occ, index) to string *)
 let rec print_pairs l = 
   match l with
   | [] -> ""
@@ -168,6 +169,7 @@ let rec print_pairs l =
   | (i, c)::t -> (string_of_occ c) ^ (string_of_index i) ^ "," ^ 
                  (print_pairs t)
 
+(* Displays a sequence of threats on the side *)
 let threat_display () = 
   let rec show_threat l num =
     match l with
@@ -177,11 +179,17 @@ let threat_display () =
       (Graphics.draw_string (print_pairs lst));
       (Graphics.set_color Graphics.black);
       (show_threat t (num-1)) in
-  Graphics.set_color Graphics.red;
   if !win_seq = [] then
+    Graphics.set_color Graphics.red;
     ((Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
     (Graphics.draw_string "No winning sequence")) else
-    (show_threat (!win_seq) (world_size+7))
+    Graphics.set_color Graphics.black;
+    ((Graphics.moveto ((world_size+4)*obj_width) ((world_size+7)*obj_width));
+    (Graphics.draw_string "Winning sequence: ")) 
+    Graphics.set_color Graphics.red;
+    (show_threat (!win_seq) (world_size+6))
+
+(*  *)
 
 (* A handles clicks to to run functions in the area above the board: 
   debugging function, change piece color *)
@@ -190,9 +198,8 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   if ((x > obj_width) && (x < 3 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
     && (y < ((world_size+6) * obj_width)))
-  then ((let x = !board_num in 
-    if x = 4 then board_num := 1 else board_num := (x + 1));
-    display_pboard ()
+  then
+    display_numboard ()
   (* gets the winning sequence after the board is set *)
   else if ((x > obj_width * 4) && (x < 6 * obj_width) 
     && (y > ((world_size+5) * obj_width)) 
@@ -236,12 +243,6 @@ let test_board () =
       Myboard.indices newbor;
       print_tuple (Myboard.getNeighbors newbor);
       newbor
-      (*draw_board ();
-      newbor
-      draw_board ();
-      debug_board ();
-      Myboard.indices bor;
-      bor*)
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
