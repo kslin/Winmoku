@@ -226,7 +226,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 		  gen_threat_tree (gen_new_board b new_t) new_t (t::threatlist)
 		in
 		Node(b, t, [new_tree]))
-	    (* Nodes remain as nodes but gain an addition tree in tlist *)
+	    (* Nodes remain as nodes but gain an additional tree in tlist *)
 	  | Node(b, t, tlist) ->
 	    let Threat(_, tgain, tcost, _) = t in
 	    let new_costs = costs @ tcost in
@@ -288,14 +288,21 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
             else false  
       else false 
 
+    (* Searches for hidden threats: a move made by black that, if followed by 
+     * a null move by white (or in other words a careless, irrelevant move by 
+     * white), creates a board where black has a winning sequence. *)
     let hidden_threats (b: board) =
       let range = Boardstuffs.range 0 (Boardstuffs.world_size -1) in
       let coords = Boardstuffs.cross range range in
       let candidates = List.filter (check_index b) coords in 
+      (* Create new boards, where black played at each of the candidate 
+       * locations *)
       let candidateboards = List.map 
                               (fun x -> ((B.insertspecial b x Black), x)) 
                               candidates 
-      in 
+      in
+      (* Filter so that only boards that now have a winning sequence are left.
+         These boards were created by hidden threats *) 
       let hiddenboards = List.filter (fun (x,y) -> if evaluate_board x = None
                                                    then false
                                                    else true)
