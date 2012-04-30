@@ -60,7 +60,7 @@ let debug_button_eval () =
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  debug_button_eval ()
+  ()
 
 (* Determines the next move based on threats *)
 let next_move (b:Myboard.board) : int*int =

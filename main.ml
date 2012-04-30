@@ -242,13 +242,11 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to a predetermined board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threathidden bor in
+      let newbor = threatseq2 bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
       newbor
-      (*Myboard.indices bor;
-      bor*)
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
