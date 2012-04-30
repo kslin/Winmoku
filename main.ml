@@ -197,8 +197,8 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
   then 
     (match (evaluate_board b) with
       | None -> 
-	print_string "None\n"; flush_all ();
-	win_seq := []; ()
+      	print_string "None\n"; flush_all ();
+      	win_seq := []; ()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
       (displaythreats := true);
