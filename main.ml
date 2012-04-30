@@ -242,10 +242,13 @@ let test_board () =
   GUI.run_game
     (* Initialize the board to a predetermined board *)
     begin fun (bor:Myboard.board) -> 
+      let newbor = threathidden bor in
       draw_board ();
       debug_board ();
-      Myboard.indices bor;
-      bor
+      Myboard.indices newbor;
+      newbor
+      (*Myboard.indices bor;
+      bor*)
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
@@ -290,7 +293,6 @@ let test_board () =
               draw_board ();
               debug_board ();
               Myboard.indices newbor;
-              print_int !board_num;
               won_board := false;
               board_four := false;
               newbor)
