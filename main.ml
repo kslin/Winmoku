@@ -224,20 +224,14 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 (* Run the board *)
 let test_board () =
   GUI.run_game
-    (* Initialize the board to be empty or a predetermined board *)
+    (* Initialize the board to a predetermined board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq4 bor in
+      let newbor = threatseq2 bor in
       draw_board ();
       debug_board ();
       Myboard.indices newbor;
       print_tuple (Myboard.getNeighbors newbor);
       newbor
-      (*draw_board ();
-      newbor
-      draw_board ();
-      debug_board ();
-      Myboard.indices bor;
-      bor*)
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
