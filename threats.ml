@@ -13,7 +13,7 @@ sig
   
   (* a collection of threats *)
   type threats
-  
+
   type tree
 
   (* Given a board returns the threats associated with it *)
@@ -64,13 +64,29 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     type board = B.board
     type threat = Boardstuffs.threat
     type threats = threat list
+
+    (* Node: holds a board, the threat that led to the board, and a list
+       of all trees arising from threats on the board 
+       and dependent on the given threat - corresponds to a threat
+       in a threat sequence
+       Leaf: holds a board and the threat that led to the board - 
+       corresponds to a board that has no more dependent threats
+       Win: holds a board, the threat that led to the board, and a 
+       collection of all the threats that led up to the winning move -
+       corresponds to a board with an unblockable threat and holds the
+       winning sequence *)
+
     type tree = 
       | Node of board * threat * (tree list)
       | Leaf of board * threat   
       | Win of board * threat * threats    
       | Loss
+
+    
     let get_threats = B.getThreats
 
+    (* A threat A is dependent on a threat B if the gain square of B
+       is one of the rest squares of A *)
     let dependent_threats (ts: threats) (t: threat) = 
       let Threat(_, tgain, _, _) = t in
       let dependent x = 
@@ -81,6 +97,10 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
     let get_dependent_threats (b: board) (t: threat) =
       dependent_threats (get_threats b) t
 
+    (* Given a board and a threat t, returns all threats on the board
+       dependent on t and are of type StraightFour or Four. 
+       These two threats are different because they result in a win
+       on the next move. *)
     let get_dependent_four_threats (b: board) (t: threat) = 
       List.filter
 	(fun x -> 
@@ -88,6 +108,9 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	  ttype = StraightFour || ttype = Four)
 	(get_dependent_threats b t)
 
+    (* Given a board and a threat t, returns the board after black
+       has played the gain square of the threat and white has played
+       all the cost squares of the threat *)
     let gen_new_board (b: board) (t:threat) =
       let Threat(_, tgain, tcost, _) = t in
       let rec insertwhitelist (b:board) (t: index list) =
@@ -96,6 +119,8 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | _ -> b in
       insertwhitelist (B.insertspecial b tgain Black) tcost
 
+    (* Given a board and a threat t, returns the threat tree created by
+       recursively finding all threats dependent on t *)
     let rec gen_threat_tree (b: board) (t: threat) (tlist: threats) = 
       let Threat(ttype, _, _, _) = t in
       if (B.isWin b = Some Black) || (ttype = StraightFour) then 
@@ -105,6 +130,9 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       then 
 	Loss
       else
+	(* if White is able to create a Three, then Black can only search for
+	   StraightFour or Four threats because only those threats have
+	   higher priority than White's Three *) 
 	let threatList = 
 	  if List.exists 
 	    (fun wt -> let Threat(wttype,_,_,_) = wt in wttype = StraightFour)
@@ -124,8 +152,10 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
             List.map tree_from_threat threatList 
           in
           Node(b, t, treeList)
-	    
-    let rec evaluate_tree (tr: tree) =
+	  
+    (* Given a tree, if the tree has a winning threat sequence then
+       returns the threat sequence leading to the win *)
+    let rec evaluate_tree (tr: tree) : threats option =
       let rec evaluate_tree_list treelist =
         match treelist with
         | [] -> None
@@ -139,6 +169,8 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | Loss -> None 
         | Node(b, t, treeList) -> (evaluate_tree_list treeList)
 
+    (* Given a tree, if there is a winning threat sequence returns the
+       first threat of that sequence *)
     let next_winning_move (tr: tree) = 
       match evaluate_tree tr with
 	    | None -> None
@@ -151,23 +183,27 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 	      )
 
     let rec merge tree1 tree2 = 
-      (* grabs top of tree2 if the threat is independent *)
-      let within_five origin point : bool = 
-	let x0, y0 = origin in
-	let x1, y1 = point in
-	let dx = abs (x1-x0) in
-	let dy = abs (y1-y0) in
-	(x0 = x1 && dy < 5) ||
-	(y0 = y1 && dx < 5) ||
-	(dx = dy && dx < 5)  
-      in
+      (* grabs first threat of tree2 if that threat is independent *)
+      (* let within_five origin point : bool = 
+	      let x0, y0 = origin in
+	      let x1, y1 = point in
+	      let dx = abs (x1-x0) in
+	      let dy = abs (y1-y0) in
+	      (x0 = x1 && dy < 5) ||
+	      (y0 = y1 && dx < 5) ||
+	      (dx = dy && dx < 5)  
+      in *)
+      (* within_five was meant to restrict merging so that only threats
+	 close to each other were merged to improve performance. 
+	 However, we could miss possible winning sequences.  Since
+	 performance of merge was not horrible we left it out *)
       let traverse2 (costs1: index list) (tgain: index) : threat option = 
 	match tree2 with
 	  | Win(_, _, _) -> raise Boardstuffs.ERROR
 	  | Node(_, t, _) | Leaf(_, t) ->
 	    let Threat(_, tgain2, tcost2, _) = t in
 	    if 
-	(*      (within_five tgain tgain2) ||*)
+	      (* (within_five tgain tgain2) || *)
 	      (List.fold_left 
 	      (fun result index -> (List.mem index costs1) || result)
 	      false (tgain2::tcost2)) then None
@@ -179,6 +215,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       let rec traverse1 costs threatlist tree1 = 
 	match tree1 with
 	  | Win(_, _, _) -> raise Boardstuffs.ERROR
+	    (* Leaf is turned into a Node if it can be merged *)
 	  | Leaf(b, t) -> 
 	    let Threat(_, tgain, tcost, _) = t in
 	    let new_costs = costs @ tcost in
@@ -189,6 +226,7 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
 		  gen_threat_tree (gen_new_board b new_t) new_t (t::threatlist)
 		in
 		Node(b, t, [new_tree]))
+	    (* Nodes remain as nodes but gain an additional tree in tlist *)
 	  | Node(b, t, tlist) ->
 	    let Threat(_, tgain, tcost, _) = t in
 	    let new_costs = costs @ tcost in
@@ -205,7 +243,8 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
       in
       traverse1 [] [] tree1 
     
-    let evaluate_board board = 
+    (* Given a board, returns a sequence of winning threats if possible *)
+    let evaluate_board board : threats option = 
       let threatlist = get_threats board in
       let update_board threat = ((gen_new_board board threat), threat) in 
       let boardlist = List.map update_board threatlist in
@@ -217,6 +256,10 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
         | hd::tl -> (if evaluate_tree hd = None then (win tl)
                      else evaluate_tree hd)
       in
+      (* if no threat tree contains a winning threat sequence then
+	 merge each tree with each other tree to see if the merged trees
+	 contain winning sequences - corresponds to playing two 
+	 independent threats *)
       match win treelist with
 	| None ->
 	  let mergefunctionlist = List.map merge treelist in
@@ -244,15 +287,22 @@ module TGenerator(B: BOARD):THREATS with type board = B.board
             if get_threats (B.insertspecial b i Black) != [] then true
             else false  
       else false 
-    
+
+    (* Searches for hidden threats: a move made by black that, if followed by 
+     * a null move by white (or in other words a careless, irrelevant move by 
+     * white), creates a board where black has a winning sequence. *)
     let hidden_threats (b: board) =
       let range = Boardstuffs.range 0 (Boardstuffs.world_size -1) in
       let coords = Boardstuffs.cross range range in
       let candidates = List.filter (check_index b) coords in 
+      (* Create new boards, where black played at each of the candidate 
+       * locations *)
       let candidateboards = List.map 
                               (fun x -> ((B.insertspecial b x Black), x)) 
                               candidates 
-      in 
+      in
+      (* Filter so that only boards that now have a winning sequence are left.
+         These boards were created by hidden threats *) 
       let hiddenboards = List.filter (fun (x,y) -> if evaluate_board x = None
                                                    then false
                                                    else true)
