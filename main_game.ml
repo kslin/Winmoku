@@ -70,7 +70,7 @@ let test_board () =
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
-        click position to do other things such as running a debugging function*)
+      click position to do other things such as running a debugging function*)
         if !won_board 
         then bor 
         else (

@@ -92,7 +92,7 @@ struct
            (* Event framework initializer *)
            begin fun () ->
              ignore(Event.add_listener key_pressed (key_handler reset));
-             ignore(Event.add_listener button_up (mouse_handler handle_move)) ;
+             ignore(Event.add_listener button_up (mouse_handler handle_move));
              bor := (init !bor)
            end
 

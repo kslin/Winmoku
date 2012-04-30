@@ -1,12 +1,5 @@
-(* Main.ml Description:                 *
- * Call draw: Draw will take user input, and return a board                 *
- * Call board: Find all threats on board from draw; create a list of board, *
- * threat pairs.                  *
- * Call on each pair in the list:             *
- * (1) gen_threat_tree                  *
- * (2) evaluate_tree                    *
- * from tree. If (2) evaluates to a winning sequence, create new board with *
- * first move from that sequence, and send board to draw.                   *)
+(* This main file evaluates threats of user inputted boards
+  It can also cycle through pre-inputted boards and evaluate those *)
 
 open Board
 open GUI
@@ -241,7 +234,7 @@ let test_board () =
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
-        click position to do other things such as running a debugging function*)
+      click position to do other things such as running a debugging function*)
         if !won_board 
         then bor 
         else (
@@ -259,7 +252,7 @@ let test_board () =
               (let newbor = (play_next bor) in Myboard.indices newbor; 
                 displaymove := false; 
                 (if (!board_four) then ((Graphics.set_color Graphics.red);
-                (Graphics.moveto (obj_width * 15) ((world_size+4) * obj_width));
+                (Graphics.moveto (obj_width * 15) ((world_size+4)*obj_width));
                 (Graphics.draw_string "STRAIGHT FOUR!!!")));
                 newbor)
             else if (!pboard) then 
