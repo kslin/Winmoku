@@ -55,7 +55,7 @@ let debug_button_eval () =
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
-  debug_button_eval ()
+  ()
 
 (* Determines the next move based on evaluate board defined above. First,
    make sure white doesn't have an impending threat, and also play any
