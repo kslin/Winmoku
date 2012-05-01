@@ -63,18 +63,18 @@ let debug_board () =
    tells you to. *)
 let next_move (b:Myboard.board) : int*int =
   (Random.self_init ();
-  match BThreats.evaluate_board b with
-  | Some tlist -> (let Threat(_,tgain, _, _) = 
-                     List.nth tlist ((List.length tlist) - 1) 
-                   in
-                     tgain)
-  | None -> 
-    (match Myboard.nextWin b with
+    match Myboard.nextWin b with
     | Some i -> i
     | None -> 
       (match Myboard.nextWhiteWin b with
- 		   | Some i -> i
- 		   | None -> 
+ 	| Some i -> i
+ 	| None -> 
+	  (match BThreats.evaluate_board b with
+	    | Some tlist -> (let Threat(_,tgain, _, _) = 
+			       List.nth tlist ((List.length tlist) - 1) 
+			     in
+			     tgain)
+	    | None -> 
          (let block_white = List.fold_left 
            (fun gains wt -> let Threat(wttype,wtgain,_,_) = wt in 
    				                    if wttype = StraightFour then wtgain::gains 
