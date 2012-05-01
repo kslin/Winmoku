@@ -1,12 +1,5 @@
-(* Main.ml Description:                 *
- * Call draw: Draw will take user input, and return a board                 *
- * Call board: Find all threats on board from draw; create a list of board, *
- * threat pairs.                  *
- * Call on each pair in the list:             *
- * (1) gen_threat_tree                  *
- * (2) evaluate_tree                    *
- * from tree. If (2) evaluates to a winning sequence, create new board with *
- * first move from that sequence, and send board to draw.                   *)
+(* This main file evaluates threats of user inputted boards
+  It can also cycle through pre-inputted boards and evaluate those *)
 
 open Board
 open GUI
@@ -66,27 +59,6 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board =
   then b
   else (
     (Myboard.insertspecial b (round_click (x,y))) !piece_color)
-
-let winning_move board = 
-  print_string "here";
-  let threatlist = BThreats.get_threats board in
-  print_string "1";
-  let update_board threat = 
-    ((BThreats.gen_new_board board threat), threat)
-  in 
-  print_string "2";
-  let boardlist = List.map update_board threatlist in
-  print_string "3";
-  let treelist = List.map (fun (x, y) -> (BThreats.gen_threat_tree x y [])) 
-                          boardlist in 
-  print_string "4";
-  let rec win tlist =   
-    match tlist with 
-    | [] -> None
-    | hd::tl -> (let result = BThreats.next_winning_move hd in
-		 if result = None then (win tl) else result)
-  in
-    win treelist
       
 (* Evaluate board function *)
 
@@ -150,10 +122,10 @@ let rec insertlist b lst =
 with the remaining moves. Returns the original board if no more moves *)
 let play_next bor =
   match (!win_seq) with
-  | [] -> (print_string "no more winning moves"; flush_all()); bor
+  | [] -> (print_string "No more winning moves\n"; flush_all()); bor
   | h::t -> 
     if fst h then (board_four := true;
-      (print_string "straight four!"; flush_all()); bor)
+      (print_string "straight four!\n"; flush_all()); bor)
     else ((win_seq := t); insertlist bor (snd h))
 
 (* displays threats when given a list of threats *)
@@ -213,11 +185,11 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
     ((displaythreats := true);
     (match (evaluate_board b) with
       | None -> 
-      	print_string "None\n"; flush_all ();
       	win_seq := []; ()
       | Some t ->
       (let l = (extract_win_seq t []) in win_seq := l;
       (print_string "got threats in seq"; flush_all ()))))
+
   (* plays the next move in the winning sequence determined when the board
   was set *)
   else if ((x > obj_width * 7) && (x < 9 * obj_width) 
@@ -240,13 +212,12 @@ let respond_click_header (b:Myboard.board) ((x,y):int*int) =
 (* Run the board *)
 let test_board () =
   GUI.run_game
-    (* Initialize the board to a predetermined board *)
+    (* Initialize the board to an empty board *)
     begin fun (bor:Myboard.board) -> 
-      let newbor = threatseq2 bor in
       draw_board ();
       debug_board ();
-      Myboard.indices newbor;
-      newbor
+      Myboard.indices bor;
+      bor
     end
     (* Reset the board to be empty *)
     begin fun (bor:Myboard.board) -> 
@@ -264,7 +235,7 @@ let test_board () =
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
-        click position to do other things such as running a debugging function*)
+      click position to do other things such as running a debugging function*)
         if !won_board 
         then bor 
         else (

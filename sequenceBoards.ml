@@ -111,15 +111,6 @@ let threatseq5 (b:Myboard.board) =
 	let b1 = Myboard.insertspecial b1 (10,10) White in
 	b1 
 
-let threathidden (b:Myboard.board) =
-	let b1 = Myboard.insertspecial b (9,9) Black in
-	let b1 = Myboard.insertspecial b1 (9,10) Black in
-	let b1 = Myboard.insertspecial b1 (10,9) Black in
-	let b1 = Myboard.insertspecial b1 (8,9) White in
-	let b1 = Myboard.insertspecial b1 (7,9) White in
-	let b1 = Myboard.insertspecial b1 (10,10) White in
-	b1 
-
 let threatseq6 (b:Myboard.board) = 
 	let b1 = Myboard.insertspecial b (9,9) Black in
 	let b1 = Myboard.insertspecial b1 (8,8) Black in
@@ -130,7 +121,17 @@ let threatseq6 (b:Myboard.board) =
 	let b1 = Myboard.insertspecial b1 (11,7) White in
 	let b1 = Myboard.insertspecial b1 (10,6) White in
 	b1   
-	
+
+(* This is an example of a hidden threat *)
+let threathidden (b:Myboard.board) =
+	let b1 = Myboard.insertspecial b (9,9) Black in
+	let b1 = Myboard.insertspecial b1 (9,10) Black in
+	let b1 = Myboard.insertspecial b1 (10,9) Black in
+	let b1 = Myboard.insertspecial b1 (8,9) White in
+	let b1 = Myboard.insertspecial b1 (7,9) White in
+	let b1 = Myboard.insertspecial b1 (10,10) White in
+	b1  
+
 let threatseq : Myboard.board list =
 	let bor = Myboard.empty in
 	let bor1 = threatseq2 bor in

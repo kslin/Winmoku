@@ -1,12 +1,4 @@
-(* Main.ml Description:                 *
- * Call draw: Draw will take user input, and return a board                 *
- * Call board: Find all threats on board from draw; create a list of board, *
- * threat pairs.                  *
- * Call on each pair in the list:             *
- * (1) gen_threat_tree                  *
- * (2) evaluate_tree                    *
- * from tree. If (2) evaluates to a winning sequence, create new board with *
- * first move from that sequence, and send board to draw.                   *)
+(*  This runs the complete AI *)
 
 open Board
 open GUI
@@ -37,7 +29,9 @@ let respond_click (b:Myboard.board) ((x,y):int*int) : Myboard.board option =
   else (
     Some (Myboard.insertspecial b (rx,ry) White))
 
-(* Evaluate board function *)
+(* Evaluate board function; first check for winning threat sequences.
+   If there aren't any, then look for hidden threats and play those. 
+   If that isn't available, use the minimax algorithm. *)
 let evaluate_board board = 
   match BThreats.evaluate_board board with
   | Some tlist -> (let Threat(_,tgain, _, _) = 
@@ -56,15 +50,19 @@ let debug_button_eval () =
   Graphics.set_color Graphics.red;
   Graphics.moveto  (obj_width) ((world_size+6) * obj_width);
   Graphics.draw_string "Debug function eval";
-  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) (obj_width)
+  Graphics.fill_rect obj_width ((world_size+5) * obj_width) (2 * obj_width) 
+                                (obj_width)
 
 (* Shows buttons and other displays for function testing purposes *)
 let debug_board () = 
   ()
 
-(* Determines the next move based on threats *)
+(* Determines the next move based on evaluate board defined above. First,
+   make sure white doesn't have an impending threat, and also play any
+   move that will win the game for you. Otherwise, play what evaluate board
+   tells you to. *)
 let next_move (b:Myboard.board) : int*int =
-  (Random.self_init ;
+  (Random.self_init ();
     (match Myboard.nextWin b with
     | Some i -> i
     | None -> 
@@ -81,7 +79,8 @@ let next_move (b:Myboard.board) : int*int =
           | [] -> 
             (match (evaluate_board b) with 
              | Some s -> (flush_all (); s)
-             | None -> (Random.int (world_size-1), Random.int (world_size-1))))))))
+             | None -> 
+                (Random.int (world_size-1),Random.int (world_size-1))))))))
 
 (* First move of the game *)
 let firstmove = ((world_size/2), (world_size/2))
@@ -112,7 +111,7 @@ let test_board () =
     end
     begin fun (bor:Myboard.board) (i:int*int) -> 
         (* If mouse click is in the area above the playing grid, checks the 
-        click position to do other things such as running a debugging function*)
+      click position to do other things such as running a debugging function*)
         if !won_board 
         then bor 
         else (
@@ -141,7 +140,8 @@ let test_board () =
             		  |Some s ->
                     won_board := true;
                     (Graphics.set_color Graphics.red);
-                    Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+                    Graphics.moveto (obj_width * 15) 
+                                    ((world_size+5)*obj_width);
                     Graphics.draw_string ("WHITE WON!!!");
                     newbor1
 		              |None -> 
@@ -151,7 +151,8 @@ let test_board () =
                       |Some s ->
                   			won_board := true;
                   			(Graphics.set_color Graphics.red);
-                  			Graphics.moveto (obj_width * 15) ((world_size+5) * obj_width);
+                  			Graphics.moveto (obj_width * 15) 
+                                        ((world_size+5) * obj_width);
                   			Graphics.draw_string ("BLACK WON!!!")
                       |None -> ()
                     );

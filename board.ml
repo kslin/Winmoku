@@ -16,10 +16,10 @@ sig
   (* Returns the color of a particular index *)
 	val get : board -> index -> occupied
 
-  (** Inserts a piece on the board of the color specified by the board *)
+  (* Inserts a piece on the board of the color specified by the board *)
 	val insert : board -> index -> board
 
-  (** Inserts a piece on the board of the color specified by the user *)
+  (* Inserts a piece on the board of the color specified by the user *)
 	val insertspecial : board -> index -> occupied -> board
 
   (* Determines if the board has a winning configuration *)
@@ -45,17 +45,18 @@ sig
 
 end
 
-(** The 4 BoardComps used by BOARD **)
+(* The 4 BoardComps used by BOARD **)
 module HorizontalBoard = BoardComp (HorizontalBoardArg)
 module VerticalBoard = BoardComp (VerticalBoardArg)
 module DiagRightBoard = BoardComp (DiagRightBoardArg)
 module DiagLeftBoard = BoardComp (DiagLeftBoardArg)
 
-(** Module for describing the entire board **)
+(* Module for describing the entire board **)
 module Myboard : BOARD =
 struct
 
-	(**Board will be an array of pieces, 4 miniboards, and who's turn it is **)
+	(* Board will be an array of pieces, 4 miniboards, 
+	   and the player who will make the next move *)
 	type board = occupied*(occupied list list)*(HorizontalBoard.boardcomp)*
                         (VerticalBoard.boardcomp)*(DiagRightBoard.boardcomp)*
                         (DiagLeftBoard.boardcomp)
@@ -121,6 +122,7 @@ struct
         (hthreats)@(vthreats)@    
         (drthreats)@(dlthreats)
 
+    (* Exchanges all black pieces for white pieces and vice versa *)
     let flipColor (b: board) : board = 
       let (_, p, _, _, _, _) = b in      
       let rec flip_row occ_row x y b = 
@@ -175,9 +177,6 @@ struct
         match lst with
             |[] -> ()
             |hd::tl -> draw hd (r,n); indices_row tl r (n+1)
-
-    (*********************************)
-    (*********************************)
 
     (** Call a function for all pieces in the world. *)
     let indices (b:board) : unit =
